@@ -30,7 +30,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class PullToRefreshHelper implements View.OnTouchListener {
+public class PullToRefreshAttacher implements View.OnTouchListener {
 
     /**
      * Default configuration values
@@ -43,7 +43,7 @@ public class PullToRefreshHelper implements View.OnTouchListener {
     private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "PullToRefreshHelper";
+    private static final String LOG_TAG = "PullToRefreshAttacher";
 
     private final View mRefreshableView;
     private final Delegate mViewDelegate;
@@ -66,21 +66,25 @@ public class PullToRefreshHelper implements View.OnTouchListener {
 
     private OnRefreshListener mRefreshListener;
 
-    public PullToRefreshHelper(Activity activity, android.widget.ScrollView view) {
-        this(activity, view, new ScrollViewDelegate());
+    public PullToRefreshAttacher(Activity activity, View view) {
+        this(activity, view, null);
     }
 
-    public PullToRefreshHelper(Activity activity, android.widget.AbsListView view) {
-        this(activity, view, new AbsListViewDelegate());
-    }
-
-    public <V extends View> PullToRefreshHelper(Activity activity, V view,
+    public <V extends View> PullToRefreshAttacher(Activity activity, V view,
             Delegate delegate) {
         this(activity, view, delegate, new Options());
     }
 
-    public <V extends View> PullToRefreshHelper(Activity activity, V view,
+    public <V extends View> PullToRefreshAttacher(Activity activity, V view,
             Delegate delegate, Options options) {
+
+        if (delegate == null) {
+            delegate = DelegateUtils.getBuiltInDelegateForView(view);
+            if (delegate == null) {
+                throw new IllegalArgumentException("No delegate given. Please provide one.");
+            }
+        }
+
         if (options == null) {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();
@@ -313,7 +317,7 @@ public class PullToRefreshHelper implements View.OnTouchListener {
          * method you should cast <code>view</code> to it's native class, and check if it is
          * scrolled to the top.
          *
-         * @param view The view this PullToRefreshHelper was created with.
+         * @param view The view this PullToRefreshAttacher was created with.
          * @return true if <code>view</code> is scrolled to the top.
          */
         public abstract boolean isScrolledToTop(View view);

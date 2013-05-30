@@ -26,9 +26,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshHelper;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
-public class AbsListViewActivity extends ListActivity implements PullToRefreshHelper.OnRefreshListener {
+public class AbsListViewActivity extends ListActivity implements PullToRefreshAttacher.OnRefreshListener {
 
     private static String[] STRINGS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
             "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
@@ -38,7 +38,7 @@ public class AbsListViewActivity extends ListActivity implements PullToRefreshHe
             "Allgauer Emmentaler"};
 
 
-    private PullToRefreshHelper mPullToRefreshHelper;
+    private PullToRefreshAttacher mPullToRefreshHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,7 @@ public class AbsListViewActivity extends ListActivity implements PullToRefreshHe
         listView.setAdapter(
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, STRINGS));
 
-        mPullToRefreshHelper = new PullToRefreshHelper(this, getListView());
+        mPullToRefreshHelper = new PullToRefreshAttacher(this, getListView());
         mPullToRefreshHelper.setRefreshListener(this);
     }
 

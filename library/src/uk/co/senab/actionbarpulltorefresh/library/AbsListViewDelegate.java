@@ -19,7 +19,9 @@ package uk.co.senab.actionbarpulltorefresh.library;
 import android.view.View;
 import android.widget.AbsListView;
 
-public class AbsListViewDelegate extends PullToRefreshHelper.Delegate {
+public class AbsListViewDelegate extends PullToRefreshAttacher.Delegate {
+
+    static final Class SUPPORTED_VIEW_CLASS = AbsListView.class;
 
     @Override
     public boolean isScrolledToTop(View view) {

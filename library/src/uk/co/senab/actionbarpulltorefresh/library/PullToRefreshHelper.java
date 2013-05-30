@@ -31,30 +31,37 @@ import android.widget.TextView;
 
 public class PullToRefreshHelper implements View.OnTouchListener {
 
+    /**
+     * Default configuration values
+     */
+    private static final int DEFAULT_HEADER_LAYOUT = R.layout.default_header;
+    private static final int DEFAULT_TEXT_PULLING = R.string.pull_to_refresh_pull_label;
+    private static final int DEFAULT_TEXT_REFRESHING = R.string.pull_to_refresh_refreshing_label;
+    private static final int DEFAULT_ANIM_HEADER_IN = R.anim.fade_in;
+    private static final int DEFAULT_ANIM_HEADER_OUT = R.anim.fade_out;
+    private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
+
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshHelper";
-
-    static final float PERCENTAGE_VIEW_MAX_SCROLL = 0.4f;
 
     private final View mRefreshableView;
     private final Delegate mViewDelegate;
     private final ViewGroup mWindowDecorView;
 
     private final View mHeaderView;
-    private final TextView mHeaderLabel;
+    private final TextView mHeaderTextView;
     private final ProgressBar mHeaderProgressBar;
 
-    private int mPullToRefreshLabelResId = R.string.pull_to_refresh_pull_label;
-    private int mRefreshingLabelResId = R.string.pull_to_refresh_refreshing_label;
+    private int mPullingLabelResId, mRefreshingLabelResId;
 
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
     private final Animation.AnimationListener mAnimationListener;
 
     private final int mTouchSlop;
     private float mInitialMotionY, mLastMotionY;
+    private final float mRefreshScrollDistance;
 
-    private boolean mIsBeingDragged;
-    private boolean mIsRefreshing;
+    private boolean mIsBeingDragged, mIsRefreshing;
 
     private OnRefreshListener mRefreshListener;
 
@@ -68,44 +75,60 @@ public class PullToRefreshHelper implements View.OnTouchListener {
 
     public <V extends View> PullToRefreshHelper(Activity activity, V view,
             Delegate delegate) {
-        this(activity, view, delegate, R.layout.default_header, R.anim.fade_in,
-                R.anim.fade_out);
+        this(activity, view, delegate, new Options());
     }
 
     public <V extends View> PullToRefreshHelper(Activity activity, V view,
-            Delegate viewDelegate, int headerLayoutRes,
-            int animInRes, int animOutRes) {
-        mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
-
-        // TODO HACK! ICS's decor view doesn't seem to fit system windows.
-        // May cause problems, need to investigate
-        if (Build.VERSION.SDK_INT >= 11 && Build.VERSION.SDK_INT < 16) {
-            mWindowDecorView.setFitsSystemWindows(true);
+            Delegate delegate, Options options) {
+        if (options == null) {
+            Log.i(LOG_TAG, "Given null options so using default options.");
+            options = new Options();
         }
+
+        // Copy necessary values from options
+        mPullingLabelResId = options.textPulling;
+        mRefreshingLabelResId = options.textRefreshing;
+        mRefreshScrollDistance = options.refreshScrollDistance;
 
         // View to detect refreshes for
         mRefreshableView = view;
         mRefreshableView.setOnTouchListener(this);
-        mViewDelegate = viewDelegate;
 
+        // Delegate
+        mViewDelegate = delegate;
+
+        // Get Window Decor View
+        mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
+        /**
+         * TODO
+         * HACK! ICS's decor view doesn't seem to fit system windows.
+         * May cause problems, need to investigate
+         */
+        if (Build.VERSION.SDK_INT >= 11 && Build.VERSION.SDK_INT < 16) {
+            mWindowDecorView.setFitsSystemWindows(true);
+        }
+
+        // Create Header view and then add to Decor View
         mHeaderView = LayoutInflater.from(activity)
-                .inflate(headerLayoutRes, mWindowDecorView, false);
+                .inflate(options.headerLayout, mWindowDecorView, false);
         if (mHeaderView == null) {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
         }
         mHeaderView.setVisibility(View.GONE);
         mWindowDecorView.addView(mHeaderView);
 
+        // Get ProgressBar and TextView. Also set initial text on TextView
         mHeaderProgressBar = (ProgressBar) mHeaderView.findViewById(R.id.ptr_progress);
-        mHeaderLabel = (TextView) mHeaderView.findViewById(R.id.ptr_text);
+        mHeaderTextView = (TextView) mHeaderView.findViewById(R.id.ptr_text);
+        mHeaderTextView.setText(mPullingLabelResId);
 
+        // Create animations for use later
         mAnimationListener = new AnimationCallback();
-        mHeaderInAnimation = AnimationUtils.loadAnimation(activity, animInRes);
-        mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, animOutRes);
+        mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
+        mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, options.headerOutAnimation);
         mHeaderOutAnimation.setAnimationListener(mAnimationListener);
 
-        mHeaderLabel.setText(mPullToRefreshLabelResId);
-
+        // Get touch slop for use later
         mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
     }
 
@@ -184,7 +207,9 @@ public class PullToRefreshHelper implements View.OnTouchListener {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPullStarted");
         }
-        showHeader();
+        // Show Header
+        mHeaderView.startAnimation(mHeaderInAnimation);
+        mHeaderView.setVisibility(View.VISIBLE);
     }
 
     void onPull() {
@@ -193,7 +218,7 @@ public class PullToRefreshHelper implements View.OnTouchListener {
         }
         mHeaderProgressBar.setVisibility(View.VISIBLE);
 
-        final float scrollToRefresh = mRefreshableView.getHeight() * PERCENTAGE_VIEW_MAX_SCROLL;
+        final float scrollToRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
         final float scrollLength = mLastMotionY - mInitialMotionY;
 
         if (scrollLength < scrollToRefresh) {
@@ -223,21 +248,11 @@ public class PullToRefreshHelper implements View.OnTouchListener {
             // Call listener
             mRefreshListener.onRefresh(mRefreshableView);
 
-            mHeaderLabel.setText(mRefreshingLabelResId);
+            mHeaderTextView.setText(mRefreshingLabelResId);
             mHeaderProgressBar.setIndeterminate(true);
         } else {
             reset();
         }
-    }
-
-    private void showHeader() {
-        mHeaderView.startAnimation(mHeaderInAnimation);
-        mHeaderView.setVisibility(View.VISIBLE);
-    }
-
-    private void hideHeader() {
-        mHeaderView.startAnimation(mHeaderOutAnimation);
-        mHeaderView.setVisibility(View.GONE);
     }
 
     private void reset() {
@@ -246,21 +261,10 @@ public class PullToRefreshHelper implements View.OnTouchListener {
         }
         mIsRefreshing = false;
         mIsBeingDragged = false;
-        hideHeader();
-    }
 
-    /**
-     * Simple Listener to listen for any callbacks to Refresh.
-     *
-     * @author Chris Banes
-     */
-    public static interface OnRefreshListener {
-
-        /**
-         * onRefresh will be called for both a Pull from start, and Pull from end
-         */
-        public void onRefresh(View view);
-
+        // Hide Header
+        mHeaderView.startAnimation(mHeaderOutAnimation);
+        mHeaderView.setVisibility(View.GONE);
     }
 
     private class AnimationCallback implements Animation.AnimationListener {
@@ -278,8 +282,8 @@ public class PullToRefreshHelper implements View.OnTouchListener {
                 mHeaderProgressBar.setIndeterminate(false);
 
                 // Reset Inner Content
-                mHeaderLabel.setVisibility(View.VISIBLE);
-                mHeaderLabel.setText(mPullToRefreshLabelResId);
+                mHeaderTextView.setVisibility(View.VISIBLE);
+                mHeaderTextView.setText(mPullingLabelResId);
             }
         }
 
@@ -288,8 +292,32 @@ public class PullToRefreshHelper implements View.OnTouchListener {
         }
     }
 
+    /**
+     * Simple Listener to listen for any callbacks to Refresh.
+     */
+    public interface OnRefreshListener {
+
+        /**
+         * Called when the user has initiated a refresh by pulling.
+         * @param view - View which the user has started the refresh from.
+         */
+        public void onRefresh(View view);
+
+    }
+
     public interface Delegate {
         boolean isScrolledToTop(View view);
+    }
+
+
+    public static final class Options {
+        // TODO Document!
+        public int headerLayout = DEFAULT_HEADER_LAYOUT;
+        public int textPulling = DEFAULT_TEXT_PULLING;
+        public int textRefreshing = DEFAULT_TEXT_REFRESHING;
+        public int headerOutAnimation = DEFAULT_ANIM_HEADER_OUT;
+        public int headerInAnimation = DEFAULT_ANIM_HEADER_IN;
+        public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
     }
 
 }

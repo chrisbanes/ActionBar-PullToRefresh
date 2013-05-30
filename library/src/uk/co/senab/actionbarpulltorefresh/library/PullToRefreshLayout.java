@@ -93,6 +93,18 @@ public class PullToRefreshLayout extends FrameLayout {
         values.recycle();
     }
 
+    public PullToRefreshAttacher getAttacher() {
+        return mAttacher;
+    }
+
+    public static PullToRefreshAttacher getAttacher(Activity activity, int layoutId) {
+        PullToRefreshLayout layout = (PullToRefreshLayout) activity.findViewById(layoutId);
+        if (layout != null) {
+            return layout.getAttacher();
+        }
+        return null;
+    }
+
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         if (getChildCount() == 0) {

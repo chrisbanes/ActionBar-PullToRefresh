@@ -50,10 +50,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final ViewGroup mWindowDecorView;
 
     private final View mHeaderView;
-    private final TextView mHeaderTextView;
-    private final ProgressBar mHeaderProgressBar;
-
-    private int mPullingLabelResId, mRefreshingLabelResId;
 
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
     private final Animation.AnimationListener mAnimationListener;
@@ -65,6 +61,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private boolean mIsBeingDragged, mIsRefreshing;
 
     private OnRefreshListener mRefreshListener;
+    private HeaderTransformer mHeaderTransformer;
 
     public PullToRefreshAttacher(Activity activity, View view) {
         this(activity, view, null);
@@ -91,8 +88,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
 
         // Copy necessary values from options
-        mPullingLabelResId = options.textPulling;
-        mRefreshingLabelResId = options.textRefreshing;
         mRefreshScrollDistance = options.refreshScrollDistance;
 
         // View to detect refreshes for
@@ -101,6 +96,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Delegate
         mDelegate = delegate;
+
+        // TODO Need to let dev provide this
+        mHeaderTransformer = new DefaultHeaderTransformer();
 
         // Get Window Decor View
         mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
@@ -113,6 +111,15 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mWindowDecorView.setFitsSystemWindows(true);
         }
 
+        // Create animations for use later
+        mAnimationListener = new AnimationCallback();
+        mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
+        mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, options.headerOutAnimation);
+        mHeaderOutAnimation.setAnimationListener(mAnimationListener);
+
+        // Get touch slop for use later
+        mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
+
         // Create Header view and then add to Decor View
         mHeaderView = LayoutInflater.from(delegate.getContextForInflater(activity))
                 .inflate(options.headerLayout, mWindowDecorView, false);
@@ -122,21 +129,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mHeaderView.setVisibility(View.GONE);
         mWindowDecorView.addView(mHeaderView);
 
-        // Get ProgressBar and TextView. Also set initial text on TextView
-        mHeaderProgressBar = (ProgressBar) mHeaderView.findViewById(R.id.ptr_progress);
-        mHeaderTextView = (TextView) mHeaderView.findViewById(R.id.ptr_text);
-        if (mHeaderTextView != null) {
-            mHeaderTextView.setText(mPullingLabelResId);
-        }
-
-        // Create animations for use later
-        mAnimationListener = new AnimationCallback();
-        mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
-        mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, options.headerOutAnimation);
-        mHeaderOutAnimation.setAnimationListener(mAnimationListener);
-
-        // Get touch slop for use later
-        mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
+        mHeaderTransformer.onViewCreated(mHeaderView, options);
     }
 
     public void onRefreshComplete() {
@@ -228,12 +221,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         final float scrollLength = mLastMotionY - mInitialMotionY;
 
         if (scrollLength < pxScrollForRefresh) {
-            final float perc = scrollLength / pxScrollForRefresh;
-
-            if (mHeaderProgressBar != null) {
-                mHeaderProgressBar.setVisibility(View.VISIBLE);
-                mHeaderProgressBar.setProgress(Math.round(mHeaderProgressBar.getMax() * perc));
-            }
+            mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);
         } else {
             startRefresh();
         }
@@ -258,12 +246,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             // Call listener
             mRefreshListener.onRefresh(mRefreshableView);
 
-            if (mHeaderTextView != null) {
-                mHeaderTextView.setText(mRefreshingLabelResId);
-            }
-            if (mHeaderProgressBar != null) {
-                mHeaderProgressBar.setIndeterminate(true);
-            }
+            // Call Transformer
+            mHeaderTransformer.onRefreshStarted();
         } else {
             reset();
         }
@@ -279,35 +263,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Hide Header
         mHeaderView.startAnimation(mHeaderOutAnimation);
         mHeaderView.setVisibility(View.GONE);
-    }
 
-    private class AnimationCallback implements Animation.AnimationListener {
-
-        @Override
-        public void onAnimationStart(Animation animation) {
-        }
-
-        @Override
-        public void onAnimationEnd(Animation animation) {
-            if (animation == mHeaderOutAnimation) {
-                // Reset Progress Bar
-                if (mHeaderProgressBar != null) {
-                    mHeaderProgressBar.setVisibility(View.GONE);
-                    mHeaderProgressBar.setProgress(0);
-                    mHeaderProgressBar.setIndeterminate(false);
-                }
-
-                // Reset Text View
-                if (mHeaderTextView != null) {
-                    mHeaderTextView.setVisibility(View.VISIBLE);
-                    mHeaderTextView.setText(mPullingLabelResId);
-                }
-            }
-        }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {
-        }
+        // FYI: HeaderTransformer is called once the animation has finished
     }
 
     /**
@@ -321,6 +278,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          */
         public void onRefresh(View view);
 
+    }
+
+    public interface HeaderTransformer {
+
+        void onViewCreated(View headerView, Options options);
+
+        void onReset();
+
+        void onPulled(float percentagePulled);
+
+        void onRefreshStarted();
     }
 
     public static abstract class Delegate {
@@ -379,6 +347,78 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * is initiated.
          */
         public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
+    }
+
+    private class AnimationCallback implements Animation.AnimationListener {
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+            if (animation == mHeaderOutAnimation) {
+                mHeaderTransformer.onReset();
+            }
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+        }
+    }
+
+    private static final class DefaultHeaderTransformer implements HeaderTransformer {
+
+        private Options mOptions;
+        private TextView mHeaderTextView;
+        private ProgressBar mHeaderProgressBar;
+
+        @Override
+        public void onViewCreated(View headerView, Options options) {
+            mOptions = options;
+
+            // Get ProgressBar and TextView. Also set initial text on TextView
+            mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
+            mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
+
+            // Call onReset to make sure that the View is consistent
+            onReset();
+        }
+
+        @Override
+        public void onReset() {
+            // Reset Progress Bar
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setVisibility(View.GONE);
+                mHeaderProgressBar.setProgress(0);
+                mHeaderProgressBar.setIndeterminate(false);
+            }
+
+            // Reset Text View
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setVisibility(View.VISIBLE);
+                mHeaderTextView.setText(mOptions.textPulling);
+            }
+        }
+
+        @Override
+        public void onPulled(float percentagePulled) {
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setVisibility(View.VISIBLE);
+                mHeaderProgressBar
+                        .setProgress(Math.round(mHeaderProgressBar.getMax() * percentagePulled));
+            }
+        }
+
+        @Override
+        public void onRefreshStarted() {
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(mOptions.textRefreshing);
+            }
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setIndeterminate(true);
+            }
+        }
     }
 
 }

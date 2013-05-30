@@ -16,12 +16,13 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import android.view.View;
 import android.widget.ScrollView;
 
-public class ScrollViewDelegate implements PullToRefreshHelper.ViewDelegate<ScrollView> {
+public class ScrollViewDelegate implements PullToRefreshHelper.Delegate {
 
     @Override
-    public boolean isViewScrolledToTop(ScrollView scrollView) {
-        return scrollView.getScrollY() <= 0;
+    public boolean isScrolledToTop(View view) {
+        return ((ScrollView) view).getScrollY() <= 0;
     }
 }

@@ -17,6 +17,7 @@
 package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.app.Activity;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,9 +36,8 @@ public class PullToRefreshHelper implements View.OnTouchListener {
 
     static final float PERCENTAGE_VIEW_MAX_SCROLL = 0.4f;
 
-    private final Activity mActivity;
     private final View mRefreshableView;
-    private final ViewDelegate mViewDelegate;
+    private final Delegate mViewDelegate;
     private final ViewGroup mWindowDecorView;
 
     private final View mHeaderView;
@@ -67,16 +67,21 @@ public class PullToRefreshHelper implements View.OnTouchListener {
     }
 
     public <V extends View> PullToRefreshHelper(Activity activity, V view,
-            ViewDelegate<V> delegate) {
+            Delegate delegate) {
         this(activity, view, delegate, R.layout.default_header, R.anim.fade_in,
                 R.anim.fade_out);
     }
 
     public <V extends View> PullToRefreshHelper(Activity activity, V view,
-            ViewDelegate<V> viewDelegate, int headerLayoutRes,
+            Delegate viewDelegate, int headerLayoutRes,
             int animInRes, int animOutRes) {
-        mActivity = activity;
         mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
+
+        // TODO HACK! ICS's decor view doesn't seem to fit system windows.
+        // May cause problems, need to investigate
+        if (Build.VERSION.SDK_INT >= 11 && Build.VERSION.SDK_INT < 16) {
+            mWindowDecorView.setFitsSystemWindows(true);
+        }
 
         // View to detect refreshes for
         mRefreshableView = view;
@@ -88,9 +93,6 @@ public class PullToRefreshHelper implements View.OnTouchListener {
         if (mHeaderView == null) {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
         }
-
-        // Make sure the header view fits system windows
-        mHeaderView.setFitsSystemWindows(true);
         mHeaderView.setVisibility(View.GONE);
         mWindowDecorView.addView(mHeaderView);
 
@@ -128,7 +130,7 @@ public class PullToRefreshHelper implements View.OnTouchListener {
                 final float yDiff = y - mLastMotionY;
 
                 if (!mIsBeingDragged && yDiff > 0f && Math.abs(yDiff) > mTouchSlop
-                        && mViewDelegate.isViewScrolledToTop(mRefreshableView)) {
+                        && mViewDelegate.isScrolledToTop(mRefreshableView)) {
                     // Reset initial y to be the starting y for pulling
                     mInitialMotionY = y;
                     mIsBeingDragged = true;
@@ -138,7 +140,7 @@ public class PullToRefreshHelper implements View.OnTouchListener {
                 if (mIsBeingDragged) {
                     mLastMotionY = y;
 
-                    if (mViewDelegate.isViewScrolledToTop(mRefreshableView)) {
+                    if (mViewDelegate.isScrolledToTop(mRefreshableView)) {
                         onPull();
                     } else {
                         // We were being dragged, but not any more.
@@ -286,8 +288,8 @@ public class PullToRefreshHelper implements View.OnTouchListener {
         }
     }
 
-    public interface ViewDelegate<V extends View> {
-        boolean isViewScrolledToTop(V view);
+    public interface Delegate {
+        boolean isScrolledToTop(View view);
     }
 
 }

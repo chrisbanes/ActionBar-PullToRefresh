@@ -18,14 +18,13 @@ package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.Adapter;
 
-public class AbsListViewDelegate implements PullToRefreshHelper.ViewDelegate<AbsListView> {
+public class AbsListViewDelegate implements PullToRefreshHelper.Delegate {
 
     @Override
-    public boolean isViewScrolledToTop(AbsListView absListView) {
-        final Adapter adapter = absListView.getAdapter();
-        if (null == adapter || adapter.isEmpty()) {
+    public boolean isScrolledToTop(View view) {
+        AbsListView absListView = (AbsListView) view;
+        if (absListView.getCount() == 0) {
             return true;
         } else if (absListView.getFirstVisiblePosition() == 0) {
             final View firstVisibleChild = absListView.getChildAt(0);

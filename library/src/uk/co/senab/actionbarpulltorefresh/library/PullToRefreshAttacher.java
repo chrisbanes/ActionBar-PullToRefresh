@@ -46,7 +46,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
     private final View mRefreshableView;
-    private final Delegate mViewDelegate;
+    private final Delegate mDelegate;
     private final ViewGroup mWindowDecorView;
 
     private final View mHeaderView;
@@ -100,7 +100,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mRefreshableView.setOnTouchListener(this);
 
         // Delegate
-        mViewDelegate = delegate;
+        mDelegate = delegate;
 
         // Get Window Decor View
         mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
@@ -125,7 +125,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Get ProgressBar and TextView. Also set initial text on TextView
         mHeaderProgressBar = (ProgressBar) mHeaderView.findViewById(R.id.ptr_progress);
         mHeaderTextView = (TextView) mHeaderView.findViewById(R.id.ptr_text);
-        mHeaderTextView.setText(mPullingLabelResId);
+        if (mHeaderTextView != null) {
+            mHeaderTextView.setText(mPullingLabelResId);
+        }
 
         // Create animations for use later
         mAnimationListener = new AnimationCallback();
@@ -158,7 +160,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 final float yDiff = y - mLastMotionY;
 
                 if (!mIsBeingDragged && yDiff > 0f && Math.abs(yDiff) > mTouchSlop
-                        && mViewDelegate.isScrolledToTop(mRefreshableView)) {
+                        && mDelegate.isScrolledToTop(mRefreshableView)) {
                     // Reset initial y to be the starting y for pulling
                     mInitialMotionY = y;
                     mIsBeingDragged = true;
@@ -168,7 +170,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 if (mIsBeingDragged) {
                     mLastMotionY = y;
 
-                    if (mViewDelegate.isScrolledToTop(mRefreshableView)) {
+                    if (mDelegate.isScrolledToTop(mRefreshableView)) {
                         onPull();
                     } else {
                         // We were being dragged, but not any more.
@@ -221,14 +223,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPull");
         }
-        mHeaderProgressBar.setVisibility(View.VISIBLE);
 
-        final float scrollToRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
+        final float pxScrollForRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
         final float scrollLength = mLastMotionY - mInitialMotionY;
 
-        if (scrollLength < scrollToRefresh) {
-            mHeaderProgressBar.setProgress(
-                    Math.round(mHeaderProgressBar.getMax() * scrollLength / scrollToRefresh));
+        if (scrollLength < pxScrollForRefresh) {
+            final float perc = scrollLength / pxScrollForRefresh;
+
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setVisibility(View.VISIBLE);
+                mHeaderProgressBar.setProgress(Math.round(mHeaderProgressBar.getMax() * perc));
+            }
         } else {
             startRefresh();
         }
@@ -253,8 +258,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             // Call listener
             mRefreshListener.onRefresh(mRefreshableView);
 
-            mHeaderTextView.setText(mRefreshingLabelResId);
-            mHeaderProgressBar.setIndeterminate(true);
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(mRefreshingLabelResId);
+            }
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setIndeterminate(true);
+            }
         } else {
             reset();
         }
@@ -282,13 +291,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         public void onAnimationEnd(Animation animation) {
             if (animation == mHeaderOutAnimation) {
                 // Reset Progress Bar
-                mHeaderProgressBar.setVisibility(View.GONE);
-                mHeaderProgressBar.setProgress(0);
-                mHeaderProgressBar.setIndeterminate(false);
+                if (mHeaderProgressBar != null) {
+                    mHeaderProgressBar.setVisibility(View.GONE);
+                    mHeaderProgressBar.setProgress(0);
+                    mHeaderProgressBar.setIndeterminate(false);
+                }
 
-                // Reset Inner Content
-                mHeaderTextView.setVisibility(View.VISIBLE);
-                mHeaderTextView.setText(mPullingLabelResId);
+                // Reset Text View
+                if (mHeaderTextView != null) {
+                    mHeaderTextView.setVisibility(View.VISIBLE);
+                    mHeaderTextView.setText(mPullingLabelResId);
+                }
             }
         }
 

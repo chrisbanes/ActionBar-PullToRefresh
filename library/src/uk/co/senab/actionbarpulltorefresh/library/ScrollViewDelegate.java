@@ -18,7 +18,7 @@ package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.view.View;
 
-public class ScrollViewDelegate implements PullToRefreshHelper.Delegate {
+public class ScrollViewDelegate extends PullToRefreshHelper.Delegate {
 
     @Override
     public boolean isScrolledToTop(View view) {

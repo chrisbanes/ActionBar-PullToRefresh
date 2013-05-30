@@ -17,6 +17,7 @@
 package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -109,7 +110,7 @@ public class PullToRefreshHelper implements View.OnTouchListener {
         }
 
         // Create Header view and then add to Decor View
-        mHeaderView = LayoutInflater.from(activity)
+        mHeaderView = LayoutInflater.from(delegate.getContextForInflater(activity))
                 .inflate(options.headerLayout, mWindowDecorView, false);
         if (mHeaderView == null) {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
@@ -305,18 +306,61 @@ public class PullToRefreshHelper implements View.OnTouchListener {
 
     }
 
-    public interface Delegate {
-        boolean isScrolledToTop(View view);
+    public static abstract class Delegate {
+
+        /**
+         * Allows you to provide support for View which do not have built-in support. In this
+         * method you should cast <code>view</code> to it's native class, and check if it is
+         * scrolled to the top.
+         *
+         * @param view The view this PullToRefreshHelper was created with.
+         * @return true if <code>view</code> is scrolled to the top.
+         */
+        public abstract boolean isScrolledToTop(View view);
+
+        /**
+         * @return Context which should be used for inflating the header layout
+         */
+        public Context getContextForInflater(Activity activity) {
+            if (Build.VERSION.SDK_INT >= 14) {
+                return activity.getActionBar().getThemedContext();
+            } else {
+                return activity;
+            }
+        }
     }
 
-
     public static final class Options {
-        // TODO Document!
+
+        /**
+         * The layout resource ID which should be inflated to be displayed above the Action Bar
+         */
         public int headerLayout = DEFAULT_HEADER_LAYOUT;
+
+        /**
+         * The string resource ID which should be displayed while the user is pulling.
+         */
         public int textPulling = DEFAULT_TEXT_PULLING;
+
+        /**
+         * The string resource ID which should be displayed after the user has initiated a refresh.
+         */
         public int textRefreshing = DEFAULT_TEXT_REFRESHING;
+
+        /**
+         * The anim resource ID which should be started when the header is being hidden.
+         */
         public int headerOutAnimation = DEFAULT_ANIM_HEADER_OUT;
+
+        /**
+         * The anim resource ID which should be started when the header is being shown.
+         */
         public int headerInAnimation = DEFAULT_ANIM_HEADER_IN;
+
+        /**
+         * The percentage of the refreshable view that needs to be scrolled before a refresh
+         * is initiated.
+         */
         public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
     }
 

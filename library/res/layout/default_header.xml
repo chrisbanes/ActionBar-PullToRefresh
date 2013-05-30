@@ -22,7 +22,7 @@
 
     <TextView
             android:id="@id/ptr_text"
-        android:background="@android:color/darker_gray"
+        android:background="?android:attr/colorBackground"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             android:textAppearance="?android:attr/textAppearanceMedium"

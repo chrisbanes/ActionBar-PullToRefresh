@@ -15,15 +15,22 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-        >
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Hello World, MyActivity"
-            />
-</LinearLayout>
+<uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
+        android:id="@+id/ptr_layout"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        ptr:refreshScrollDistance="0.75">
+
+
+    <ScrollView android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                android:text="SCROLLVIEW"/>
+
+    </ScrollView>
+</uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>
 

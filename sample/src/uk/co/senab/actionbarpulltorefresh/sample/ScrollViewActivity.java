@@ -25,9 +25,9 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
- * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.ScrollView}. It
- * utilises {@link PullToRefreshLayout} to setup the ScrollView via XML. See the layout resource
- * file for more information.
+ * This sample shows how to use ActionBar-PullToRefresh with a
+ * {@link android.widget.ScrollView ScrollView}. It utilises {@link PullToRefreshLayout} to setup
+ * the ScrollView via XML. See the layout resource file for more information.
  * <p />
  * Once inflated, you can retrieve the {@link PullToRefreshAttacher} by calling
  * {@link PullToRefreshLayout#getAttacher(android.app.Activity, int) getAttacher(Activity, int)},

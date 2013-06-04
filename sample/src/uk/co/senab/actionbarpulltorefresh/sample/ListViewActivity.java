@@ -18,26 +18,28 @@ package uk.co.senab.actionbarpulltorefresh.sample;
 
 import android.app.ListActivity;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
+/**
+ * This sample shows how to use ActionBar-PullToRefresh with a
+ * {@link android.widget.ListView ListView}, and manually creating (and attaching) a
+ * {@link PullToRefreshAttacher} to the view.
+ */
 public class ListViewActivity extends ListActivity
         implements PullToRefreshAttacher.OnRefreshListener {
 
-    private static String[] STRINGS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
+    private static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
             "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
             "Airag", "Airedale", "Aisy Cendre", "Allgauer Emmentaler", "Abbaye de Belloc",
             "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi", "Acorn", "Adelost",
             "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
             "Allgauer Emmentaler"};
-
 
     private PullToRefreshAttacher mPullToRefreshHelper;
 
@@ -45,10 +47,18 @@ public class ListViewActivity extends ListActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final ListView listView = getListView();
-        listView.setAdapter(
-                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, STRINGS));
+        /**
+         * Get ListView and give it an adapter to display the sample items
+         */
+        ListView listView = getListView();
+        ListAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                ITEMS);
+        listView.setAdapter(adapter);
 
+        /**
+         * Here we create a PullToRefreshAttacher manually without an Options instance.
+         * PullToRefreshAttacher will manually create one using default values.
+         */
         mPullToRefreshHelper = new PullToRefreshAttacher(this, getListView());
         mPullToRefreshHelper.setRefreshListener(this);
     }
@@ -73,6 +83,8 @@ public class ListViewActivity extends ListActivity
             @Override
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
+
+                // Notify PullToRefreshAttacher that the refresh has finished
                 mPullToRefreshHelper.setRefreshComplete();
             }
         }.execute();

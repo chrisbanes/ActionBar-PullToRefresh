@@ -19,12 +19,11 @@
 
     <declare-styleable name="PullToRefreshLayout">
         <attr name="headerLayout" format="reference"/>
-        <attr name="textPulling" format="reference"/>
-        <attr name="textRefreshing" format="reference"/>
         <attr name="headerOutAnimation" format="reference"/>
         <attr name="headerInAnimation" format="reference"/>
         <attr name="refreshScrollDistance" format="reference|float"/>
         <attr name="delegateClass" format="string"/>
+        <attr name="headerTransformerClass" format="string"/>
     </declare-styleable>
 
 </resources>

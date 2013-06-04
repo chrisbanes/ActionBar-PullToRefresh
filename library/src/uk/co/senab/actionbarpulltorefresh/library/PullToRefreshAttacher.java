@@ -36,8 +36,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Default configuration values
      */
     private static final int DEFAULT_HEADER_LAYOUT = R.layout.default_header;
-    private static final int DEFAULT_TEXT_PULLING = R.string.pull_to_refresh_pull_label;
-    private static final int DEFAULT_TEXT_REFRESHING = R.string.pull_to_refresh_refreshing_label;
     private static final int DEFAULT_ANIM_HEADER_IN = R.anim.fade_in;
     private static final int DEFAULT_ANIM_HEADER_OUT = R.anim.fade_out;
     private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
@@ -55,33 +53,18 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final Animation.AnimationListener mAnimationListener;
 
     private final int mTouchSlop;
-    private float mInitialMotionY, mLastMotionY;
     private final float mRefreshScrollDistance;
-
+    private float mInitialMotionY, mLastMotionY;
     private boolean mIsBeingDragged, mIsRefreshing;
 
     private OnRefreshListener mRefreshListener;
-    private HeaderTransformer mHeaderTransformer;
+    private final HeaderTransformer mHeaderTransformer;
 
     public PullToRefreshAttacher(Activity activity, View view) {
-        this(activity, view, null);
+        this(activity, view, new Options());
     }
 
-    public <V extends View> PullToRefreshAttacher(Activity activity, V view,
-            Delegate delegate) {
-        this(activity, view, delegate, new Options());
-    }
-
-    public <V extends View> PullToRefreshAttacher(Activity activity, V view,
-            Delegate delegate, Options options) {
-
-        if (delegate == null) {
-            delegate = DelegateUtils.getBuiltInDelegateForView(view);
-            if (delegate == null) {
-                throw new IllegalArgumentException("No delegate given. Please provide one.");
-            }
-        }
-
+    public <V extends View> PullToRefreshAttacher(Activity activity, V view, Options options) {
         if (options == null) {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();
@@ -95,10 +78,18 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mRefreshableView.setOnTouchListener(this);
 
         // Delegate
+        Delegate delegate = options.delegate;
+        if (delegate == null) {
+            delegate = InstanceCreationUtils.getBuiltInDelegateForView(view);
+            if (delegate == null) {
+                throw new IllegalArgumentException("No delegate given. Please provide one.");
+            }
+        }
         mDelegate = delegate;
 
-        // TODO Need to let dev provide this
-        mHeaderTransformer = new DefaultHeaderTransformer();
+        // Header Transformer
+        mHeaderTransformer = options.headerTransformer != null ? options.headerTransformer
+                : new DefaultHeaderTransformer();
 
         // Get Window Decor View
         mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
@@ -129,11 +120,18 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mHeaderView.setVisibility(View.GONE);
         mWindowDecorView.addView(mHeaderView);
 
-        mHeaderTransformer.onViewCreated(mHeaderView, options);
+        // Notify transformer
+        mHeaderTransformer.onViewCreated(mHeaderView);
     }
 
-    public void onRefreshComplete() {
-        reset();
+    /**
+     * Call this when your refresh is complete and this view should reset itself (header view
+     * will be hidden).
+     */
+    public final void setRefreshComplete() {
+        if (mIsRefreshing) {
+            reset();
+        }
     }
 
     @Override
@@ -199,6 +197,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         return false;
     }
 
+    /**
+     * Set a listener for when a refresh is started.
+     * @param listener
+     */
     public void setRefreshListener(OnRefreshListener listener) {
         mRefreshListener = listener;
     }
@@ -244,7 +246,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mIsRefreshing = true;
 
             // Call listener
-            mRefreshListener.onRefresh(mRefreshableView);
+            mRefreshListener.onRefreshStarted(mRefreshableView);
 
             // Call Transformer
             mHeaderTransformer.onRefreshStarted();
@@ -271,24 +273,41 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Simple Listener to listen for any callbacks to Refresh.
      */
     public interface OnRefreshListener {
-
         /**
          * Called when the user has initiated a refresh by pulling.
          * @param view - View which the user has started the refresh from.
          */
-        public void onRefresh(View view);
-
+        public void onRefreshStarted(View view);
     }
 
-    public interface HeaderTransformer {
+    public static abstract class HeaderTransformer {
+        /**
+         * Called whether the header view has been inflated from the resources defined in
+         * {@link Options#headerLayout}.
+         *
+         * @param headerView - inflated header view.
+         */
+        public abstract void onViewCreated(View headerView);
 
-        void onViewCreated(View headerView, Options options);
+        /**
+         * Called when the header should be reset. You should update any child views to reflect this.
+         * <p/>
+         * You should <strong>not</strong> change the
+         * visibility of the header view.
+         */
+        public abstract void onReset();
 
-        void onReset();
+        /**
+         * Called the user has pulled on the scrollable view.
+         * @param  percentagePulled - value between 0.0f and 1.0f depending on how far the user has pulled.
+         */
+        public abstract void onPulled(float percentagePulled);
 
-        void onPulled(float percentagePulled);
-
-        void onRefreshStarted();
+        /**
+         * Called when a refresh has begun. Theoretically this call is similar to that provided
+         * from {@link OnRefreshListener} but is more suitable for header view updates.
+         */
+        public abstract void onRefreshStarted();
     }
 
     public static abstract class Delegate {
@@ -316,6 +335,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     public static final class Options {
+        /**
+         * Delegate instance which will be used. If null, we will try to find an instance which
+         * will work for the given scrollable view.
+         */
+        public Delegate delegate = null;
 
         /**
          * The layout resource ID which should be inflated to be displayed above the Action Bar
@@ -323,14 +347,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         public int headerLayout = DEFAULT_HEADER_LAYOUT;
 
         /**
-         * The string resource ID which should be displayed while the user is pulling.
+         * The header transformer to be used to transfer the header view. If null, an instance of
+         * {@link DefaultHeaderTransformer} will be used.
          */
-        public int textPulling = DEFAULT_TEXT_PULLING;
-
-        /**
-         * The string resource ID which should be displayed after the user has initiated a refresh.
-         */
-        public int textRefreshing = DEFAULT_TEXT_REFRESHING;
+        public HeaderTransformer headerTransformer = null;
 
         /**
          * The anim resource ID which should be started when the header is being hidden.
@@ -367,16 +387,15 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
     }
 
-    private static final class DefaultHeaderTransformer implements HeaderTransformer {
-
-        private Options mOptions;
+    /**
+     * Default Header Transformer.
+     */
+    public static class DefaultHeaderTransformer extends HeaderTransformer {
         private TextView mHeaderTextView;
         private ProgressBar mHeaderProgressBar;
 
         @Override
-        public void onViewCreated(View headerView, Options options) {
-            mOptions = options;
-
+        public void onViewCreated(View headerView) {
             // Get ProgressBar and TextView. Also set initial text on TextView
             mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
             mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
@@ -397,7 +416,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             // Reset Text View
             if (mHeaderTextView != null) {
                 mHeaderTextView.setVisibility(View.VISIBLE);
-                mHeaderTextView.setText(mOptions.textPulling);
+                mHeaderTextView.setText(R.string.pull_to_refresh_pull_label);
             }
         }
 
@@ -413,7 +432,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         @Override
         public void onRefreshStarted() {
             if (mHeaderTextView != null) {
-                mHeaderTextView.setText(mOptions.textRefreshing);
+                mHeaderTextView.setText(R.string.pull_to_refresh_refreshing_label);
             }
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setIndeterminate(true);

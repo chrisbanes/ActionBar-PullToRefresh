@@ -38,7 +38,7 @@ public class ScrollViewActivity extends Activity implements PullToRefreshAttache
     }
 
     @Override
-    public void onRefresh(View view) {
+    public void onRefreshStarted(View view) {
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -54,7 +54,7 @@ public class ScrollViewActivity extends Activity implements PullToRefreshAttache
             @Override
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
-                mPullToRefreshHelper.onRefreshComplete();
+                mPullToRefreshHelper.setRefreshComplete();
             }
         }.execute();
     }

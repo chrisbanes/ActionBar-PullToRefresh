@@ -74,7 +74,7 @@ public class AbsListViewActivity extends ListActivity implements PullToRefreshAt
     }
 
     @Override
-    public void onRefresh(View view) {
+    public void onRefreshStarted(View view) {
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -90,7 +90,7 @@ public class AbsListViewActivity extends ListActivity implements PullToRefreshAt
             @Override
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
-                mPullToRefreshHelper.onRefreshComplete();
+                mPullToRefreshHelper.setRefreshComplete();
             }
         }.execute();
     }

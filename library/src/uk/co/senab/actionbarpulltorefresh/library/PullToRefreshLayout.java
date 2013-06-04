@@ -30,7 +30,6 @@ public class PullToRefreshLayout extends FrameLayout {
     private static final String LOG_TAG = "PullToRefreshLayout";
 
     private final PullToRefreshAttacher.Options mOptions;
-    private final PullToRefreshAttacher.Delegate mDelegate;
     private PullToRefreshAttacher mAttacher;
 
     public PullToRefreshLayout(Context context) {
@@ -54,17 +53,6 @@ public class PullToRefreshLayout extends FrameLayout {
                             mOptions.headerLayout);
         }
 
-        if (values.hasValue(R.styleable.PullToRefreshLayout_textPulling)) {
-            mOptions.textPulling = values.getResourceId(R.styleable.PullToRefreshLayout_textPulling,
-                    mOptions.textPulling);
-        }
-
-        if (values.hasValue(R.styleable.PullToRefreshLayout_textRefreshing)) {
-            mOptions.textRefreshing = values
-                    .getResourceId(R.styleable.PullToRefreshLayout_textRefreshing,
-                            mOptions.textRefreshing);
-        }
-
         if (values.hasValue(R.styleable.PullToRefreshLayout_headerInAnimation)) {
             mOptions.headerInAnimation = values
                     .getResourceId(R.styleable.PullToRefreshLayout_headerInAnimation,
@@ -85,14 +73,23 @@ public class PullToRefreshLayout extends FrameLayout {
 
         if (values.hasValue(R.styleable.PullToRefreshLayout_delegateClass)) {
             String className = values.getString(R.styleable.PullToRefreshLayout_delegateClass);
-            mDelegate = DelegateUtils.newInstance(getContext(), className);
-        } else {
-            mDelegate = null;
+            mOptions.delegate = InstanceCreationUtils.instantiateDelegate(getContext(),
+                    className, null);
+        }
+
+        if (values.hasValue(R.styleable.PullToRefreshLayout_headerTransformerClass)) {
+            String className = values
+                    .getString(R.styleable.PullToRefreshLayout_headerTransformerClass);
+            mOptions.delegate = InstanceCreationUtils.instantiateTransformer(getContext(),
+                    className, null);
         }
 
         values.recycle();
     }
 
+    /**
+     * @return PullToRefreshAttacher linked with this view.
+     */
     public PullToRefreshAttacher getAttacher() {
         return mAttacher;
     }
@@ -116,7 +113,7 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     void createAttacher(View view) {
-        mAttacher = new PullToRefreshAttacher((Activity) getContext(), view, mDelegate, mOptions);
+        mAttacher = new PullToRefreshAttacher((Activity) getContext(), view, mOptions);
     }
 
 }

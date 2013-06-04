@@ -1,5 +1,6 @@
 # ActionBar-PullToRefresh
 
+![ActionBar-PullToRefresh](https://github.com/chrisbanes/ActionBar-PullToRefresh/raw/master/header.png)
 
 ActionBar-PullToRefresh provides an easy way to add a modern version of the pull-to-refresh interaction to your application.
 
@@ -7,6 +8,15 @@ Please note that this is __not__ an update to [Android-PullToRefresh](https://gi
 
 ### This is a Preview
 Please note that this is currently in a preview state. This basically means that the API is not fixed and you should expect changes between releases.
+
+### Todo
+As this is a preview also means that function is missing. See the [Todo](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/Todo) page for more info on what needs to be added.
+
+---
+
+## Sample
+
+Eventually the sample will be available to download on Google Play. As we're not stable yet you can find the APK [here](https://drive.google.com/folderview?id=0BxAFUoBj0OjaYTd3SUkzYjIydG8&usp=sharing).
 
 ---
 
@@ -42,7 +52,7 @@ public void onCreate(Bundle savedInstanceState) {
 }
 ```
 
-__See the [ListView]() sample for more info.__
+__See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/ListViewActivity.java) sample for more info.__
   
 ### Declaratively
 Here you just wrap your scrollable view in a `PullToRefreshLayout` in your layout XML:
@@ -81,18 +91,17 @@ mPullToRefreshAttacher = PullToRefreshLayout.getAttacher(this, R.id.ptr_layout);
 mPullToRefreshAttacher.setRefreshListener(this);
 ```
 
-__See the [ScrollView]() sample for more info.__
+__See the [ScrollView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/ScrollViewActivity.java) sample for more info.__
 
 ---
 
 ## Customisation    
     
 ### Delegates
-TODO
+TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/GridViewActivity.java) sample for more info for now.
 
 ### HeaderTransformers
-TODO
-
+TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/GridViewActivity.java) sample for more info for now.
 
 ---
 

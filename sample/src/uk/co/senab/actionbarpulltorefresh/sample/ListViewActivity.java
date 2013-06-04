@@ -41,7 +41,7 @@ public class ListViewActivity extends ListActivity
             "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
             "Allgauer Emmentaler"};
 
-    private PullToRefreshAttacher mPullToRefreshHelper;
+    private PullToRefreshAttacher mPullToRefreshAttacher;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,8 +59,10 @@ public class ListViewActivity extends ListActivity
          * Here we create a PullToRefreshAttacher manually without an Options instance.
          * PullToRefreshAttacher will manually create one using default values.
          */
-        mPullToRefreshHelper = new PullToRefreshAttacher(this, getListView());
-        mPullToRefreshHelper.setRefreshListener(this);
+        mPullToRefreshAttacher = new PullToRefreshAttacher(this, getListView());
+
+        // Set Listener to know when a refresh should be started
+        mPullToRefreshAttacher.setRefreshListener(this);
     }
 
     @Override
@@ -85,7 +87,7 @@ public class ListViewActivity extends ListActivity
                 super.onPostExecute(result);
 
                 // Notify PullToRefreshAttacher that the refresh has finished
-                mPullToRefreshHelper.setRefreshComplete();
+                mPullToRefreshAttacher.setRefreshComplete();
             }
         }.execute();
     }

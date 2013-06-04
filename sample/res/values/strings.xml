@@ -17,4 +17,6 @@
 
 <resources>
     <string name="app_name">ActionBarPullToRefresh</string>
+    <string name="activity_scrollview">ScrollView</string>
+    <string name="activity_listview">ListView</string>
 </resources>

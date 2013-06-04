@@ -39,12 +39,15 @@ public class ScrollViewActivity extends Activity implements PullToRefreshAttache
 
     @Override
     public void onRefreshStarted(View view) {
+        /**
+         * Simulate Refresh with 4 seconds sleep
+         */
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

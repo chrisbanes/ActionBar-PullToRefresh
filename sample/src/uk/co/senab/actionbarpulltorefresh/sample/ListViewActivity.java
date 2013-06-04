@@ -28,7 +28,8 @@ import android.widget.ListView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
-public class AbsListViewActivity extends ListActivity implements PullToRefreshAttacher.OnRefreshListener {
+public class ListViewActivity extends ListActivity
+        implements PullToRefreshAttacher.OnRefreshListener {
 
     private static String[] STRINGS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
             "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
@@ -53,34 +54,16 @@ public class AbsListViewActivity extends ListActivity implements PullToRefreshAt
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_hide_nav:
-                if (Build.VERSION.SDK_INT < 16) {
-                    getListView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-                } else {
-                    getListView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
-                }
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onRefreshStarted(View view) {
+        /**
+         * Simulate Refresh with 4 seconds sleep
+         */
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

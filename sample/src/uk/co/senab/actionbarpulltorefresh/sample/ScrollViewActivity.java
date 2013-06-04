@@ -24,17 +24,31 @@ import android.view.View;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
-public class ScrollViewActivity extends Activity implements PullToRefreshAttacher.OnRefreshListener {
+/**
+ * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.ScrollView}. It
+ * utilises {@link PullToRefreshLayout} to setup the ScrollView via XML. See the layout resource
+ * file for more information.
+ * <p />
+ * Once inflated, you can retrieve the {@link PullToRefreshAttacher} by calling
+ * {@link PullToRefreshLayout#getAttacher(android.app.Activity, int) getAttacher(Activity, int)},
+ * passing it the PullToRefreshLayout's ID. From there you can set your
+ * {@link PullToRefreshAttacher.OnRefreshListener OnRefreshListener} as usual.
+ */
+public class ScrollViewActivity extends Activity
+        implements PullToRefreshAttacher.OnRefreshListener {
 
-    private PullToRefreshAttacher mPullToRefreshHelper;
+    private PullToRefreshAttacher mPullToRefreshAttacher;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_scrollview);
 
-        mPullToRefreshHelper = PullToRefreshLayout.getAttacher(this, R.id.ptr_layout);
-        mPullToRefreshHelper.setRefreshListener(this);
+        // Retrieve PullToRefreshAttacher from PullToRefreshLayout
+        mPullToRefreshAttacher = PullToRefreshLayout.getAttacher(this, R.id.ptr_layout);
+
+        // Set Listener to know when a refresh should be started
+        mPullToRefreshAttacher.setRefreshListener(this);
     }
 
     @Override
@@ -57,7 +71,9 @@ public class ScrollViewActivity extends Activity implements PullToRefreshAttache
             @Override
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
-                mPullToRefreshHelper.setRefreshComplete();
+
+                // Notify PullToRefreshAttacher that the refresh has finished
+                mPullToRefreshAttacher.setRefreshComplete();
             }
         }.execute();
     }

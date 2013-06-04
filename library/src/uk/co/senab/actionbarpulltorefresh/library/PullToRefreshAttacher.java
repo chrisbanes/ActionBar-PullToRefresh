@@ -93,14 +93,8 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Get Window Decor View
         mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
-        /**
-         * TODO
-         * HACK! ICS's decor view doesn't seem to fit system windows.
-         * May cause problems, need to investigate
-         */
-        if (Build.VERSION.SDK_INT >= 11 && Build.VERSION.SDK_INT < 16) {
-            mWindowDecorView.setFitsSystemWindows(true);
-        }
+        // FIXME Decor view doesn't seem to fit system windows by default. May cause problems, need to investigate
+        mWindowDecorView.setFitsSystemWindows(true);
 
         // Create animations for use later
         mAnimationListener = new AnimationCallback();

@@ -30,7 +30,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class PullToRefreshAttacher implements View.OnTouchListener {
+public final class PullToRefreshAttacher implements View.OnTouchListener {
 
     /**
      * Default configuration values

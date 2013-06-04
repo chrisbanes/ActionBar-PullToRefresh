@@ -16,7 +16,6 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -25,6 +24,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+/**
+ * A layout which allows you to declare a child scrollable view to be used to trigger
+ * Pull-to-Refresh interactions via XML.
+ */
 public class PullToRefreshLayout extends FrameLayout {
 
     private static final String LOG_TAG = "PullToRefreshLayout";
@@ -94,8 +97,12 @@ public class PullToRefreshLayout extends FrameLayout {
         return mAttacher;
     }
 
-    public static PullToRefreshAttacher getAttacher(Activity activity, int layoutId) {
-        PullToRefreshLayout layout = (PullToRefreshLayout) activity.findViewById(layoutId);
+    /**
+     * @return The PullToRefreshAttacher linked with the {@link PullToRefreshLayout} found with
+     * the id given at <code>viewId</code>
+     */
+    public static PullToRefreshAttacher getAttacher(Activity activity, int viewId) {
+        PullToRefreshLayout layout = (PullToRefreshLayout) activity.findViewById(viewId);
         if (layout != null) {
             return layout.getAttacher();
         }

@@ -45,12 +45,9 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
     private final View mRefreshableView;
     private final Delegate mDelegate;
-    private final ViewGroup mWindowDecorView;
-
     private final View mHeaderView;
 
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
-    private final Animation.AnimationListener mAnimationListener;
 
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
@@ -92,27 +89,28 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
                 : new DefaultHeaderTransformer();
 
         // Get Window Decor View
-        mWindowDecorView = (ViewGroup) activity.getWindow().getDecorView();
+        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
         // FIXME Decor view doesn't seem to fit system windows by default. May cause problems, need to investigate
-        mWindowDecorView.setFitsSystemWindows(true);
+        decorView.setFitsSystemWindows(true);
 
         // Create animations for use later
-        mAnimationListener = new AnimationCallback();
         mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
         mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, options.headerOutAnimation);
-        mHeaderOutAnimation.setAnimationListener(mAnimationListener);
+        if (mHeaderOutAnimation != null) {
+            mHeaderOutAnimation.setAnimationListener(new AnimationCallback());
+        }
 
         // Get touch slop for use later
         mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
 
         // Create Header view and then add to Decor View
         mHeaderView = LayoutInflater.from(delegate.getContextForInflater(activity))
-                .inflate(options.headerLayout, mWindowDecorView, false);
+                .inflate(options.headerLayout, decorView, false);
         if (mHeaderView == null) {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
         }
         mHeaderView.setVisibility(View.GONE);
-        mWindowDecorView.addView(mHeaderView);
+        decorView.addView(mHeaderView);
 
         // Notify transformer
         mHeaderTransformer.onViewCreated(mHeaderView);
@@ -193,7 +191,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
     /**
      * Set a listener for when a refresh is started.
-     * @param listener
+     * @param listener - OnRefreshListener to be invoked when a refresh is started.
      */
     public void setRefreshListener(OnRefreshListener listener) {
         mRefreshListener = listener;
@@ -204,7 +202,9 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
             Log.d(LOG_TAG, "onPullStarted");
         }
         // Show Header
-        mHeaderView.startAnimation(mHeaderInAnimation);
+        if (mHeaderInAnimation != null) {
+            mHeaderView.startAnimation(mHeaderInAnimation);
+        }
         mHeaderView.setVisibility(View.VISIBLE);
     }
 
@@ -257,7 +257,9 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         mIsBeingDragged = false;
 
         // Hide Header
-        mHeaderView.startAnimation(mHeaderOutAnimation);
+        if (mHeaderOutAnimation != null) {
+            mHeaderView.startAnimation(mHeaderOutAnimation);
+        }
         mHeaderView.setVisibility(View.GONE);
 
         // FYI: HeaderTransformer is called once the animation has finished

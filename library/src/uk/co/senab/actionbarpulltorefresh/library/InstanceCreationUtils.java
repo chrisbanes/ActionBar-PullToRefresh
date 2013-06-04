@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import uk.co.senab.actionbarpulltorefresh.library.delegate.AbsListViewDelegate;
+import uk.co.senab.actionbarpulltorefresh.library.delegate.ScrollViewDelegate;
+
 class InstanceCreationUtils {
 
     private static final String LOG_TAG = "InstanceCreationUtils";

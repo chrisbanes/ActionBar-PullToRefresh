@@ -117,13 +117,29 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
+     * Manually set this Attacher's refreshing state. The header will be displayed or hidden as
+     * requested.
+     * @param refreshing - Whether the attacher should be in a refreshing state,
+     */
+    public final void setRefreshing(boolean refreshing) {
+        setRefreshingInt(refreshing, false);
+    }
+
+    /**
+     * @return true if this Attacher is currently in a refreshing state.
+     */
+    public final boolean isRefreshing() {
+        return mIsRefreshing;
+    }
+
+    /**
      * Call this when your refresh is complete and this view should reset itself (header view
      * will be hidden).
+     *
+     * This is the equivalent of calling <code>setRefreshing(false)</code>.
      */
     public final void setRefreshComplete() {
-        if (mIsRefreshing) {
-            reset();
-        }
+        setRefreshingInt(false, false);
     }
 
     @Override
@@ -219,7 +235,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);
         } else {
-            startRefresh();
+            setRefreshingInt(true, true);
         }
     }
 
@@ -228,41 +244,59 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
             Log.d(LOG_TAG, "onPullEnded");
         }
         if (!mIsRefreshing) {
-            reset();
+            reset(true);
         }
     }
 
-    private void startRefresh() {
+    private void setRefreshingInt(boolean refreshing, boolean fromTouch) {
         if (DEBUG) {
-            Log.d(LOG_TAG, "startRefresh");
+            Log.d(LOG_TAG, "setRefreshingInt: " + refreshing);
         }
-        if (mRefreshListener != null) {
-            mIsRefreshing = true;
+        // Check to see if we need to do anything
+        if (mIsRefreshing == refreshing) {
+            return;
+        }
 
-            // Call listener
-            mRefreshListener.onRefreshStarted(mRefreshableView);
-
-            // Call Transformer
-            mHeaderTransformer.onRefreshStarted();
+        if (refreshing && canRefresh(fromTouch)) {
+            startRefresh(fromTouch);
         } else {
-            reset();
+            reset(fromTouch);
+        }
+
+        mIsRefreshing = refreshing;
+    }
+
+    private boolean canRefresh(boolean fromTouch) {
+        return !mIsRefreshing && (!fromTouch || mRefreshListener != null);
+    }
+
+    private void reset(boolean fromTouch) {
+        if (mHeaderView.getVisibility() != View.GONE) {
+            // Hide Header
+            if (mHeaderOutAnimation != null) {
+                mHeaderView.startAnimation(mHeaderOutAnimation);
+                // HeaderTransformer.onReset() is called once the animation has finished
+            } else {
+                // As we're not animating, call the header transformer now
+                mHeaderTransformer.onReset();
+            }
+            mHeaderView.setVisibility(View.GONE);
         }
     }
 
-    private void reset() {
-        if (DEBUG) {
-            Log.d(LOG_TAG, "reset()");
+    private void startRefresh(boolean fromTouch) {
+        // Call OnRefreshListener if this call has originated from a touch event
+        if (fromTouch) {
+            mRefreshListener.onRefreshStarted(mRefreshableView);
         }
-        mIsRefreshing = false;
-        mIsBeingDragged = false;
+        // Call Transformer
+        mHeaderTransformer.onRefreshStarted();
 
-        // Hide Header
-        if (mHeaderOutAnimation != null) {
-            mHeaderView.startAnimation(mHeaderOutAnimation);
+        // Make sure header is visible.
+        // TODO Use header in anim
+        if (mHeaderView.getVisibility() != View.VISIBLE) {
+            mHeaderView.setVisibility(View.VISIBLE);
         }
-        mHeaderView.setVisibility(View.GONE);
-
-        // FYI: HeaderTransformer is called once the animation has finished
     }
 
     /**

@@ -52,7 +52,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
     private float mInitialMotionY, mLastMotionY;
-    private boolean mIsBeingDragged, mIsRefreshing;
+    private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
 
     private OnRefreshListener mRefreshListener;
     private final HeaderTransformer mHeaderTransformer;
@@ -150,32 +150,34 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
-                // If we're already refreshing, ignore
-                if (mIsRefreshing) {
+                // If we're already refreshing or not handling the event, ignore it
+                if (mIsRefreshing || !mIsHandlingTouchEvent) {
                     return false;
                 }
 
                 final float y = event.getY();
-                final float yDiff = y - mLastMotionY;
 
-                if (!mIsBeingDragged && yDiff > 0f && Math.abs(yDiff) > mTouchSlop
-                        && mDelegate.isScrolledToTop(mRefreshableView)) {
-                    // Reset initial y to be the starting y for pulling
-                    mInitialMotionY = y;
+                // We're not currently being dragged so check to see if the user has scrolled enough
+                if (!mIsBeingDragged && (y - mInitialMotionY) > mTouchSlop) {
                     mIsBeingDragged = true;
                     onPullStarted();
                 }
 
                 if (mIsBeingDragged) {
-                    mLastMotionY = y;
+                    final float yDx = y - mLastMotionY;
 
-                    if (mDelegate.isScrolledToTop(mRefreshableView)) {
-                        onPull();
+                    /**
+                     * Check to see if the user is scrolling the right direction (down).
+                     * We allow a small scroll up which is the check against negative touch slop.
+                     */
+                    if (yDx >= -mTouchSlop) {
+                        onPull(y);
+                        // Only record the y motion if the user has scrolled down.
+                        if (yDx > 0f) {
+                            mLastMotionY = y;
+                        }
                     } else {
-                        // We were being dragged, but not any more.
-                        mIsBeingDragged = false;
-                        mLastMotionY = mInitialMotionY = 0f;
-                        onPullEnded();
+                        resetTouch();
                     }
                 }
                 break;
@@ -183,26 +185,32 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (!mIsRefreshing) {
-                    mLastMotionY = mInitialMotionY = event.getY();
+                if (!mIsRefreshing && mDelegate.isScrolledToTop(mRefreshableView)) {
+                    mIsHandlingTouchEvent = true;
+                    mInitialMotionY = event.getY();
                 }
                 break;
             }
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
-                if (mIsBeingDragged) {
-                    // We were being dragged, but not any more.
-                    mIsBeingDragged = false;
-                    onPullEnded();
-                }
-                mLastMotionY = mInitialMotionY = 0f;
+                resetTouch();
                 break;
             }
         }
 
         // Always return false as we only want to observe events
         return false;
+    }
+
+    private void resetTouch() {
+        if (mIsBeingDragged) {
+            // We were being dragged, but not any more.
+            mIsBeingDragged = false;
+            onPullEnded();
+        }
+        mIsHandlingTouchEvent = false;
+        mInitialMotionY = mLastMotionY = 0f;
     }
 
     /**
@@ -224,13 +232,13 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         mHeaderView.setVisibility(View.VISIBLE);
     }
 
-    void onPull() {
+    void onPull(float y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPull");
         }
 
         final float pxScrollForRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
-        final float scrollLength = mLastMotionY - mInitialMotionY;
+        final float scrollLength = y - mInitialMotionY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);

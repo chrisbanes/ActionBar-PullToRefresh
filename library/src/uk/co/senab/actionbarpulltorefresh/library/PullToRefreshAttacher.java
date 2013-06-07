@@ -18,6 +18,7 @@ package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -88,11 +90,6 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         mHeaderTransformer = options.headerTransformer != null ? options.headerTransformer
                 : new DefaultHeaderTransformer();
 
-        // Get Window Decor View
-        ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-        // FIXME Decor view doesn't seem to fit system windows by default. May cause problems, need to investigate
-        decorView.setFitsSystemWindows(true);
-
         // Create animations for use later
         mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
         mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, options.headerOutAnimation);
@@ -103,6 +100,9 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         // Get touch slop for use later
         mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
 
+        // Get Window Decor View
+        final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+
         // Create Header view and then add to Decor View
         mHeaderView = LayoutInflater.from(delegate.getContextForInflater(activity))
                 .inflate(options.headerLayout, decorView, false);
@@ -110,7 +110,15 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
         }
         mHeaderView.setVisibility(View.GONE);
-        decorView.addView(mHeaderView);
+
+        // Create DecorChildLayout which will move all of the system's decor view's children + the
+        // Header View to itself. See DecorChildLayout for more info.
+        DecorChildLayout decorContents = new DecorChildLayout(activity, decorView,
+                mHeaderView);
+
+        // Now add the DecorChildLayout to the decor view
+        decorView.addView(decorContents, ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
 
         // Notify transformer
         mHeaderTransformer.onViewCreated(mHeaderView);
@@ -475,6 +483,48 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setIndeterminate(true);
             }
+        }
+    }
+
+    /**
+     * This class allows us to insert a layer in between the system decor view and the actual decor.
+     * (e.g. Action Bar views). This is needed so we can receive a call to fitSystemWindows(Rect)
+     * so we can adjust the header view to fit the system windows too.
+     */
+    final static class DecorChildLayout extends FrameLayout {
+        private ViewGroup mHeaderViewWrapper;
+
+        DecorChildLayout(Context context, ViewGroup systemDecorView, View headerView) {
+            super(context);
+
+            // Move all children from decor view to here
+            for (int i = 0, z = systemDecorView.getChildCount() ; i < z ; i++) {
+                View child = systemDecorView.getChildAt(i);
+                systemDecorView.removeView(child);
+                addView(child);
+            }
+
+            /**
+             * Wrap the Header View in a FrameLayout and add it to this view. It is wrapped
+             * so any inset changes do not affect the actual header view.
+             */
+            mHeaderViewWrapper = new FrameLayout(context);
+            mHeaderViewWrapper.addView(headerView);
+            addView(mHeaderViewWrapper, ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        @Override
+        protected boolean fitSystemWindows(Rect insets) {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "fitSystemWindows: " + insets.toString());
+            }
+
+            // Adjust the Header View's padding to take the insets into account
+            mHeaderViewWrapper.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+
+            // Call return super so that the rest of the
+            return super.fitSystemWindows(insets);
         }
     }
 

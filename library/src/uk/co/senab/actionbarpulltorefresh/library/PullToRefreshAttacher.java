@@ -44,10 +44,12 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
+    
+    private Activity mActivity;
 
-    private final View mRefreshableView;
-    private final Delegate mDelegate;
-    private final View mHeaderView;
+    private View mRefreshableView;
+    private Delegate mDelegate;
+    private View mHeaderView;
 
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
 
@@ -68,28 +70,19 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();
         }
+        
+        mActivity = activity;
 
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
-
-        // View to detect refreshes for
-        mRefreshableView = view;
-        mRefreshableView.setOnTouchListener(this);
-
-        // Delegate
-        Delegate delegate = options.delegate;
-        if (delegate == null) {
-            delegate = InstanceCreationUtils.getBuiltInDelegateForView(view);
-            if (delegate == null) {
-                throw new IllegalArgumentException("No delegate given. Please provide one.");
-            }
-        }
-        mDelegate = delegate;
 
         // Header Transformer
         mHeaderTransformer = options.headerTransformer != null ? options.headerTransformer
                 : new DefaultHeaderTransformer();
 
+        // Define view to detect refreshes for
+        setRefreshableView(view, options);
+        
         // Create animations for use later
         mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
         mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, options.headerOutAnimation);
@@ -99,29 +92,6 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Get touch slop for use later
         mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
-
-        // Get Window Decor View
-        final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
-
-        // Create Header view and then add to Decor View
-        mHeaderView = LayoutInflater.from(delegate.getContextForInflater(activity))
-                .inflate(options.headerLayout, decorView, false);
-        if (mHeaderView == null) {
-            throw new IllegalArgumentException("Must supply valid layout id for header.");
-        }
-        mHeaderView.setVisibility(View.GONE);
-
-        // Create DecorChildLayout which will move all of the system's decor view's children + the
-        // Header View to itself. See DecorChildLayout for more info.
-        DecorChildLayout decorContents = new DecorChildLayout(activity, decorView,
-                mHeaderView);
-
-        // Now add the DecorChildLayout to the decor view
-        decorView.addView(decorContents, ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        // Notify transformer
-        mHeaderTransformer.onViewCreated(mHeaderView);
     }
 
     /**
@@ -148,6 +118,69 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public final void setRefreshComplete() {
         setRefreshingInt(false, false);
+    }
+    
+    /**
+     * Change the view on which the refreshes are going to be detected
+     * @param view - View to detect refreshes for
+     */
+    public void setRefreshableView(View view) {
+    	setRefreshableView(view, null);
+    }
+    
+    /**
+     * Change the view on which the refreshes are going to be detected
+     * @param view - View to detect refreshes for
+     * @param options - Customize header (layout, animations, ...). If
+     * null default options will be used. 
+     */
+    public void setRefreshableView(View view, Options options) {
+    	if (options == null) {
+            options = new Options();
+        }
+        mRefreshableView = view;
+        if (mRefreshableView == null) {
+        	mDelegate = null;
+        	return;
+        }
+        
+        mRefreshableView.setOnTouchListener(this);
+
+        // Delegate
+        Delegate delegate = options.delegate;
+        if (delegate == null) {
+            delegate = InstanceCreationUtils.getBuiltInDelegateForView(view);
+            if (delegate == null) {
+                throw new IllegalArgumentException("No delegate given. Please provide one.");
+            }
+        }
+        mDelegate = delegate;
+
+        // Don't inject twice the header
+        if (mHeaderView == null) {
+            // Get Window Decor View
+            final ViewGroup decorView = (ViewGroup) mActivity.getWindow().getDecorView();
+        	
+            // Create Header view and then add to Decor View
+            mHeaderView = LayoutInflater.from(delegate.getContextForInflater(mActivity))
+                    .inflate(options.headerLayout, decorView, false);
+            if (mHeaderView == null) {
+                throw new IllegalArgumentException("Must supply valid layout id for header.");
+            }
+            mHeaderView.setVisibility(View.GONE);
+
+            // Create DecorChildLayout which will move all of the system's decor view's children + the
+            // Header View to itself. See DecorChildLayout for more info.
+            DecorChildLayout decorContents = new DecorChildLayout(mActivity, decorView,
+                    mHeaderView);
+
+            // Now add the DecorChildLayout to the decor view
+            decorView.addView(decorContents, ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+
+            // Notify transformer
+            mHeaderTransformer.onViewCreated(mHeaderView);
+        }
     }
 
     @Override

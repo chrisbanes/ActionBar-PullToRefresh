@@ -28,8 +28,8 @@
 
     <scm>
         <url>https://github.com/chrisbanes/Android-BitmapCache</url>
-        <connection>scm:git:git://github.com:chrisbanes/ActionBar-PullToRefresh.git</connection>
-        <developerConnection>scm:git:git://github.com:chrisbanes/ActionBar-PullToRefresh.git
+        <connection>scm:git:git://github.com/chrisbanes/ActionBar-PullToRefresh.git</connection>
+        <developerConnection>scm:git:git@github.com:chrisbanes/ActionBar-PullToRefresh.git
         </developerConnection>
         <tag>HEAD</tag>
     </scm>

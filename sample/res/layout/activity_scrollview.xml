@@ -16,9 +16,9 @@
   -->
 
 <uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
-    android:id="@+id/ptr_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ptr="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ptr_layout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     ptr:refreshScrollDistance="0.75">

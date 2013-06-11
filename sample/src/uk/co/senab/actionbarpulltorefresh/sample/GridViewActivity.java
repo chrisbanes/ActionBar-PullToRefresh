@@ -26,8 +26,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
-import uk.co.senab.actionbarpulltorefresh.library.delegate.AbsListViewDelegate;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.AbsListViewDelegate;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.GridView
@@ -62,13 +61,6 @@ public class GridViewActivity extends Activity
         // Here we make the refresh scroll distance to 75% of the GridView height
         ptrOptions.refreshScrollDistance = 0.75f;
 
-        /**
-         * As GridView is an AbsListView derived class, we create a new AbsListViewDelegate
-         * instance. You do NOT need to do this if you're using a supported scrollable Views. It is
-         * merely in this sample to show you how to set a custom delegate.
-         */
-        ptrOptions.delegate = new AbsListViewDelegate();
-
         // Here we customise the animations which are used when showing/hiding the header view
         ptrOptions.headerInAnimation = R.anim.slide_in_top;
         ptrOptions.headerOutAnimation = R.anim.slide_out_top;
@@ -81,7 +73,16 @@ public class GridViewActivity extends Activity
         ptrOptions.headerTransformer = new CustomisedHeaderTransformer();
 
         // Here we create a PullToRefreshAttacher manually with the Options instance created above.
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this, gridView, ptrOptions);
+        mPullToRefreshAttacher = new PullToRefreshAttacher(this, ptrOptions);
+
+        /**
+         * As GridView is an AbsListView derived class, we create a new
+         * AbsListViewDelegate instance. You do NOT need to do this if you're using
+         * a supported scrollable Views. It is merely in this sample to show you how to set a
+         * custom view delegate.
+         */
+        PullToRefreshAttacher.ViewDelegate handler = new AbsListViewDelegate();
+        mPullToRefreshAttacher.setRefreshableView(gridView, handler);
 
         // Set Listener to know when a refresh should be started
         mPullToRefreshAttacher.setRefreshListener(this);

@@ -14,27 +14,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ptr="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/ptr_layout"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ptr_scrollview"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    ptr:refreshScrollDistance="0.75">
+    android:padding="8dp"
+    android:scrollbarStyle="outsideInset">
 
-    <ScrollView
+    <TextView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:padding="8dp"
-        android:scrollbarStyle="outsideInset">
+        android:layout_height="wrap_content"
+        android:text="@string/filler_text" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/filler_text" />
-
-    </ScrollView>
-
-</uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>
+</ScrollView>
 

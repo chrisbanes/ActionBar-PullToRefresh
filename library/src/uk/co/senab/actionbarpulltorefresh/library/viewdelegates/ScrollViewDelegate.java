@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.library.delegate;
+package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
 
 import android.view.View;
-import android.widget.AbsListView;
+import android.widget.ScrollView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
-public class AbsListViewDelegate extends PullToRefreshAttacher.Delegate {
+/**
+ * FIXME
+ */
+public class ScrollViewDelegate extends PullToRefreshAttacher.ViewDelegate {
 
-    public static final Class SUPPORTED_VIEW_CLASS = AbsListView.class;
+    public static final Class SUPPORTED_VIEW_CLASS = ScrollView.class;
 
     @Override
     public boolean isScrolledToTop(View view) {
-        AbsListView absListView = (AbsListView) view;
-        if (absListView.getCount() == 0) {
-            return true;
-        } else if (absListView.getFirstVisiblePosition() == 0) {
-            final View firstVisibleChild = absListView.getChildAt(0);
-            return firstVisibleChild != null && firstVisibleChild.getTop() >= 0;
-        }
-        return false;
+        return view.getScrollY() <= 0;
     }
 }

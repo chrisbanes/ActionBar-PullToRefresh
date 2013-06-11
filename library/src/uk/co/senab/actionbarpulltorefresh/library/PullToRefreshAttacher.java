@@ -32,6 +32,9 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+/**
+ * FIXME
+ */
 public final class PullToRefreshAttacher implements View.OnTouchListener {
 
     /**
@@ -45,10 +48,12 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
-    private final View mRefreshableView;
-    private final Delegate mDelegate;
-    private final View mHeaderView;
+    private View mRefreshableView;
+    private ViewDelegate mViewDelegate;
 
+    private final EnvironmentDelegate mEnvironmentDelegate;
+
+    private final View mHeaderView;
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
 
     private final int mTouchSlop;
@@ -59,11 +64,20 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     private OnRefreshListener mRefreshListener;
     private final HeaderTransformer mHeaderTransformer;
 
-    public PullToRefreshAttacher(Activity activity, View view) {
-        this(activity, view, new Options());
+    /**
+     * FIXME
+     * @param activity
+     */
+    public PullToRefreshAttacher(Activity activity) {
+        this(activity, new Options());
     }
 
-    public <V extends View> PullToRefreshAttacher(Activity activity, V view, Options options) {
+    /**
+     * FIXME
+     * @param activity
+     * @param options
+     */
+    public PullToRefreshAttacher(Activity activity, Options options) {
         if (options == null) {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();
@@ -72,22 +86,14 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
 
-        // View to detect refreshes for
-        mRefreshableView = view;
-        mRefreshableView.setOnTouchListener(this);
-
-        // Delegate
-        Delegate delegate = options.delegate;
-        if (delegate == null) {
-            delegate = InstanceCreationUtils.getBuiltInDelegateForView(view);
-            if (delegate == null) {
-                throw new IllegalArgumentException("No delegate given. Please provide one.");
-            }
-        }
-        mDelegate = delegate;
+        // EnvironmentDelegate
+        mEnvironmentDelegate = options.environmentDelegate != null
+                ? options.environmentDelegate
+                : new EnvironmentDelegate();
 
         // Header Transformer
-        mHeaderTransformer = options.headerTransformer != null ? options.headerTransformer
+        mHeaderTransformer = options.headerTransformer != null
+                ? options.headerTransformer
                 : new DefaultHeaderTransformer();
 
         // Create animations for use later
@@ -104,7 +110,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
 
         // Create Header view and then add to Decor View
-        mHeaderView = LayoutInflater.from(delegate.getContextForInflater(activity))
+        mHeaderView = LayoutInflater.from(mEnvironmentDelegate.getContextForInflater(activity))
                 .inflate(options.headerLayout, decorView, false);
         if (mHeaderView == null) {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
@@ -122,6 +128,49 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Notify transformer
         mHeaderTransformer.onViewCreated(mHeaderView);
+    }
+
+    /**
+     * Set the view which will be used to initiate refresh requests. This version of the method
+     * will try to find a handler for the view from the built-in viewdelegates.
+     *
+     * @param view - View which will be used to initiate refresh requests.
+     */
+    public void setRefreshableView(View view) {
+        setRefreshableView(view, null);
+    }
+
+    /**
+     * Set the view which will be used to initiate refresh requests, along with a delegate which
+     * knows how to handle the given view.
+     *
+     * @param view - View which will be used to initiate refresh requests.
+     * @param viewDelegate - delegate which knows how to handle <code>view</code>.
+     */
+    public void setRefreshableView(View view, ViewDelegate viewDelegate) {
+        // If we already have a refreshable view, reset it and our state
+        if (mRefreshableView != null) {
+            mRefreshableView.setOnTouchListener(null);
+            setRefreshingInt(false, false);
+        }
+
+        // Check to see if view is null
+        if (view == null) {
+            throw new IllegalArgumentException("Refreshable View can not be null");
+        }
+
+        // View to detect refreshes for
+        mRefreshableView = view;
+        mRefreshableView.setOnTouchListener(this);
+
+        // ViewDelegate
+        if (viewDelegate == null) {
+            viewDelegate = InstanceCreationUtils.getBuiltInViewDelegate(view);
+            if (viewDelegate == null) {
+                throw new IllegalArgumentException("No view handler found. Please provide one.");
+            }
+        }
+        mViewDelegate = viewDelegate;
     }
 
     /**
@@ -193,7 +242,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (!mIsRefreshing && mDelegate.isScrolledToTop(mRefreshableView)) {
+                if (!mIsRefreshing && mViewDelegate.isScrolledToTop(mRefreshableView)) {
                     mIsHandlingTouchEvent = true;
                     mInitialMotionY = event.getY();
                 }
@@ -356,17 +405,26 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         public abstract void onRefreshStarted();
     }
 
-    public static abstract class Delegate {
+    /**
+     * FIXME
+     */
+    public static abstract class ViewDelegate {
 
         /**
          * Allows you to provide support for View which do not have built-in support. In this
          * method you should cast <code>view</code> to it's native class, and check if it is
          * scrolled to the top.
          *
-         * @param view The view this PullToRefreshAttacher was created with.
+         * @param view The view which has should be checked against.
          * @return true if <code>view</code> is scrolled to the top.
          */
         public abstract boolean isScrolledToTop(View view);
+    }
+
+    /**
+     * FIXME
+     */
+    public static class EnvironmentDelegate {
 
         /**
          * @return Context which should be used for inflating the header layout
@@ -382,10 +440,10 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
     public static final class Options {
         /**
-         * Delegate instance which will be used. If null, we will try to find an instance which
-         * will work for the given scrollable view.
+         * EnvironmentDelegate instance which will be used. If null, we will create an instance of
+         * the default class.
          */
-        public Delegate delegate = null;
+        public EnvironmentDelegate environmentDelegate = null;
 
         /**
          * The layout resource ID which should be inflated to be displayed above the Action Bar

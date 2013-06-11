@@ -64,6 +64,8 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     private OnRefreshListener mRefreshListener;
     private final HeaderTransformer mHeaderTransformer;
 
+    private boolean mEnabled = true;
+
     /**
      * FIXME
      * @param activity
@@ -199,6 +201,33 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
+     * @return true if this PullToRefresh is currently enabled (defaults to <code>true</code>)
+     */
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    /**
+     * Allows the enable/disable of this PullToRefreshAttacher. If disabled when refreshing then
+     * the UI is automatically reset.
+     *
+     * @param enabled - Whether this PullToRefreshAttacher is enabled.
+     */
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+
+        if (!enabled) {
+            // If we're not enabled, reset any touch handling
+            resetTouch();
+
+            // If we're currently refreshing, reset the ptr UI
+            if (mIsRefreshing) {
+                reset(false);
+            }
+        }
+    }
+
+    /**
      * Call this when your refresh is complete and this view should reset itself (header view
      * will be hidden).
      *
@@ -211,6 +240,11 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     @Override
     public final boolean onTouch(View view, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN && event.getEdgeFlags() != 0) {
+            return false;
+        }
+
+        // If we're not enabled don't handle any touch events
+        if (!isEnabled()) {
             return false;
         }
 
@@ -251,7 +285,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (!mIsRefreshing && mViewDelegate.isScrolledToTop(mRefreshableView)) {
+                if (canRefresh(true) && mViewDelegate.isScrolledToTop(mRefreshableView)) {
                     mIsHandlingTouchEvent = true;
                     mInitialMotionY = event.getY();
                 }
@@ -328,8 +362,6 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         } else {
             reset(fromTouch);
         }
-
-        mIsRefreshing = refreshing;
     }
 
     private boolean canRefresh(boolean fromTouch) {
@@ -337,6 +369,9 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     private void reset(boolean fromTouch) {
+        // Update isRefreshing state
+        mIsRefreshing = false;
+
         if (mHeaderView.getVisibility() != View.GONE) {
             // Hide Header
             if (mHeaderOutAnimation != null) {
@@ -347,11 +382,13 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
                 mHeaderView.setVisibility(View.GONE);
                 mHeaderTransformer.onReset();
             }
-
         }
     }
 
     private void startRefresh(boolean fromTouch) {
+        // Update isRefreshing state
+        mIsRefreshing = true;
+
         // Call OnRefreshListener if this call has originated from a touch event
         if (fromTouch) {
             mRefreshListener.onRefreshStarted(mRefreshableView);

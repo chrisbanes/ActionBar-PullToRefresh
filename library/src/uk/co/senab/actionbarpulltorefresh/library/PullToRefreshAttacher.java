@@ -293,10 +293,11 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
                 mHeaderView.startAnimation(mHeaderOutAnimation);
                 // HeaderTransformer.onReset() is called once the animation has finished
             } else {
-                // As we're not animating, call the header transformer now
+                // As we're not animating, hide the header + call the header transformer now
+                mHeaderView.setVisibility(View.GONE);
                 mHeaderTransformer.onReset();
             }
-            mHeaderView.setVisibility(View.GONE);
+
         }
     }
 
@@ -424,6 +425,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         @Override
         public void onAnimationEnd(Animation animation) {
             if (animation == mHeaderOutAnimation) {
+                mHeaderView.setVisibility(View.GONE);
                 mHeaderTransformer.onReset();
             }
         }

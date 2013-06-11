@@ -131,32 +131,41 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
-     * Set the view which will be used to initiate refresh requests. This version of the method
-     * will try to find a handler for the view from the built-in viewdelegates.
+     * Set the view which will be used to initiate refresh requests and a listener to be invoked
+     * when a refresh is started. This version of the method will try to find a handler for the
+     * view from the built-in view delegates.
      *
      * @param view - View which will be used to initiate refresh requests.
+     * @param refreshListener - Listener to be invoked when a refresh is started.
      */
-    public void setRefreshableView(View view) {
-        setRefreshableView(view, null);
+    public void setRefreshableView(View view, OnRefreshListener refreshListener) {
+        setRefreshableView(view, null, refreshListener);
     }
 
     /**
      * Set the view which will be used to initiate refresh requests, along with a delegate which
-     * knows how to handle the given view.
+     * knows how to handle the given view, and a listener to be invoked when a refresh is started.
      *
      * @param view - View which will be used to initiate refresh requests.
      * @param viewDelegate - delegate which knows how to handle <code>view</code>.
+     * @param refreshListener - Listener to be invoked when a refresh is started.
      */
-    public void setRefreshableView(View view, ViewDelegate viewDelegate) {
+    public void setRefreshableView(View view, ViewDelegate viewDelegate,
+            OnRefreshListener refreshListener) {
         // If we already have a refreshable view, reset it and our state
         if (mRefreshableView != null) {
             mRefreshableView.setOnTouchListener(null);
             setRefreshingInt(false, false);
         }
 
+        // Update Refresh Listener
+        mRefreshListener = refreshListener;
+
         // Check to see if view is null
         if (view == null) {
-            throw new IllegalArgumentException("Refreshable View can not be null");
+            Log.i(LOG_TAG, "Refreshable View is null.");
+            mViewDelegate = null;
+            return;
         }
 
         // View to detect refreshes for
@@ -268,14 +277,6 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         }
         mIsHandlingTouchEvent = false;
         mInitialMotionY = mLastMotionY = 0f;
-    }
-
-    /**
-     * Set a listener for when a refresh is started.
-     * @param listener - OnRefreshListener to be invoked when a refresh is started.
-     */
-    public void setRefreshListener(OnRefreshListener listener) {
-        mRefreshListener = listener;
     }
 
     void onPullStarted() {

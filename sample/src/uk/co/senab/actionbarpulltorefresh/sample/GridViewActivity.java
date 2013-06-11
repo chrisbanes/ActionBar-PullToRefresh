@@ -82,10 +82,7 @@ public class GridViewActivity extends Activity
          * custom view delegate.
          */
         PullToRefreshAttacher.ViewDelegate handler = new AbsListViewDelegate();
-        mPullToRefreshAttacher.setRefreshableView(gridView, handler);
-
-        // Set Listener to know when a refresh should be started
-        mPullToRefreshAttacher.setRefreshListener(this);
+        mPullToRefreshAttacher.setRefreshableView(gridView, handler, this);
     }
 
     @Override

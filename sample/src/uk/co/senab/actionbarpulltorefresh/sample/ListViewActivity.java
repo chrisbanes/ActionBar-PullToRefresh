@@ -61,11 +61,8 @@ public class ListViewActivity extends ListActivity
          */
         mPullToRefreshAttacher = new PullToRefreshAttacher(this);
 
-        // Set the Refreshable View. Here we're using the ListView
-        mPullToRefreshAttacher.setRefreshableView(listView);
-
-        // Set Listener to know when a refresh should be started
-        mPullToRefreshAttacher.setRefreshListener(this);
+        // Set the Refreshable View to be the ListView and the refresh listener to be this.
+        mPullToRefreshAttacher.setRefreshableView(listView, this);
     }
 
     @Override

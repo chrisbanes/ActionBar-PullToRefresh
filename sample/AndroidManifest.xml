@@ -4,7 +4,7 @@
     android:versionCode="1"
     android:versionName="0.1">
 
-    <uses-sdk android:minSdkVersion="14" />
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="17" />
     <application
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
@@ -30,6 +30,10 @@
         <activity
             android:name=".GridViewActivity"
             android:label="@string/activity_gridview" />
+
+        <activity
+            android:name=".FragmentTabsActivity"
+            android:label="@string/activity_fragment_tabs" />
 
     </application>
 </manifest>

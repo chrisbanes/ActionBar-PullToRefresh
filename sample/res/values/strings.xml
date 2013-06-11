@@ -20,6 +20,7 @@
     <string name="activity_scrollview">ScrollView</string>
     <string name="activity_listview">ListView</string>
     <string name="activity_gridview">GridView</string>
+    <string name="activity_fragment_tabs">Fragments + Tabs</string>
 
     <string name="filler_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
         sollicitudin mauris varius lacus porttitor eget blandit massa facilisis. Nulla pellentesque

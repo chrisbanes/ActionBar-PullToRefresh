@@ -27,6 +27,7 @@ import java.util.Set;
 
 import uk.co.senab.actionbarpulltorefresh.library.delegate.AbsListViewDelegate;
 import uk.co.senab.actionbarpulltorefresh.library.delegate.ScrollViewDelegate;
+import uk.co.senab.actionbarpulltorefresh.library.delegate.WebViewDelegate;
 
 class InstanceCreationUtils {
 

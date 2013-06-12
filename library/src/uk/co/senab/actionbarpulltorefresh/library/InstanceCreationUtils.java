@@ -41,6 +41,7 @@ class InstanceCreationUtils {
         BUILT_IN_DELEGATES = new HashMap<Class, Class>();
         BUILT_IN_DELEGATES.put(AbsListViewDelegate.SUPPORTED_VIEW_CLASS, AbsListViewDelegate.class);
         BUILT_IN_DELEGATES.put(ScrollViewDelegate.SUPPORTED_VIEW_CLASS, ScrollViewDelegate.class);
+        BUILT_IN_DELEGATES.put(WebViewDelegate.SUPPORTED_VIEW_CLASS, WebViewDelegate.class);
     }
 
     static PullToRefreshAttacher.Delegate getBuiltInDelegateForView(final View view) {

@@ -21,14 +21,11 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -481,6 +478,79 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
                 mHeaderTextView.setText(R.string.pull_to_refresh_refreshing_label);
             }
             if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setIndeterminate(true);
+            }
+        }
+    }
+
+    /**
+     * Header Transformer that expands the ProgressBar out from its center, a la Gmail.
+     *
+     * FromCenterHeaderTransformer assumes that the ProgressBar resides in a LinearLayout.
+     */
+    public static class FromCenterHeaderTransformer extends HeaderTransformer {
+        private TextView mHeaderTextView;
+        private ProgressBar mHeaderProgressBar;
+
+        @Override
+        public void onViewCreated(View headerView) {
+            // Get ProgressBar and TextView. Also set initial text on TextView
+            mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
+            mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
+
+            // Call onReset to make sure that the View is consistent
+            onReset();
+        }
+
+        @Override
+        public void onReset() {
+            // Reset Progress Bar
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setVisibility(View.GONE);
+                mHeaderProgressBar.setProgress(100);
+                mHeaderProgressBar.setIndeterminate(false);
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mHeaderProgressBar.getLayoutParams();
+                if (lp == null) {
+                    lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
+                lp.width = 0;
+                lp.gravity = Gravity.CENTER_HORIZONTAL;
+                mHeaderProgressBar.setLayoutParams(lp);
+            }
+
+            // Reset Text View
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setVisibility(View.VISIBLE);
+                mHeaderTextView.setText(R.string.pull_to_refresh_pull_label);
+            }
+        }
+
+        @Override
+        public void onPulled(float percentagePulled) {
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setVisibility(View.VISIBLE);
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mHeaderProgressBar.getLayoutParams();
+                if (lp == null) {
+                    lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
+                lp.width = Math.round(((View)mHeaderProgressBar.getParent()).getWidth() * percentagePulled);
+                lp.gravity = Gravity.CENTER_HORIZONTAL;
+                mHeaderProgressBar.setLayoutParams(lp);
+            }
+        }
+
+        @Override
+        public void onRefreshStarted() {
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(R.string.pull_to_refresh_refreshing_label);
+            }
+            if (mHeaderProgressBar != null) {
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mHeaderProgressBar.getLayoutParams();
+                if (lp == null) {
+                    lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
+                lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                mHeaderProgressBar.setLayoutParams(lp);
                 mHeaderProgressBar.setIndeterminate(true);
             }
         }

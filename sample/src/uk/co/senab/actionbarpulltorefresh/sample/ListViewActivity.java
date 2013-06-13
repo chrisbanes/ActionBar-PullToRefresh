@@ -55,11 +55,16 @@ public class ListViewActivity extends ListActivity
                 ITEMS);
         listView.setAdapter(adapter);
 
+        PullToRefreshAttacher.Options ptrOptions = new PullToRefreshAttacher.Options();
+
+        // We want the progress bar to expand from the center, so use FromCenterHeaderTransformer
+        ptrOptions.headerTransformer = new PullToRefreshAttacher.FromCenterHeaderTransformer();
+
         /**
          * Here we create a PullToRefreshAttacher manually without an Options instance.
          * PullToRefreshAttacher will manually create one using default values.
          */
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this, getListView());
+        mPullToRefreshAttacher = new PullToRefreshAttacher(this, getListView(), ptrOptions);
 
         // Set Listener to know when a refresh should be started
         mPullToRefreshAttacher.setRefreshListener(this);

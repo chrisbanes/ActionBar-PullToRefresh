@@ -32,8 +32,15 @@
             android:label="@string/activity_gridview" />
 
         <activity
+            android:name=".WebViewActivity"
+            android:label="@string/activity_webview" />
+
+        <activity
             android:name=".FragmentTabsActivity"
             android:label="@string/activity_fragment_tabs" />
 
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
 </manifest>

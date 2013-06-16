@@ -15,5 +15,6 @@
 	
 	<modules>
 		<module>stock</module>
+		<module>actionbarsherlock</module>
 	</modules>
 </project>

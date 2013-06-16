@@ -397,8 +397,10 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         mHeaderTransformer.onRefreshStarted();
 
         // Make sure header is visible.
-        // TODO Use header in anim
         if (mHeaderView.getVisibility() != View.VISIBLE) {
+            if (mHeaderInAnimation != null) {
+                mHeaderView.startAnimation(mHeaderInAnimation);
+            }
             mHeaderView.setVisibility(View.VISIBLE);
         }
     }
@@ -579,6 +581,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
                 mHeaderTextView.setText(R.string.pull_to_refresh_refreshing_label);
             }
             if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setVisibility(View.VISIBLE);
                 mHeaderProgressBar.setIndeterminate(true);
             }
         }

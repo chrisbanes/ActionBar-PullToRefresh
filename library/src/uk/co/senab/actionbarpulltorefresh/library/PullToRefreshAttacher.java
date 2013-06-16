@@ -26,8 +26,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -58,7 +61,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
-    private float mInitialMotionY, mLastMotionY;
+    private float mInitialMotionY, mLastMotionY, mPullBeginY;
     private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
 
     private OnRefreshListener mRefreshListener;
@@ -272,7 +275,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
                 // We're not currently being dragged so check to see if the user has scrolled enough
                 if (!mIsBeingDragged && (y - mInitialMotionY) > mTouchSlop) {
                     mIsBeingDragged = true;
-                    onPullStarted();
+                    onPullStarted(y);
                 }
 
                 if (mIsBeingDragged) {
@@ -322,10 +325,10 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
             onPullEnded();
         }
         mIsHandlingTouchEvent = false;
-        mInitialMotionY = mLastMotionY = 0f;
+        mInitialMotionY = mLastMotionY = mPullBeginY = 0f;
     }
 
-    void onPullStarted() {
+    void onPullStarted(float y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPullStarted");
         }
@@ -334,6 +337,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
             mHeaderView.startAnimation(mHeaderInAnimation);
         }
         mHeaderView.setVisibility(View.VISIBLE);
+        mPullBeginY = y;
     }
 
     void onPull(float y) {
@@ -342,7 +346,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         }
 
         final float pxScrollForRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
-        final float scrollLength = y - mInitialMotionY;
+        final float scrollLength = y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);
@@ -556,6 +560,8 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         private TextView mHeaderTextView;
         private ProgressBar mHeaderProgressBar;
 
+        private final Interpolator mInterpolator = new AccelerateInterpolator();
+
         @Override
         public void onViewCreated(View headerView) {
             // Get ProgressBar and TextView. Also set initial text on TextView
@@ -586,8 +592,8 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         public void onPulled(float percentagePulled) {
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setVisibility(View.VISIBLE);
-                mHeaderProgressBar
-                        .setProgress(Math.round(mHeaderProgressBar.getMax() * percentagePulled));
+                final float progress = mInterpolator.getInterpolation(percentagePulled);
+                mHeaderProgressBar.setProgress(Math.round(mHeaderProgressBar.getMax() * progress));
             }
         }
 

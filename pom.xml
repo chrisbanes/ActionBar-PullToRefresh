@@ -42,7 +42,7 @@
 
     <modules>
         <module>library</module>
-        <module>sample</module>
+        <module>samples</module>
         <module>extras</module>
     </modules>
 

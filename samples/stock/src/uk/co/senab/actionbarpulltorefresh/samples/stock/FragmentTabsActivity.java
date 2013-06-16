@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.sample;
+package uk.co.senab.actionbarpulltorefresh.samples;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -29,6 +29,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.samples.stock.R;
 
 /**
  * A sample which show you how to use PullToRefreshAttacher with Fragments.

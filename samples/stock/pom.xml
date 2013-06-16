@@ -3,13 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
-	<artifactId>sample</artifactId>
+	<artifactId>sample-stock</artifactId>
 	<packaging>apk</packaging>
 	<name>ActionBar-PullToRefresh Sample</name>
 	
 	<parent>
 		<groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
-		<artifactId>parent</artifactId>
+		<artifactId>samples</artifactId>
 		<version>0.3-SNAPSHOT</version>
 	</parent>
 

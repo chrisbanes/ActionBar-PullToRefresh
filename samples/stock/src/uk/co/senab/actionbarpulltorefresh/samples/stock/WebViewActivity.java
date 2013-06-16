@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.sample;
+package uk.co.senab.actionbarpulltorefresh.samples;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -23,6 +23,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.samples.stock.R;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a

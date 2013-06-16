@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.sample;
+package uk.co.senab.actionbarpulltorefresh.samples;
 
 import android.app.ListActivity;
 import android.os.AsyncTask;

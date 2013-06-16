@@ -26,15 +26,13 @@ ActionBar-PullToRefresh has in-built support for:
 
  * AbsListView derivatives (ListView & GridView).
  * ScrollView
+ * WebView
 
 If the View you want to use is not listed above, you can easily add support by providing a `Delegate`. See the 'Delegates' section below for more info.
 
 ---
 
 ## Usage
-There are two ways to use this library, programmatically or declaratively.
-
-### Programmatically
 You just need to create an instance of `PullToRefreshAttacher`, giving it the Activity and the View for which will scroll.
 
 ``` java
@@ -54,45 +52,6 @@ public void onCreate(Bundle savedInstanceState) {
 
 __See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/ListViewActivity.java) sample for more info.__
   
-### Declaratively
-Here you just wrap your scrollable view in a `PullToRefreshLayout` in your layout XML:
-
-``` xml
-<uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
-    android:id="@+id/ptr_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ptr="http://schemas.android.com/apk/res-auto"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    ptr:refreshScrollDistance="0.75">
-
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:padding="8dp"
-        android:scrollbarStyle="outsideInset">
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/filler_text" />
-
-    </ScrollView>
-
-</uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>
-```
-In you Activity/Fragment you then do the following to retrieve the generated PullToRefreshAttacher
-
-``` java
-// Retrieve PullToRefreshAttacher from PullToRefreshLayout
-mPullToRefreshAttacher = PullToRefreshLayout.getAttacher(this, R.id.ptr_layout);
-
-// Set Listener to know when a refresh should be started
-mPullToRefreshAttacher.setRefreshListener(this);
-```
-
-__See the [ScrollView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/ScrollViewActivity.java) sample for more info.__
-
 ---
 
 ## Customisation    

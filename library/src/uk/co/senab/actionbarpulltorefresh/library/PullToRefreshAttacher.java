@@ -88,6 +88,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             options = new Options();
         }
 
+        // See if any derivative classes want to alter the options
+        onOptionsCreated(options);
+
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
 
@@ -366,6 +369,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     protected EnvironmentDelegate createDefaultEnvironmentDelegate() {
         return new EnvironmentDelegate();
+    }
+
+    protected void onOptionsCreated(Options options) {
+        // NO-OP
     }
 
     private void setRefreshingInt(boolean refreshing, boolean fromTouch) {

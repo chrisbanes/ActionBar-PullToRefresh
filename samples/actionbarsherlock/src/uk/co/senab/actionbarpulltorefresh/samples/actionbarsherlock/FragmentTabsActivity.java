@@ -17,10 +17,9 @@
 package uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -36,9 +35,10 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefresh
  * A sample which show you how to use PullToRefreshAttacher with Fragments.
  * <p/>
  * The TL;DR version is that the {@link PullToRefreshAttacher} should always be created in your
- * in {@link Activity#onCreate(android.os.Bundle)} and then passed to your Fragments as necessary.
+ * in {@link #onCreate(android.os.Bundle)} and then passed to your Fragments as necessary.
  */
-public class FragmentTabsActivity extends SherlockActivity implements ActionBar.TabListener {
+public class FragmentTabsActivity extends SherlockFragmentActivity
+        implements ActionBar.TabListener {
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
 
@@ -71,7 +71,8 @@ public class FragmentTabsActivity extends SherlockActivity implements ActionBar.
         // Set title for display purposes
         fragment.setTitle(tab.getText());
 
-        ft.replace(R.id.ptr_fragment, fragment);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.ptr_fragment, fragment).commit();
     }
 
     // From TabListener

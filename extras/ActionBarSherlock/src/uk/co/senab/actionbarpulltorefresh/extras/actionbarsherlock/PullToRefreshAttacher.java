@@ -29,17 +29,24 @@ public class PullToRefreshAttacher extends
         super(activity);
     }
 
-    public PullToRefreshAttacher(Activity activity,
-            Options options) {
+    public PullToRefreshAttacher(Activity activity, Options options) {
         super(activity, options);
     }
 
+    @Override
     protected EnvironmentDelegate createDefaultEnvironmentDelegate() {
         return new AbsEnvironmentDelegate();
     }
 
-    public static class AbsEnvironmentDelegate extends EnvironmentDelegate {
+    @Override
+    protected void onOptionsCreated(Options options) {
+        // Replace the standard header with our ABS version
+        if (options.headerLayout == R.layout.default_header) {
+            options.headerLayout = R.layout.abs_default_header;
+        }
+    }
 
+    public static class AbsEnvironmentDelegate extends EnvironmentDelegate {
         /**
          * @return Context which should be used for inflating the header layout
          */

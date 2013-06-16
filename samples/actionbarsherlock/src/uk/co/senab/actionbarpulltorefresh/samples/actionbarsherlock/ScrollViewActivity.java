@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.samples;
+package uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock;
+
+import com.actionbarsherlock.app.SherlockActivity;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -29,7 +31,7 @@ import uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock.R;
  * This sample shows how to use ActionBar-PullToRefresh with a
  * {@link android.widget.ScrollView ScrollView}.
  */
-public class ScrollViewActivity extends Activity
+public class ScrollViewActivity extends SherlockActivity
         implements PullToRefreshAttacher.OnRefreshListener {
 
     private PullToRefreshAttacher mPullToRefreshAttacher;

@@ -522,7 +522,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 			}
 
 			// Adjust the Header View's padding to take the insets into account
-			mHeaderViewWrapper.setPadding(insets.left, 50, insets.right, insets.bottom);
+			mHeaderViewWrapper.setPadding(insets.left, insets.top, insets.right, insets.bottom);
 
 			// Call return super so that the rest of the
 			return super.fitSystemWindows(insets);

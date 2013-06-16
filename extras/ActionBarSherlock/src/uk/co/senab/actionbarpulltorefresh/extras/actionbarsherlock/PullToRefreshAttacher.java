@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.actionbarsherlock;
+package uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockListActivity;
@@ -24,7 +24,6 @@ import android.content.Context;
 
 public class PullToRefreshAttacher extends
         uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher {
-
 
     public PullToRefreshAttacher(Activity activity) {
         super(activity);

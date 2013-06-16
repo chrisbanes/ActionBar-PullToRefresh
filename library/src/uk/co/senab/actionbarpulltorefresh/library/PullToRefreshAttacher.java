@@ -509,23 +509,32 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
              * so any inset changes do not affect the actual header view.
              */
             mHeaderViewWrapper = new FrameLayout(context);
-            mHeaderViewWrapper.addView(headerView);
-            addView(mHeaderViewWrapper, ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
 
-        @Override
-        protected boolean fitSystemWindows(Rect insets) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "fitSystemWindows: " + insets.toString());
-            }
+    		mHeaderViewWrapper.setPadding(0, getStatusBarHeight(context), 0, 0);
+			mHeaderViewWrapper.addView(headerView);
+			addView(mHeaderViewWrapper, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		}
 
-            // Adjust the Header View's padding to take the insets into account
-            mHeaderViewWrapper.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+		@Override
+		protected boolean fitSystemWindows(Rect insets) {
+			if (DEBUG) {
+				Log.d(LOG_TAG, "fitSystemWindows: " + insets.toString());
+			}
 
-            // Call return super so that the rest of the
-            return super.fitSystemWindows(insets);
-        }
-    }
+			// Adjust the Header View's padding to take the insets into account
+			mHeaderViewWrapper.setPadding(insets.left, insets.top, insets.right, insets.bottom);
 
+			// Call return super so that the rest of the
+			return super.fitSystemWindows(insets);
+		}
+	}
+
+	public static int getStatusBarHeight(Context c) {
+		int result = 0;
+		int resourceId = c.getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0) {
+			result = c.getResources().getDimensionPixelSize(resourceId);
+		}
+		return result;
+	}
 }

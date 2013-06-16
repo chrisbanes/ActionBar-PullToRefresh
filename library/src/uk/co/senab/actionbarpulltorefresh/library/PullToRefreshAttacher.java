@@ -250,12 +250,24 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
-                // If we're already refreshing or not handling the event, ignore it
-                if (mIsRefreshing || !mIsHandlingTouchEvent) {
+                // If we're already refreshing ignore it
+                if (mIsRefreshing) {
                     return false;
                 }
 
                 final float y = event.getY();
+
+                // As there are times when we are not given the ACTION_DOWN, we need to check here
+                // whether we should handle the event
+                if (!mIsHandlingTouchEvent) {
+                    if (canRefresh(true) && mViewDelegate.isScrolledToTop(mRefreshableView)) {
+                        mIsHandlingTouchEvent = true;
+                        mInitialMotionY = y;
+                    } else {
+                        // We're still not handling the event, so fail-fast
+                        return false;
+                    }
+                }
 
                 // We're not currently being dragged so check to see if the user has scrolled enough
                 if (!mIsBeingDragged && (y - mInitialMotionY) > mTouchSlop) {
@@ -364,6 +376,10 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         }
     }
 
+    /**
+     * @param fromTouch - Whether this is being invoked from a touch event
+     * @return true if we're currently in a state where a refresh can be started.
+     */
     private boolean canRefresh(boolean fromTouch) {
         return !mIsRefreshing && (!fromTouch || mRefreshListener != null);
     }

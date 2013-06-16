@@ -38,7 +38,7 @@ import android.widget.TextView;
 /**
  * FIXME
  */
-public final class PullToRefreshAttacher implements View.OnTouchListener {
+public class PullToRefreshAttacher implements View.OnTouchListener {
 
     /**
      * Default configuration values
@@ -94,7 +94,7 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         // EnvironmentDelegate
         mEnvironmentDelegate = options.environmentDelegate != null
                 ? options.environmentDelegate
-                : new EnvironmentDelegate();
+                : createDefaultEnvironmentDelegate();
 
         // Header Transformer
         mHeaderTransformer = options.headerTransformer != null
@@ -362,6 +362,10 @@ public final class PullToRefreshAttacher implements View.OnTouchListener {
         if (!mIsRefreshing) {
             reset(true);
         }
+    }
+
+    protected EnvironmentDelegate createDefaultEnvironmentDelegate() {
+        return new EnvironmentDelegate();
     }
 
     private void setRefreshingInt(boolean refreshing, boolean fromTouch) {

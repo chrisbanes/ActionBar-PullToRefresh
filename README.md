@@ -50,17 +50,17 @@ public void onCreate(Bundle savedInstanceState) {
 }
 ```
 
-__See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/ListViewActivity.java) sample for more info.__
+__See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/ListViewActivity.java) sample for more info.__
   
 ---
 
 ## Customisation    
     
 ### Delegates
-TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/GridViewActivity.java) sample for more info for now.
+TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/GridViewActivity.java) sample for more info for now.
 
 ### HeaderTransformers
-TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/GridViewActivity.java) sample for more info for now.
+TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/GridViewActivity.java) sample for more info for now.
 
 ---
 

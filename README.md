@@ -25,7 +25,7 @@ ActionBar-PullToRefresh has in-built support for:
  * ScrollView
  * WebView
 
-If the View you want to use is not listed above, you can easily add support in your own code by providing a `ViewDelegate`. See the 'Delegates' section below for more info.
+If the View you want to use is not listed above, you can easily add support in your own code by providing a `ViewDelegate`. See the `ViewDelegate` section below for more info.
 
 ---
 
@@ -98,7 +98,7 @@ When instatiating a `PullToRefreshAttacher` you can provide an `Options` instanc
 HeaderTransformers are responsible for updating the header view to match the current state. If you do not provide a HeaderTransformer, there is a default implementation created for you called `DefaultHeaderTransformer`. This default implementation is what provides the default behaviour (growing progress bar, etc).
 
 ### Customised Header View layout
-If you feel that the default header view layout does not provide what you require, you can provide your own which is inflated for you. For the majority of cases, you will probably want to provide your own `HeaderTransformer` too so update your custom layout.
+If you feel that the default header view layout does not provide what you require, you can provide your own which is inflated for you. For the majority of cases, you will probably want to provide your own `HeaderTransformer` as well, to update your custom layout.
 
 ---
 

@@ -54,21 +54,22 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
-    private View mRefreshableView;
-    private ViewDelegate mViewDelegate;
-
     private final EnvironmentDelegate mEnvironmentDelegate;
+    private final HeaderTransformer mHeaderTransformer;
 
     private final View mHeaderView;
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
 
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
+
     private float mInitialMotionY, mLastMotionY, mPullBeginY;
     private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
 
+    private View mRefreshableView;
+    private ViewDelegate mViewDelegate;
+
     private OnRefreshListener mRefreshListener;
-    private final HeaderTransformer mHeaderTransformer;
 
     private boolean mEnabled = true;
 
@@ -241,6 +242,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public final void setRefreshComplete() {
         setRefreshingInt(false, false);
+    }
+
+    /**
+     * @return The HeaderTransformer currently used by this Attacher.
+     */
+    public HeaderTransformer getHeaderTransformer() {
+        return mHeaderTransformer;
     }
 
     @Override
@@ -571,6 +579,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         private TextView mHeaderTextView;
         private ProgressBar mHeaderProgressBar;
 
+        private CharSequence mPullRefreshLabel, mRefreshingLabel;
+
         private final Interpolator mInterpolator = new AccelerateInterpolator();
 
         @Override
@@ -578,6 +588,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             // Get ProgressBar and TextView. Also set initial text on TextView
             mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
             mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
+
+            // Labels to display
+            mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
+            mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
 
             View contentView = headerView.findViewById(R.id.ptr_content);
             if (contentView != null) {
@@ -614,7 +628,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             // Reset Text View
             if (mHeaderTextView != null) {
                 mHeaderTextView.setVisibility(View.VISIBLE);
-                mHeaderTextView.setText(R.string.pull_to_refresh_pull_label);
+                mHeaderTextView.setText(mPullRefreshLabel);
             }
         }
 
@@ -630,12 +644,31 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         @Override
         public void onRefreshStarted() {
             if (mHeaderTextView != null) {
-                mHeaderTextView.setText(R.string.pull_to_refresh_refreshing_label);
+                mHeaderTextView.setText(mRefreshingLabel);
             }
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setVisibility(View.VISIBLE);
                 mHeaderProgressBar.setIndeterminate(true);
             }
+        }
+
+        /**
+         * Set Text to show to prompt the user is pull (or keep pulling).
+         * @param pullText - Text to display.
+         */
+        public void setPullText(CharSequence pullText) {
+            mPullRefreshLabel = pullText;
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(mPullRefreshLabel);
+            }
+        }
+
+        /**
+         * Set Text to show to tell the user that a refresh is currently in progress.
+         * @param refreshingText - Text to display.
+         */
+        public void setRefreshingText(CharSequence refreshingText) {
+            mRefreshingLabel = refreshingText;
         }
 
         protected Drawable getActionBarBackground(Context context) {

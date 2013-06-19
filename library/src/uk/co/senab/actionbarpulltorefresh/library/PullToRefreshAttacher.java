@@ -128,8 +128,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Create DecorChildLayout which will move all of the system's decor view's children + the
         // Header View to itself. See DecorChildLayout for more info.
-        DecorChildLayout decorContents = new DecorChildLayout(activity, decorView,
-                mHeaderView);
+        DecorChildLayout decorContents = new DecorChildLayout(activity, decorView, mHeaderView);
 
         // Now add the DecorChildLayout to the decor view
         decorView.addView(decorContents, ViewGroup.LayoutParams.MATCH_PARENT,

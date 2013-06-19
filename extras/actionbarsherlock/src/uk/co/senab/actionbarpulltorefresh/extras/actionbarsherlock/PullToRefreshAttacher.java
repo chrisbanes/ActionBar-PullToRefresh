@@ -17,7 +17,10 @@
 package uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockExpandableListActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -56,8 +59,17 @@ public class PullToRefreshAttacher extends
                 return ((SherlockActivity) activity).getSupportActionBar().getThemedContext();
             } else if (activity instanceof SherlockListActivity) {
                 return ((SherlockListActivity) activity).getSupportActionBar().getThemedContext();
+            } else if (activity instanceof SherlockFragmentActivity) {
+                return ((SherlockFragmentActivity) activity).getSupportActionBar()
+                        .getThemedContext();
+            } else if (activity instanceof SherlockExpandableListActivity) {
+                return ((SherlockExpandableListActivity) activity).getSupportActionBar()
+                        .getThemedContext();
+            } else if (activity instanceof SherlockPreferenceActivity) {
+                return ((SherlockPreferenceActivity) activity).getSupportActionBar()
+                        .getThemedContext();
             }
-            return activity;
+            return super.getContextForInflater(activity);
         }
     }
 

@@ -15,6 +15,8 @@ Please note that this is currently in a preview state. This basically means that
 
 Eventually the sample will be available to download on Google Play. As we're not stable yet you can find the APKs [here](https://drive.google.com/folderview?id=0BxAFUoBj0OjaYTd3SUkzYjIydG8&usp=sharing).
 
+#### Video
+
 [![Sample Video](http://img.youtube.com/vi/YOYtPF-4RPg/0.jpg)](https://www.youtube.com/watch?v=YOYtPF-4RPg)
 
 ---

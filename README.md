@@ -45,22 +45,24 @@ public void onCreate(Bundle savedInstanceState) {
     // Get View for which the user will scroll…
     View scrollableView = findViewById(R.id.blah); 
 
-    mPullToRefreshHelper = new PullToRefreshAttacher(this, scrollableView);
-    mPullToRefreshHelper.setRefreshListener(this);
+    mPullToRefreshHelper = new PullToRefreshAttacher(this);
+
+    //Set refreshable View and refresh listener
+    mPullToRefreshHelper.setRefreshableView(scrollableView, this);
 }
 ```
 
-__See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/ListViewActivity.java) sample for more info.__
+__See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/ListViewActivity.java) sample for more info.__
   
 ---
 
 ## Customisation    
     
 ### Delegates
-TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/GridViewActivity.java) sample for more info for now.
+TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/GridViewActivity.java) sample for more info for now.
 
 ### HeaderTransformers
-TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/sample/src/uk/co/senab/actionbarpulltorefresh/sample/GridViewActivity.java) sample for more info for now.
+TODO. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/GridViewActivity.java) sample for more info for now.
 
 ---
 

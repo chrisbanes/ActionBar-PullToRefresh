@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.3.1</version>
+		<version>0.4</version>
 	</parent>
 	
 	<modules>

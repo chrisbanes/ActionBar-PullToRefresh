@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.AbsListViewDelegate;
-import uk.co.senab.actionbarpulltorefresh.samples.stock.R;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.GridView
@@ -122,7 +121,7 @@ public class GridViewActivity extends Activity
         private TextView mProgressTextView;
 
         @Override
-        public void onViewCreated(View headerView) {
+        public void onViewCreated(Activity activity, View headerView) {
             mMainTextView = (TextView) headerView.findViewById(R.id.ptr_text);
             mProgressTextView = (TextView) headerView.findViewById(R.id.ptr_text_secondary);
         }

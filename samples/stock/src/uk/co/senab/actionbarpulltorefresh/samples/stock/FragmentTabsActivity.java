@@ -29,13 +29,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.samples.stock.R;
 
 /**
  * A sample which show you how to use PullToRefreshAttacher with Fragments.
  * <p/>
  * The TL;DR version is that the {@link PullToRefreshAttacher} should always be created in your
- * in {@link Activity#onCreate(android.os.Bundle)} and then passed to your Fragments as necessary.
+ * in {@link #onCreate(android.os.Bundle)} and then pulled in from your Fragments as necessary.
  */
 public class FragmentTabsActivity extends Activity implements ActionBar.TabListener {
 
@@ -64,9 +63,6 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
         // Create Fragment
         SampleFragment fragment = new SampleFragment();
 
-        // Give the Fragment a reference to our PullToRefreshAttacher
-        fragment.setPullToRefreshAttacher(mPullToRefreshAttacher);
-
         // Set title for display purposes
         fragment.setTitle(tab.getText());
 
@@ -83,6 +79,9 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
     }
 
+    PullToRefreshAttacher getPullToRefreshAttacher() {
+        return mPullToRefreshAttacher;
+    }
 
     /**
      * Fragment Class
@@ -110,6 +109,11 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
 
             // The ScrollView is what we'll be listening to for refresh starts
             ScrollView scrollView = (ScrollView) view.findViewById(R.id.ptr_scrollview);
+
+            // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
+            // is to create an implicit interface instead of casting to the concrete Activity
+            mPullToRefreshAttacher = ((FragmentTabsActivity) getActivity())
+                    .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)
             mPullToRefreshAttacher.setRefreshableView(scrollView, this);

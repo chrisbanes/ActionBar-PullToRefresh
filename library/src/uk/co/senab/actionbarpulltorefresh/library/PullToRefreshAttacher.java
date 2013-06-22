@@ -18,15 +18,18 @@ package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -51,21 +54,22 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
-    private View mRefreshableView;
-    private ViewDelegate mViewDelegate;
-
     private final EnvironmentDelegate mEnvironmentDelegate;
+    private final HeaderTransformer mHeaderTransformer;
 
     private final View mHeaderView;
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
 
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
+
     private float mInitialMotionY, mLastMotionY, mPullBeginY;
     private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
 
+    private View mRefreshableView;
+    private ViewDelegate mViewDelegate;
+
     private OnRefreshListener mRefreshListener;
-    private final HeaderTransformer mHeaderTransformer;
 
     private boolean mEnabled = true;
 
@@ -88,9 +92,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             options = new Options();
         }
 
-        // See if any derivative classes want to alter the options
-        onOptionsCreated(options);
-
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
 
@@ -102,7 +103,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Header Transformer
         mHeaderTransformer = options.headerTransformer != null
                 ? options.headerTransformer
-                : new DefaultHeaderTransformer();
+                : createDefaultHeaderTransformer();
 
         // Create animations for use later
         mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
@@ -127,15 +128,14 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Create DecorChildLayout which will move all of the system's decor view's children + the
         // Header View to itself. See DecorChildLayout for more info.
-        DecorChildLayout decorContents = new DecorChildLayout(activity, decorView,
-                mHeaderView);
+        DecorChildLayout decorContents = new DecorChildLayout(activity, decorView, mHeaderView);
 
         // Now add the DecorChildLayout to the decor view
         decorView.addView(decorContents, ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
 
         // Notify transformer
-        mHeaderTransformer.onViewCreated(mHeaderView);
+        mHeaderTransformer.onViewCreated(activity, mHeaderView);
     }
 
     /**
@@ -241,6 +241,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public final void setRefreshComplete() {
         setRefreshingInt(false, false);
+    }
+
+    /**
+     * @return The HeaderTransformer currently used by this Attacher.
+     */
+    public HeaderTransformer getHeaderTransformer() {
+        return mHeaderTransformer;
     }
 
     @Override
@@ -371,8 +378,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         return new EnvironmentDelegate();
     }
 
-    protected void onOptionsCreated(Options options) {
-        // NO-OP
+    protected HeaderTransformer createDefaultHeaderTransformer() {
+        return new DefaultHeaderTransformer();
     }
 
     private void setRefreshingInt(boolean refreshing, boolean fromTouch) {
@@ -454,7 +461,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          *
          * @param headerView - inflated header view.
          */
-        public abstract void onViewCreated(View headerView);
+        public abstract void onViewCreated(Activity activity, View headerView);
 
         /**
          * Called when the header should be reset. You should update any child views to reflect this.
@@ -571,13 +578,38 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         private TextView mHeaderTextView;
         private ProgressBar mHeaderProgressBar;
 
+        private CharSequence mPullRefreshLabel, mRefreshingLabel;
+
         private final Interpolator mInterpolator = new AccelerateInterpolator();
 
         @Override
-        public void onViewCreated(View headerView) {
+        public void onViewCreated(Activity activity, View headerView) {
             // Get ProgressBar and TextView. Also set initial text on TextView
             mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
             mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
+
+            // Labels to display
+            mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
+            mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
+
+            View contentView = headerView.findViewById(R.id.ptr_content);
+            if (contentView != null) {
+                contentView.getLayoutParams().height = getActionBarSize(activity);
+                contentView.requestLayout();
+            }
+
+            Drawable abBg = getActionBarBackground(activity);
+            if (abBg != null) {
+                // If we do not have a opaque background we just display a solid solid behind it
+                if (abBg.getOpacity() != PixelFormat.OPAQUE) {
+                    View view = headerView.findViewById(R.id.ptr_text_opaque_bg);
+                    if (view != null) {
+                        view.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                mHeaderTextView.setBackgroundDrawable(abBg);
+            }
 
             // Call onReset to make sure that the View is consistent
             onReset();
@@ -595,7 +627,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             // Reset Text View
             if (mHeaderTextView != null) {
                 mHeaderTextView.setVisibility(View.VISIBLE);
-                mHeaderTextView.setText(R.string.pull_to_refresh_pull_label);
+                mHeaderTextView.setText(mPullRefreshLabel);
             }
         }
 
@@ -611,11 +643,57 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         @Override
         public void onRefreshStarted() {
             if (mHeaderTextView != null) {
-                mHeaderTextView.setText(R.string.pull_to_refresh_refreshing_label);
+                mHeaderTextView.setText(mRefreshingLabel);
             }
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setVisibility(View.VISIBLE);
                 mHeaderProgressBar.setIndeterminate(true);
+            }
+        }
+
+        /**
+         * Set Text to show to prompt the user is pull (or keep pulling).
+         * @param pullText - Text to display.
+         */
+        public void setPullText(CharSequence pullText) {
+            mPullRefreshLabel = pullText;
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(mPullRefreshLabel);
+            }
+        }
+
+        /**
+         * Set Text to show to tell the user that a refresh is currently in progress.
+         * @param refreshingText - Text to display.
+         */
+        public void setRefreshingText(CharSequence refreshingText) {
+            mRefreshingLabel = refreshingText;
+        }
+
+        protected Drawable getActionBarBackground(Context context) {
+            int[] android_styleable_ActionBar = { android.R.attr.background };
+
+            // Need to get resource id of style pointed to from actionBarStyle
+            TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
+            // Now get action bar style values...
+            TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+                    android_styleable_ActionBar);
+            try {
+                // background is the first attr in the array above so it's index is 0.
+                return abStyle.getDrawable(0);
+            } finally {
+                abStyle.recycle();
+            }
+        }
+
+        protected int getActionBarSize(Context context) {
+            int[] attrs = { android.R.attr.actionBarSize };
+            TypedArray values = context.getTheme().obtainStyledAttributes(attrs);
+            try {
+                return values.getDimensionPixelSize(0, 0);
+            } finally {
+                values.recycle();
             }
         }
     }

@@ -23,7 +23,7 @@ import android.view.View;
 import android.widget.ScrollView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.samples.stock.R;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.DefaultHeaderTransformer;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
@@ -46,6 +46,16 @@ public class ScrollViewActivity extends Activity
 
         // Set Refreshable View to be the ScrollView and the refresh listener to be this.
         mPullToRefreshAttacher.setRefreshableView(scrollView, this);
+
+        // As we haven't set an explicit HeaderTransformer, we can safely cast the result of
+        // getHeaderTransformer() to DefaultHeaderTransformer
+        DefaultHeaderTransformer ht = (DefaultHeaderTransformer) mPullToRefreshAttacher
+                .getHeaderTransformer();
+
+        // As we're using a DefaultHeaderTransformer we can change the text which is displayed.
+        // You should load these values from localised resources, but we'll just use static strings.
+        ht.setPullText("Swipe Me!!!");
+        ht.setRefreshingText("Refreshing :)");
     }
 
     @Override

@@ -21,7 +21,8 @@
 
         <activity
             android:name=".ListViewActivity"
-            android:label="@string/activity_listview" />
+            android:label="@string/activity_listview"
+            android:theme="@android:style/Theme.Holo.Light" />
 
         <activity
             android:name=".ScrollViewActivity"
@@ -29,7 +30,8 @@
 
         <activity
             android:name=".GridViewActivity"
-            android:label="@string/activity_gridview" />
+            android:label="@string/activity_gridview"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" />
 
         <activity
             android:name=".WebViewActivity"
@@ -37,7 +39,8 @@
 
         <activity
             android:name=".FragmentTabsActivity"
-            android:label="@string/activity_fragment_tabs" />
+            android:label="@string/activity_fragment_tabs"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" />
 
     </application>
 

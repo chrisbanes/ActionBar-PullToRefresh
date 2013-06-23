@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.co.senab.actionbarpulltorefresh.samples.stock"
-    android:versionCode="031"
-    android:versionName="0.3.1">
+    android:versionCode="040"
+    android:versionName="0.4">
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="17" />
     <application

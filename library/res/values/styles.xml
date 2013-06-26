@@ -16,9 +16,14 @@
 
 <resources>
 
-    <style name="Widget.Holo.ProgressBar.Horizontal.Center"
-        parent="android:Widget.Holo.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_holo_center</item>
+    <style name="Widget.PullToRefresh.ProgressBar.Horizontal.Center"
+        parent="android:Widget.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/ptr_progress_horizontal_holo_center</item>
+        <item name="android:indeterminateDrawable">
+            @drawable/ptr_progress_indeterminate_horizontal_holo
+        </item>
+        <item name="android:minHeight">4dip</item>
+        <item name="android:maxHeight">4dip</item>
     </style>
 
 </resources>

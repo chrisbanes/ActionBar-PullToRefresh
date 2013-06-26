@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright 2013 Chris Banes
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +13,15 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
+-->
 
-<resources>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Widget.Holo.ProgressBar.Horizontal.Center"
-        parent="@style/Widget.Sherlock.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_holo_center</item>
-    </style>
+    <item android:id="@android:id/progress">
+        <scale
+            android:scaleWidth="100%"
+            android:scaleGravity="center"
+            android:drawable="@drawable/ptr_progress_primary_holo" />
+    </item>
 
-</resources>
+</layer-list>

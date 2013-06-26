@@ -45,8 +45,7 @@
         android:id="@id/ptr_progress"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        style="@style/Widget.Holo.ProgressBar.Horizontal.Center"
-        android:layout_marginTop="-6dp"/>
+        style="@style/Widget.PullToRefresh.ProgressBar.Horizontal.Center" />
 
 </LinearLayout>
 

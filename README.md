@@ -11,11 +11,17 @@ Please note that this is currently in a preview state. This basically means that
 
 ---
 
-## Sample
+## Sample Apps
 
-Eventually the sample will be available to download on Google Play. As we're not stable yet you can find the APKs [here](https://drive.google.com/folderview?id=0BxAFUoBj0OjaYTd3SUkzYjIydG8&usp=sharing).
+There are two sample applications, the stock sample which uses the standard library and is therefore has a `minSdkVersion` of 14. There is also a sample which uses the ActionBarSherlock extra so has a `minSdkVersion` of 7.
 
-#### Video
+### Stock Sample
+[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](http://play.google.com/store/apps/details?id=uk.co.senab.actionbarpulltorefresh.samples.stock)
+
+### ActionBarSherlock Sample
+[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](http://play.google.com/store/apps/details?id=uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock)
+
+## Video
 
 [![Sample Video](http://img.youtube.com/vi/YOYtPF-4RPg/0.jpg)](https://www.youtube.com/watch?v=YOYtPF-4RPg)
 

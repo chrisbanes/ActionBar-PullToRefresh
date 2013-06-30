@@ -550,6 +550,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * is initiated.
          */
         public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
+        /**
+         * Set to true if you wish Pull to Refresh only to occur <b>after</b> the user
+         * lifts their finger from the screen
+         */
+        public boolean refreshOnActionUp = false;
     }
 
     private class AnimationCallback implements Animation.AnimationListener {

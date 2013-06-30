@@ -61,10 +61,12 @@ public class ListViewRefreshOnActionUpActivity extends SherlockListActivity
         // As we're modifying some of the options, create an instance of
         // PullToRefreshAttacher.Options
         PullToRefreshAttacher.Options ptrOptions = new PullToRefreshAttacher.Options();
+        // Set the option to only refresh when the user lifts their finger off the screen
+        // (rather than when we reach a certain length of pull)
+        ptrOptions.refreshOnActionUp = true;
 
         // Here we create a PullToRefreshAttacher manually with the Options instance created above.
         mPullToRefreshAttacher = new PullToRefreshAttacher(this, ptrOptions);
-        ptrOptions.refreshOnActionUp = true;
 
         // Set the Refreshable View to be the ListView and the refresh listener to be this.
         mPullToRefreshAttacher.setRefreshableView(listView, this);

@@ -363,7 +363,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             Log.d(LOG_TAG, "onPull");
         }
 
-        final float pxScrollForRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
+        final float pxScrollForRefresh = mRefreshableView.getWidth() * mRefreshScrollDistance;
         final float scrollLength = y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {

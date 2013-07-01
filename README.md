@@ -110,6 +110,24 @@ HeaderTransformers are responsible for updating the header view to match the cur
 ### Customised Header View layout
 If you feel that the default header view layout does not provide what you require, you can provide your own which is inflated for you. For the majority of cases, you will probably want to provide your own `HeaderTransformer` as well, to update your custom layout.
 
+## Maven
+For the standard library (APIv14+) add the following as a dependency in you `pom.xml`:
+```
+<dependency>
+    <groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
+    <artifactId>library</artifactId>
+    <version>0.4</version>
+</dependency>
+```
+
+If you're using ActionBarSherlock (APIv7+) add the following as a dependency in you `pom.xml`:
+```
+<dependency>
+    <groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
+    <artifactId>extra-abs</artifactId>
+    <version>0.4</version>
+</dependency>
+```
 ---
 
 ## License

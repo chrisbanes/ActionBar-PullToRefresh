@@ -25,6 +25,11 @@
             android:theme="@android:style/Theme.Holo.Light" />
 
         <activity
+            android:name=".ListViewRefreshOnActionUpActivity"
+            android:label="@string/activity_listview_refresh_on_action_up"
+            android:theme="@android:style/Theme.Holo.Light" />
+
+        <activity
             android:name=".ScrollViewActivity"
             android:label="@string/activity_scrollview" />
 

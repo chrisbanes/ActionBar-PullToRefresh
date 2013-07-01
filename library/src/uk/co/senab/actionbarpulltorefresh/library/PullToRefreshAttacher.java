@@ -50,8 +50,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final int DEFAULT_ANIM_HEADER_IN = R.anim.fade_in;
     private static final int DEFAULT_ANIM_HEADER_OUT = R.anim.fade_out;
     private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
+    private static final boolean DEFAULT_REFRESH_ON_ACTION_UP = false;
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
     private final EnvironmentDelegate mEnvironmentDelegate;
@@ -62,6 +63,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
+    private final boolean mRefreshOnActionUp;
 
     private float mInitialMotionY, mLastMotionY, mPullBeginY;
     private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
@@ -72,6 +74,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private OnRefreshListener mRefreshListener;
 
     private boolean mEnabled = true;
+    private boolean mPulledEnoughForActionUp = false;
 
     /**
      * FIXME
@@ -94,6 +97,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
+        mRefreshOnActionUp = options.refreshOnActionUp;
 
         // EnvironmentDelegate
         mEnvironmentDelegate = options.environmentDelegate != null
@@ -319,6 +323,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
+                if(mRefreshOnActionUp && mPulledEnoughForActionUp) {
+                    setRefreshingInt(true, true);
+                }
                 resetTouch();
                 break;
             }
@@ -335,6 +342,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             onPullEnded();
         }
         mIsHandlingTouchEvent = false;
+        mPulledEnoughForActionUp = false;
         mInitialMotionY = mLastMotionY = mPullBeginY = 0f;
     }
 
@@ -355,11 +363,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             Log.d(LOG_TAG, "onPull");
         }
 
-        final float pxScrollForRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
+        final float pxScrollForRefresh = mRefreshableView.getWidth() * mRefreshScrollDistance;
         final float scrollLength = y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);
+        } else if(mRefreshOnActionUp) {
+            mPulledEnoughForActionUp = true;
         } else {
             setRefreshingInt(true, true);
         }
@@ -550,6 +560,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * is initiated.
          */
         public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
+
+        /**
+         * Set to true if you wish Pull to Refresh only to occur <b>after</b> the user
+         * lifts their finger from the screen
+         */
+        public boolean refreshOnActionUp = DEFAULT_REFRESH_ON_ACTION_UP;
     }
 
     private class AnimationCallback implements Animation.AnimationListener {

@@ -19,6 +19,7 @@
     <string name="app_name">ActionBarPullToRefresh ABS</string>
     <string name="activity_scrollview">ScrollView</string>
     <string name="activity_listview">ListView</string>
+    <string name="activity_listview_refresh_on_action_up">ListView refresh on up</string>
     <string name="activity_gridview">GridView</string>
     <string name="activity_webview">WebView</string>
     <string name="activity_fragment_tabs">Fragments + Tabs</string>

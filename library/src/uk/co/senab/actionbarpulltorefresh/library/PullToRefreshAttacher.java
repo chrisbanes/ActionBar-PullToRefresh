@@ -671,11 +671,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
 
         protected Drawable getActionBarBackground(Context context) {
-            int[] android_styleable_ActionBar = { android.R.attr.background };
+            int[] android_styleable_ActionBar = { com.actionbarsherlock.R.attr.background };
 
             // Need to get resource id of style pointed to from actionBarStyle
             TypedValue outValue = new TypedValue();
-            context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
+            context.getTheme().resolveAttribute(com.actionbarsherlock.R.attr.actionBarStyle, outValue, true);
             // Now get action bar style values...
             TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
                     android_styleable_ActionBar);
@@ -688,7 +688,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
 
         protected int getActionBarSize(Context context) {
-            int[] attrs = { android.R.attr.actionBarSize };
+            int[] attrs = { com.actionbarsherlock.R.attr.actionBarSize };
             TypedArray values = context.getTheme().obtainStyledAttributes(attrs);
             try {
                 return values.getDimensionPixelSize(0, 0);

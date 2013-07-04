@@ -30,4 +30,17 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>gen_abs</name>
+			<type>2</type>
+			<locationURI>WHIROOT_LOC/libs/ActionBarSherlock/actionbarsherlock/gen</locationURI>
+		</link>
+	</linkedResources>
+	<variableList>
+		<variable>
+			<name>WHIROOT_LOC</name>
+			<value>$%7BPARENT-3-PROJECT_LOC%7D</value>
+		</variable>
+	</variableList>
 </projectDescription>

@@ -103,6 +103,7 @@ When instatiating a `PullToRefreshAttacher` you can provide an `Options` instanc
  * `headerInAnimation`: The animation resource which is used when the header view is shown.
  * `headerOutAnimation`: The animation resource which is used when the header view is hidden.
  * `refreshScrollDistance`: The vertical distance (percentage of the scrollable view height) that the user needs to scroll for a refresh to start.
+ * `refreshOnUp`: Whether to wait to start the refresh until when the user has lifted their finger.
 
 ### HeaderTransformers
 HeaderTransformers are responsible for updating the header view to match the current state. If you do not provide a HeaderTransformer, there is a default implementation created for you called `DefaultHeaderTransformer`. This default implementation is what provides the default behaviour (growing progress bar, etc).

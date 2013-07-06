@@ -148,5 +148,10 @@ public class GridViewActivity extends SherlockActivity
             mMainTextView.setText(R.string.pull_to_refresh_refreshing_label);
             mProgressTextView.setVisibility(View.GONE);
         }
+
+        @Override
+        public void onReleaseToRefresh() {
+            mMainTextView.setText(R.string.pull_to_refresh_release_label);
+        }
     }
 }

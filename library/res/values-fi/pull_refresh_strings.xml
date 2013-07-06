@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2013 Chris Banes
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,5 +16,6 @@
 
 <resources>
     <string name="pull_to_refresh_pull_label">Päivitä vetämällä alas…</string>
+    <string name="pull_to_refresh_release_label">Päivitä vapauttamalla…</string>
     <string name="pull_to_refresh_refreshing_label">Päivitetään…</string>
 </resources>

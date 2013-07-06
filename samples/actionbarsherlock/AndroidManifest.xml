@@ -42,6 +42,11 @@
             android:label="@string/activity_fragment_tabs"
             android:theme="@style/Theme.Sherlock.Light.DarkActionBar"/>
 
+        <activity
+            android:name=".FragmentTabsViewPagerActivity"
+            android:label="@string/activity_fragment_tabs_vp"
+            android:theme="@style/Theme.Sherlock.Light"/>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

@@ -163,9 +163,27 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public void setRefreshableView(View view, ViewDelegate viewDelegate,
             OnRefreshListener refreshListener) {
+        setRefreshableView(view, null, refreshListener, true);
+    }
+
+    /**
+     * Set the view which will be used to initiate refresh requests, along with a delegate which
+     * knows how to handle the given view, and a listener to be invoked when a refresh is started.
+     *
+     * @param view - View which will be used to initiate refresh requests.
+     * @param viewDelegate - delegate which knows how to handle <code>view</code>.
+     * @param refreshListener - Listener to be invoked when a refresh is started.
+     * @param alterTouchListeners - Whether to set this as the touch listener for <code>view</code>.
+     *                            You should only provide <code>false</code> here if you will
+     *                            propagate the touch events to this object yourself.
+     */
+    public void setRefreshableView(View view, ViewDelegate viewDelegate,
+            OnRefreshListener refreshListener, final boolean alterTouchListeners) {
         // If we already have a refreshable view, reset it and our state
         if (mRefreshableView != null) {
-            mRefreshableView.setOnTouchListener(null);
+            if (alterTouchListeners) {
+                mRefreshableView.setOnTouchListener(null);
+            }
             setRefreshingInt(false, false);
         }
 
@@ -181,7 +199,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // View to detect refreshes for
         mRefreshableView = view;
-        mRefreshableView.setOnTouchListener(this);
+        if (alterTouchListeners) {
+            mRefreshableView.setOnTouchListener(this);
+        }
 
         // ViewDelegate
         if (viewDelegate == null) {

@@ -19,7 +19,7 @@ There are two sample applications, the stock sample which uses the standard libr
 [![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](http://play.google.com/store/apps/details?id=uk.co.senab.actionbarpulltorefresh.samples.stock)
 
 ### ActionBarSherlock Sample
-[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](http://play.google.com/store/apps/details?id=uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock)
+[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](http://play.google.com/store/apps/details?id=uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock)
 
 ## Video
 
@@ -117,7 +117,7 @@ For the standard library (APIv14+) add the following as a dependency in you `pom
 <dependency>
     <groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
     <artifactId>library</artifactId>
-    <version>0.4</version>
+    <version>0.5</version>
 </dependency>
 ```
 
@@ -126,7 +126,7 @@ If you're using ActionBarSherlock (APIv7+) add the following as a dependency in 
 <dependency>
     <groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
     <artifactId>extra-abs</artifactId>
-    <version>0.4</version>
+    <version>0.5</version>
 </dependency>
 ```
 ---

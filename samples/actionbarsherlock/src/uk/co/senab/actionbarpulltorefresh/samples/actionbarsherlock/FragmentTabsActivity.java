@@ -39,6 +39,7 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefresh
  */
 public class FragmentTabsActivity extends SherlockFragmentActivity
         implements ActionBar.TabListener {
+    private static String EXTRA_TITLE = "extra_title";
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
 
@@ -66,7 +67,9 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
         SampleFragment fragment = new SampleFragment();
 
         // Set title for display purposes
-        fragment.setTitle(tab.getText());
+        Bundle b = new Bundle();
+        b.putString(EXTRA_TITLE, tab.getText().toString());
+        fragment.setArguments(b);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.ptr_fragment, fragment).commit();
@@ -91,13 +94,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
      */
     public static class SampleFragment extends SherlockFragment implements
             PullToRefreshAttacher.OnRefreshListener {
-        private CharSequence mTitle;
         private PullToRefreshAttacher mPullToRefreshAttacher;
-
-        // Just allows the Activity to set the Fragment title
-        void setTitle(CharSequence title) {
-            mTitle = title;
-        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -118,7 +115,10 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);
-            title.setText(mTitle);
+            Bundle b = getArguments();
+            if (b != null) {
+                title.setText(b.getString(EXTRA_TITLE));
+            }
 
             return view;
         }

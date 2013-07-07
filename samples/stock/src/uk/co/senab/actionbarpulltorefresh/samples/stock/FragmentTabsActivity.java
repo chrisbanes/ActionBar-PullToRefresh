@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,6 +37,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
  * in {@link #onCreate(android.os.Bundle)} and then pulled in from your Fragments as necessary.
  */
 public class FragmentTabsActivity extends Activity implements ActionBar.TabListener {
+    private static String EXTRA_TITLE = "extra_title";
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
 
@@ -64,7 +65,9 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
         SampleFragment fragment = new SampleFragment();
 
         // Set title for display purposes
-        fragment.setTitle(tab.getText());
+        Bundle b = new Bundle();
+        b.putString(EXTRA_TITLE, tab.getText().toString());
+        fragment.setArguments(b);
 
         ft.replace(R.id.ptr_fragment, fragment);
     }
@@ -88,17 +91,11 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
      */
     public static class SampleFragment extends Fragment implements
             PullToRefreshAttacher.OnRefreshListener {
-        private CharSequence mTitle;
         private PullToRefreshAttacher mPullToRefreshAttacher;
 
         // Allow Activity to pass us it's PullToRefreshAttacher
         void setPullToRefreshAttacher(PullToRefreshAttacher attacher) {
             mPullToRefreshAttacher = attacher;
-        }
-
-        // Just allows the Activity to set the Fragment title
-        void setTitle(CharSequence title) {
-            mTitle = title;
         }
 
         @Override
@@ -120,7 +117,10 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);
-            title.setText(mTitle);
+            Bundle b = getArguments();
+            if (b != null) {
+                title.setText(b.getString(EXTRA_TITLE));
+            }
 
             return view;
         }

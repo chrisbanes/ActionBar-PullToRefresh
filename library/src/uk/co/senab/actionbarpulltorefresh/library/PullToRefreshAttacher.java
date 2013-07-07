@@ -50,6 +50,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final int DEFAULT_ANIM_HEADER_IN = R.anim.fade_in;
     private static final int DEFAULT_ANIM_HEADER_OUT = R.anim.fade_out;
     private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
+    private static final boolean DEFAULT_REFRESH_ON_UP = false;
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
@@ -72,6 +73,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private OnRefreshListener mRefreshListener;
 
     private boolean mEnabled = true;
+    private boolean mRefreshOnUp;
 
     /**
      * FIXME
@@ -94,6 +96,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
+        mRefreshOnUp = options.refreshOnUp;
 
         // EnvironmentDelegate
         mEnvironmentDelegate = options.environmentDelegate != null
@@ -160,9 +163,27 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public void setRefreshableView(View view, ViewDelegate viewDelegate,
             OnRefreshListener refreshListener) {
+        setRefreshableView(view, null, refreshListener, true);
+    }
+
+    /**
+     * Set the view which will be used to initiate refresh requests, along with a delegate which
+     * knows how to handle the given view, and a listener to be invoked when a refresh is started.
+     *
+     * @param view - View which will be used to initiate refresh requests.
+     * @param viewDelegate - delegate which knows how to handle <code>view</code>.
+     * @param refreshListener - Listener to be invoked when a refresh is started.
+     * @param alterTouchListeners - Whether to set this as the touch listener for <code>view</code>.
+     *                            You should only provide <code>false</code> here if you will
+     *                            propagate the touch events to this object yourself.
+     */
+    public void setRefreshableView(View view, ViewDelegate viewDelegate,
+            OnRefreshListener refreshListener, final boolean alterTouchListeners) {
         // If we already have a refreshable view, reset it and our state
         if (mRefreshableView != null) {
-            mRefreshableView.setOnTouchListener(null);
+            if (alterTouchListeners) {
+                mRefreshableView.setOnTouchListener(null);
+            }
             setRefreshingInt(false, false);
         }
 
@@ -178,7 +199,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // View to detect refreshes for
         mRefreshableView = view;
-        mRefreshableView.setOnTouchListener(this);
+        if (alterTouchListeners) {
+            mRefreshableView.setOnTouchListener(this);
+        }
 
         // ViewDelegate
         if (viewDelegate == null) {
@@ -319,6 +342,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
+                checkScrollForRefresh();
                 resetTouch();
                 break;
             }
@@ -355,13 +379,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             Log.d(LOG_TAG, "onPull");
         }
 
-        final float pxScrollForRefresh = mRefreshableView.getHeight() * mRefreshScrollDistance;
+        final int pxScrollForRefresh = getScrollNeededForRefresh();
         final float scrollLength = y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);
         } else {
-            setRefreshingInt(true, true);
+            if (mRefreshOnUp) {
+                mHeaderTransformer.onReleaseToRefresh();
+            } else {
+                setRefreshingInt(true, true);
+            }
         }
     }
 
@@ -380,6 +408,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     protected HeaderTransformer createDefaultHeaderTransformer() {
         return new DefaultHeaderTransformer();
+    }
+
+    private boolean checkScrollForRefresh() {
+        if (mIsBeingDragged && mRefreshOnUp) {
+            if (mLastMotionY - mPullBeginY >= getScrollNeededForRefresh()) {
+                setRefreshingInt(true, true);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setRefreshingInt(boolean refreshing, boolean fromTouch) {
@@ -404,6 +442,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     private boolean canRefresh(boolean fromTouch) {
         return !mIsRefreshing && (!fromTouch || mRefreshListener != null);
+    }
+
+    private int getScrollNeededForRefresh() {
+        return Math.round(mRefreshableView.getHeight() * mRefreshScrollDistance);
     }
 
     private void reset(boolean fromTouch) {
@@ -482,6 +524,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * from {@link OnRefreshListener} but is more suitable for header view updates.
          */
         public abstract void onRefreshStarted();
+
+        /**
+         * Called when a refresh can be initiated when the user ends the touch event. This is only
+         * called when {@link Options#refreshOnUp} is set to true.
+         */
+        public abstract void onReleaseToRefresh();
     }
 
     /**
@@ -550,6 +598,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * is initiated.
          */
         public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
+
+        /**
+         * Whether a refresh should only be initiated when the user has finished the touch event.
+         */
+        public boolean refreshOnUp = DEFAULT_REFRESH_ON_UP;
     }
 
     private class AnimationCallback implements Animation.AnimationListener {
@@ -578,7 +631,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         private TextView mHeaderTextView;
         private ProgressBar mHeaderProgressBar;
 
-        private CharSequence mPullRefreshLabel, mRefreshingLabel;
+        private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
 
         private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -591,6 +644,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             // Labels to display
             mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
             mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
+            mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
 
             View contentView = headerView.findViewById(R.id.ptr_content);
             if (contentView != null) {
@@ -651,6 +705,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             }
         }
 
+        @Override
+        public void onReleaseToRefresh() {
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(mReleaseLabel);
+            }
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setProgress(mHeaderProgressBar.getMax());
+            }
+        }
+
         /**
          * Set Text to show to prompt the user is pull (or keep pulling).
          * @param pullText - Text to display.
@@ -668,6 +732,14 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          */
         public void setRefreshingText(CharSequence refreshingText) {
             mRefreshingLabel = refreshingText;
+        }
+
+        /**
+         * Set Text to show to tell the user has scrolled enough to refresh.
+         * @param releaseText - Text to display.
+         */
+        public void setReleaseText(CharSequence releaseText) {
+            mReleaseLabel = releaseText;
         }
 
         protected Drawable getActionBarBackground(Context context) {

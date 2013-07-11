@@ -56,7 +56,7 @@ public void onCreate(Bundle savedInstanceState) {
     mPullToRefreshHelper = new PullToRefreshAttacher(this);
 
     // Set the Refreshable View and provide the refresh listener
-    mPullToRefreshAttacher.setRefreshableView(scrollableView, this);
+    mPullToRefreshHelper.setRefreshableView(scrollableView, this);
 }
 ```
 See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/ListViewActivity.java) sample for more info.

@@ -43,7 +43,7 @@ If the View you want to use is not listed above, you can easily add support in y
 You just need to create an instance of `PullToRefreshAttacher`, giving it the Activity and the View for which will scroll.
 
 ``` java
-private PullToRefreshAttacher mPullToRefreshHelper;
+private PullToRefreshAttacher mPullToRefreshAttacher;
 
 @Override
 public void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,7 @@ public void onCreate(Bundle savedInstanceState) {
     View scrollableView = findViewById(R.id.blah); 
 
     // Create a PullToRefreshAttacher instance
-    mPullToRefreshHelper = new PullToRefreshAttacher(this);
+    mPullToRefreshAttacher = new PullToRefreshAttacher(this);
 
     // Add the Refreshable View and provide the refresh listener
     mPullToRefreshAttacher.addRefreshableView(scrollableView, this);

@@ -23,7 +23,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.samples.stock.R;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
@@ -55,7 +54,7 @@ public class WebViewActivity extends Activity implements PullToRefreshAttacher.O
         mPullToRefreshAttacher = new PullToRefreshAttacher(this);
 
         // Set the Refreshable View to be the ListView and the refresh listener to be this.
-        mPullToRefreshAttacher.setRefreshableView(mWebView, this);
+        mPullToRefreshAttacher.addRefreshableView(mWebView, this);
 
         // Finally make the WebView load something...
         mWebView.loadUrl("http://www.google.com");

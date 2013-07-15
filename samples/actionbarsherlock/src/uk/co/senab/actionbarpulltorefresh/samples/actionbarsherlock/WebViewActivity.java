@@ -57,7 +57,7 @@ public class WebViewActivity extends SherlockActivity
         mPullToRefreshAttacher = new PullToRefreshAttacher(this);
 
         // Set the Refreshable View to be the ListView and the refresh listener to be this.
-        mPullToRefreshAttacher.setRefreshableView(mWebView, this);
+        mPullToRefreshAttacher.addRefreshableView(mWebView, this);
 
         // Finally make the WebView load something...
         mWebView.loadUrl("http://www.google.com");

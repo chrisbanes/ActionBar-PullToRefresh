@@ -38,6 +38,8 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.WeakHashMap;
+
 /**
  * FIXME
  */
@@ -67,10 +69,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private float mInitialMotionY, mLastMotionY, mPullBeginY;
     private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
 
-    private View mRefreshableView;
-    private ViewDelegate mViewDelegate;
-
-    private OnRefreshListener mRefreshListener;
+    private final WeakHashMap<View, ViewParams> mRefreshableViews;
 
     private boolean mEnabled = true;
     private boolean mRefreshOnUp;
@@ -93,6 +92,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();
         }
+
+        mRefreshableViews = new WeakHashMap<View, ViewParams>();
 
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
@@ -142,65 +143,35 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
-     * Set the view which will be used to initiate refresh requests and a listener to be invoked
+     * Add a view which will be used to initiate refresh requests and a listener to be invoked
      * when a refresh is started. This version of the method will try to find a handler for the
      * view from the built-in view delegates.
      *
      * @param view - View which will be used to initiate refresh requests.
      * @param refreshListener - Listener to be invoked when a refresh is started.
      */
-    public void setRefreshableView(View view, OnRefreshListener refreshListener) {
-        setRefreshableView(view, null, refreshListener);
+    public void addRefreshableView(View view, OnRefreshListener refreshListener) {
+        addRefreshableView(view, null, refreshListener);
     }
 
     /**
-     * Set the view which will be used to initiate refresh requests, along with a delegate which
+     * Add a view which will be used to initiate refresh requests, along with a delegate which
      * knows how to handle the given view, and a listener to be invoked when a refresh is started.
      *
      * @param view - View which will be used to initiate refresh requests.
      * @param viewDelegate - delegate which knows how to handle <code>view</code>.
      * @param refreshListener - Listener to be invoked when a refresh is started.
      */
-    public void setRefreshableView(View view, ViewDelegate viewDelegate,
+    public void addRefreshableView(View view, ViewDelegate viewDelegate,
             OnRefreshListener refreshListener) {
-        setRefreshableView(view, null, refreshListener, true);
-    }
-
-    /**
-     * Set the view which will be used to initiate refresh requests, along with a delegate which
-     * knows how to handle the given view, and a listener to be invoked when a refresh is started.
-     *
-     * @param view - View which will be used to initiate refresh requests.
-     * @param viewDelegate - delegate which knows how to handle <code>view</code>.
-     * @param refreshListener - Listener to be invoked when a refresh is started.
-     * @param alterTouchListeners - Whether to set this as the touch listener for <code>view</code>.
-     *                            You should only provide <code>false</code> here if you will
-     *                            propagate the touch events to this object yourself.
-     */
-    public void setRefreshableView(View view, ViewDelegate viewDelegate,
-            OnRefreshListener refreshListener, final boolean alterTouchListeners) {
-        // If we already have a refreshable view, reset it and our state
-        if (mRefreshableView != null) {
-            if (alterTouchListeners) {
-                mRefreshableView.setOnTouchListener(null);
-            }
-            setRefreshingInt(false, false);
-        }
-
-        // Update Refresh Listener
-        mRefreshListener = refreshListener;
-
         // Check to see if view is null
         if (view == null) {
             Log.i(LOG_TAG, "Refreshable View is null.");
-            mViewDelegate = null;
             return;
         }
 
-        // View to detect refreshes for
-        mRefreshableView = view;
-        if (alterTouchListeners) {
-            mRefreshableView.setOnTouchListener(this);
+        if (refreshListener == null) {
+            throw new IllegalArgumentException("OnRefreshListener not given. Please provide one.");
         }
 
         // ViewDelegate
@@ -210,7 +181,22 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 throw new IllegalArgumentException("No view handler found. Please provide one.");
             }
         }
-        mViewDelegate = viewDelegate;
+
+        // View to detect refreshes for
+        mRefreshableViews.put(view, new ViewParams(viewDelegate, refreshListener));
+        view.setOnTouchListener(this);
+    }
+
+    /**
+     * Remove a view which was previously used to initiate refresh requests.
+     *
+     * @param view - View which will be used to initiate refresh requests.
+     */
+    public void removeRefreshableView(View view) {
+        if (mRefreshableViews.containsKey(view)) {
+            mRefreshableViews.remove(view);
+            view.setOnTouchListener(null);
+        }
     }
 
     /**
@@ -219,7 +205,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * @param refreshing - Whether the attacher should be in a refreshing state,
      */
     public final void setRefreshing(boolean refreshing) {
-        setRefreshingInt(refreshing, false);
+        setRefreshingInt(null, refreshing, false);
     }
 
     /**
@@ -263,7 +249,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * This is the equivalent of calling <code>setRefreshing(false)</code>.
      */
     public final void setRefreshComplete() {
-        setRefreshingInt(false, false);
+        setRefreshingInt(null, false, false);
     }
 
     /**
@@ -274,13 +260,18 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     @Override
-    public final boolean onTouch(View view, MotionEvent event) {
+    public final boolean onTouch(final View view, final MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN && event.getEdgeFlags() != 0) {
             return false;
         }
 
         // If we're not enabled don't handle any touch events
         if (!isEnabled()) {
+            return false;
+        }
+
+        final ViewParams params = mRefreshableViews.get(view);
+        if (params == null) {
             return false;
         }
 
@@ -296,7 +287,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 // As there are times when we are not given the ACTION_DOWN, we need to check here
                 // whether we should handle the event
                 if (!mIsHandlingTouchEvent) {
-                    if (canRefresh(true) && mViewDelegate.isScrolledToTop(mRefreshableView)) {
+                    if (canRefresh(true, params.onRefreshListener) &&
+                            params.viewDelegate.isScrolledToTop(view)) {
                         mIsHandlingTouchEvent = true;
                         mInitialMotionY = y;
                     } else {
@@ -319,7 +311,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                      * We allow a small scroll up which is the check against negative touch slop.
                      */
                     if (yDx >= -mTouchSlop) {
-                        onPull(y);
+                        onPull(view, y);
                         // Only record the y motion if the user has scrolled down.
                         if (yDx > 0f) {
                             mLastMotionY = y;
@@ -334,7 +326,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (canRefresh(true) && mViewDelegate.isScrolledToTop(mRefreshableView)) {
+                if (canRefresh(true, params.onRefreshListener) &&
+                        params.viewDelegate.isScrolledToTop(view)) {
                     mIsHandlingTouchEvent = true;
                     mInitialMotionY = event.getY();
                 }
@@ -343,7 +336,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
-                checkScrollForRefresh();
+                checkScrollForRefresh(view);
                 if (mIsBeingDragged) {
                     onPullEnded();
                 }
@@ -374,12 +367,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mPullBeginY = y;
     }
 
-    void onPull(float y) {
+    void onPull(View view, float y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPull");
         }
 
-        final int pxScrollForRefresh = getScrollNeededForRefresh();
+        final int pxScrollForRefresh = getScrollNeededForRefresh(view);
         final float scrollLength = y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
@@ -388,7 +381,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             if (mRefreshOnUp) {
                 mHeaderTransformer.onReleaseToRefresh();
             } else {
-                setRefreshingInt(true, true);
+                setRefreshingInt(view, true, true);
             }
         }
     }
@@ -410,17 +403,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         return new DefaultHeaderTransformer();
     }
 
-    private boolean checkScrollForRefresh() {
-        if (mIsBeingDragged && mRefreshOnUp) {
-            if (mLastMotionY - mPullBeginY >= getScrollNeededForRefresh()) {
-                setRefreshingInt(true, true);
+    private boolean checkScrollForRefresh(View view) {
+        if (mIsBeingDragged && mRefreshOnUp && view != null) {
+            if (mLastMotionY - mPullBeginY >= getScrollNeededForRefresh(view)) {
+                setRefreshingInt(view, true, true);
                 return true;
             }
         }
         return false;
     }
 
-    private void setRefreshingInt(boolean refreshing, boolean fromTouch) {
+    private void setRefreshingInt(View view, boolean refreshing, boolean fromTouch) {
         if (DEBUG) {
             Log.d(LOG_TAG, "setRefreshingInt: " + refreshing);
         }
@@ -431,23 +424,33 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         resetTouch();
 
-        if (refreshing && canRefresh(fromTouch)) {
-            startRefresh(fromTouch);
+        if (refreshing && canRefresh(fromTouch, getRefreshListenerForView(view))) {
+            startRefresh(view, fromTouch);
         } else {
             reset(fromTouch);
         }
+    }
+
+    private OnRefreshListener getRefreshListenerForView(View view) {
+        if (view != null) {
+            ViewParams params = mRefreshableViews.get(view);
+            if (params != null) {
+                return params.onRefreshListener;
+            }
+        }
+        return null;
     }
 
     /**
      * @param fromTouch - Whether this is being invoked from a touch event
      * @return true if we're currently in a state where a refresh can be started.
      */
-    private boolean canRefresh(boolean fromTouch) {
-        return !mIsRefreshing && (!fromTouch || mRefreshListener != null);
+    private boolean canRefresh(boolean fromTouch, OnRefreshListener listener) {
+        return !mIsRefreshing && (!fromTouch || listener != null);
     }
 
-    private int getScrollNeededForRefresh() {
-        return Math.round(mRefreshableView.getHeight() * mRefreshScrollDistance);
+    private int getScrollNeededForRefresh(View view) {
+        return Math.round(view.getHeight() * mRefreshScrollDistance);
     }
 
     private void reset(boolean fromTouch) {
@@ -467,14 +470,18 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
     }
 
-    private void startRefresh(boolean fromTouch) {
+    private void startRefresh(View view, boolean fromTouch) {
         // Update isRefreshing state
         mIsRefreshing = true;
 
         // Call OnRefreshListener if this call has originated from a touch event
         if (fromTouch) {
-            mRefreshListener.onRefreshStarted(mRefreshableView);
+            OnRefreshListener listener = getRefreshListenerForView(view);
+            if (listener != null) {
+                listener.onRefreshStarted(view);
+            }
         }
+
         // Call Transformer
         mHeaderTransformer.onRefreshStarted();
 
@@ -811,6 +818,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             // Call return super so that the rest of the
             return super.fitSystemWindows(insets);
+        }
+    }
+
+    private static final class ViewParams {
+        final OnRefreshListener onRefreshListener;
+        final ViewDelegate viewDelegate;
+
+        ViewParams(ViewDelegate _viewDelegate, OnRefreshListener _onRefreshListener) {
+            onRefreshListener = _onRefreshListener;
+            viewDelegate = _viewDelegate;
         }
     }
 

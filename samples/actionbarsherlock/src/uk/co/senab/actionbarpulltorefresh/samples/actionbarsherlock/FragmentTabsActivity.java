@@ -111,7 +111,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
                     .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)
-            mPullToRefreshAttacher.setRefreshableView(scrollView, this);
+            mPullToRefreshAttacher.addRefreshableView(scrollView, this);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);

@@ -84,7 +84,7 @@ public class GridViewActivity extends SherlockActivity
          * custom view delegate.
          */
         PullToRefreshAttacher.ViewDelegate handler = new AbsListViewDelegate();
-        mPullToRefreshAttacher.setRefreshableView(gridView, handler, this);
+        mPullToRefreshAttacher.addRefreshableView(gridView, handler, this);
     }
 
     @Override

@@ -22,7 +22,6 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -145,7 +144,7 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
                     .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)
-            mPullToRefreshAttacher.setRefreshableView(mScrollView, this);
+            mPullToRefreshAttacher.addRefreshableView(mScrollView, this);
         }
     }
 }

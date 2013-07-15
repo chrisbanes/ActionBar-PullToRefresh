@@ -45,7 +45,7 @@ public class ScrollViewActivity extends Activity
         mPullToRefreshAttacher = new PullToRefreshAttacher(this);
 
         // Set Refreshable View to be the ScrollView and the refresh listener to be this.
-        mPullToRefreshAttacher.setRefreshableView(scrollView, this);
+        mPullToRefreshAttacher.addRefreshableView(scrollView, this);
 
         // As we haven't set an explicit HeaderTransformer, we can safely cast the result of
         // getHeaderTransformer() to DefaultHeaderTransformer

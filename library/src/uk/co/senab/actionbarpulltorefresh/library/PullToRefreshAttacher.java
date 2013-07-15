@@ -325,6 +325,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                             mLastMotionY = y;
                         }
                     } else {
+                        onPullEnded();
                         resetTouch();
                     }
                 }
@@ -343,6 +344,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
                 checkScrollForRefresh();
+                if (mIsBeingDragged) {
+                    onPullEnded();
+                }
                 resetTouch();
                 break;
             }
@@ -353,11 +357,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     private void resetTouch() {
-        if (mIsBeingDragged) {
-            // We were being dragged, but not any more.
-            mIsBeingDragged = false;
-            onPullEnded();
-        }
+        mIsBeingDragged = false;
         mIsHandlingTouchEvent = false;
         mInitialMotionY = mLastMotionY = mPullBeginY = 0f;
     }
@@ -428,6 +428,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         if (mIsRefreshing == refreshing) {
             return;
         }
+
+        resetTouch();
 
         if (refreshing && canRefresh(fromTouch)) {
             startRefresh(fromTouch);

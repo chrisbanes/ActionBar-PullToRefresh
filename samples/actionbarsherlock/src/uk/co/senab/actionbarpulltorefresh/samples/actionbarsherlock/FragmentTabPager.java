@@ -25,9 +25,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.util.SparseArray;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 class FragmentTabPager extends FragmentPagerAdapter
@@ -38,10 +36,6 @@ class FragmentTabPager extends FragmentPagerAdapter
     private final ViewPager mViewPager;
 
     private final ArrayList<TabInfo> mTabs = new ArrayList<TabInfo>();
-
-    private final SparseArray<WeakReference<Fragment>> mFragments
-            = new SparseArray<WeakReference<Fragment>>();
-
     static final class TabInfo {
         private final Class<?> clss;
         private final Bundle args;
@@ -50,13 +44,6 @@ class FragmentTabPager extends FragmentPagerAdapter
             clss = _class;
             args = _args;
         }
-    }
-
-    interface Listener {
-        /**
-         * Called when the item has been selected in the ViewPager.
-         */
-        void onPageSelected();
     }
 
     FragmentTabPager(SherlockFragmentActivity activity, ViewPager pager) {
@@ -86,9 +73,7 @@ class FragmentTabPager extends FragmentPagerAdapter
     @Override
     public Fragment getItem(int position) {
         TabInfo info = mTabs.get(position);
-        Fragment frag = Fragment.instantiate(mContext, info.clss.getName(), info.args);
-        mFragments.append(position, new WeakReference<Fragment>(frag));
-        return frag;
+        return Fragment.instantiate(mContext, info.clss.getName(), info.args);
     }
 
     @Override
@@ -99,14 +84,6 @@ class FragmentTabPager extends FragmentPagerAdapter
     @Override
     public void onPageSelected(int position) {
         mActionBar.setSelectedNavigationItem(position);
-
-        WeakReference<Fragment> ref = mFragments.get(position);
-        Fragment frag = null != ref ? ref.get() : null;
-
-        // We need to notify the fragment that it is selected
-        if (frag != null && frag instanceof Listener) {
-            ((Listener) frag).onPageSelected();
-        }
     }
 
     @Override
@@ -136,7 +113,6 @@ class FragmentTabPager extends FragmentPagerAdapter
 
     @Override
     public void notifyDataSetChanged() {
-        mFragments.clear();
         super.notifyDataSetChanged();
     }
 }

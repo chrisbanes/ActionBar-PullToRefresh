@@ -54,7 +54,7 @@ public class WebViewActivity extends SherlockActivity
          * Here we create a PullToRefreshAttacher manually without an Options instance.
          * PullToRefreshAttacher will manually create one using default values.
          */
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Set the Refreshable View to be the ListView and the refresh listener to be this.
         mPullToRefreshAttacher.addRefreshableView(mWebView, this);

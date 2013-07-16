@@ -45,9 +45,7 @@ import java.util.WeakHashMap;
  */
 public class PullToRefreshAttacher implements View.OnTouchListener {
 
-    /**
-     * Default configuration values
-     */
+    /* Default configuration values */
     private static final int DEFAULT_HEADER_LAYOUT = R.layout.default_header;
     private static final int DEFAULT_ANIM_HEADER_IN = R.anim.fade_in;
     private static final int DEFAULT_ANIM_HEADER_OUT = R.anim.fade_out;
@@ -56,6 +54,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
+
+    private static final WeakHashMap<Activity, PullToRefreshAttacher> ATTACHERS
+            = new WeakHashMap<Activity, PullToRefreshAttacher>();
+
+    /* Member Variables */
 
     private final EnvironmentDelegate mEnvironmentDelegate;
     private final HeaderTransformer mHeaderTransformer;
@@ -75,19 +78,35 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private boolean mRefreshOnUp;
 
     /**
-     * FIXME
-     * @param activity
+     * Get a PullToRefreshAttacher for this Activity. If there is already a PullToRefreshAttacher
+     * attached to the Activity, the existing one is returned, otherwise a new instance is created.
+     * This version of the method will use default configuration options for everything.
+     *
+     * @param activity - Activity to attach to.
+     * @return PullToRefresh attached to the Activity.
      */
-    public PullToRefreshAttacher(Activity activity) {
-        this(activity, new Options());
+    public static PullToRefreshAttacher get(Activity activity) {
+        return get(activity, new Options());
     }
 
     /**
-     * FIXME
-     * @param activity
-     * @param options
+     * Get a PullToRefreshAttacher for this Activity. If there is already a PullToRefreshAttacher
+     * attached to the Activity, the existing one is returned, otherwise a new instance is created.
+     *
+     * @param activity - Activity to attach to.
+     * @param options - Options used when creating the PullToRefreshAttacher.
+     * @return PullToRefresh attached to the Activity.
      */
-    public PullToRefreshAttacher(Activity activity, Options options) {
+    public static PullToRefreshAttacher get(Activity activity, Options options) {
+        PullToRefreshAttacher attacher = ATTACHERS.get(activity);
+        if (attacher == null) {
+            attacher = new PullToRefreshAttacher(activity, options);
+            ATTACHERS.put(activity, attacher);
+        }
+        return attacher;
+    }
+
+    protected PullToRefreshAttacher(Activity activity, Options options) {
         if (options == null) {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();

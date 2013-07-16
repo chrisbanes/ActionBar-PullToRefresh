@@ -50,7 +50,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
         setContentView(R.layout.activity_fragment_tabs);
 
         // The attacher should always be created in the Activity's onCreate
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Add 3 tabs which will switch fragments
         ActionBar ab = getSupportActionBar();

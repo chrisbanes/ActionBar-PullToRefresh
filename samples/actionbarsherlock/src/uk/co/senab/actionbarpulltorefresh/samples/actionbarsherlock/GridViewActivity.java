@@ -75,7 +75,7 @@ public class GridViewActivity extends SherlockActivity
         ptrOptions.headerTransformer = new CustomisedHeaderTransformer();
 
         // Here we create a PullToRefreshAttacher manually with the Options instance created above.
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this, ptrOptions);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this, ptrOptions);
 
         /**
          * As GridView is an AbsListView derived class, we create a new

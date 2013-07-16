@@ -48,7 +48,7 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
         setContentView(R.layout.activity_fragment_tabs);
 
         // The attacher should always be created in the Activity's onCreate
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Add 3 tabs which will switch fragments
         ActionBar ab = getActionBar();
@@ -92,11 +92,6 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
     public static class SampleFragment extends Fragment implements
             PullToRefreshAttacher.OnRefreshListener {
         private PullToRefreshAttacher mPullToRefreshAttacher;
-
-        // Allow Activity to pass us it's PullToRefreshAttacher
-        void setPullToRefreshAttacher(PullToRefreshAttacher attacher) {
-            mPullToRefreshAttacher = attacher;
-        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,

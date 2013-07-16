@@ -43,7 +43,7 @@ public class ScrollViewActivity extends SherlockActivity
         ScrollView scrollView = (ScrollView) findViewById(R.id.ptr_scrollview);
 
         // Create new PullToRefreshAttacher
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Set Refreshable View to be the ScrollView and the refresh listener to be this.
         mPullToRefreshAttacher.addRefreshableView(scrollView, this);

@@ -55,7 +55,7 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
         mFragmentTabPager = new FragmentTabPager(this, vp);
 
         // The attacher should always be created in the Activity's onCreate
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Add 3 tabs which will switch fragments
         ActionBar ab = getSupportActionBar();

@@ -23,6 +23,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -51,6 +52,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final int DEFAULT_ANIM_HEADER_OUT = R.anim.fade_out;
     private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
     private static final boolean DEFAULT_REFRESH_ON_UP = false;
+    private static final int DEFAULT_REFRESH_MINIMIZED_DELAY = 3 * 1000;
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
@@ -76,6 +78,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     private boolean mEnabled = true;
     private boolean mRefreshOnUp;
+    private int mRefreshMinimizeDelay;
+
+    private final Handler mHandler = new Handler();
 
     /**
      * Get a PullToRefreshAttacher for this Activity. If there is already a PullToRefreshAttacher
@@ -117,6 +122,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
         mRefreshOnUp = options.refreshOnUp;
+        mRefreshMinimizeDelay = options.refreshMinimizeDelay;
 
         // EnvironmentDelegate
         mEnvironmentDelegate = options.environmentDelegate != null
@@ -476,6 +482,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Update isRefreshing state
         mIsRefreshing = false;
 
+        // Remove any minimize callbacks
+        mHandler.removeCallbacks(mRefreshMinimizeRunnable);
+
         if (mHeaderView.getVisibility() != View.GONE) {
             // Hide Header
             if (mHeaderOutAnimation != null) {
@@ -511,6 +520,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             }
             mHeaderView.setVisibility(View.VISIBLE);
         }
+
+        // Post a delay runnable to minimize the refresh header
+        mHandler.postDelayed(mRefreshMinimizeRunnable, mRefreshMinimizeDelay);
     }
 
     /**
@@ -536,8 +548,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         /**
          * Called when the header should be reset. You should update any child views to reflect this.
          * <p/>
-         * You should <strong>not</strong> change the
-         * visibility of the header view.
+         * You should <strong>not</strong> change the visibility of the header view.
          */
         public abstract void onReset();
 
@@ -558,6 +569,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * called when {@link Options#refreshOnUp} is set to true.
          */
         public abstract void onReleaseToRefresh();
+
+        /**
+         * Called when the current refresh has taken longer than the time specified in
+         * {@link Options#refreshMinimizeDelay}.
+         */
+        public abstract void onRefreshMinimized();
     }
 
     /**
@@ -631,6 +648,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * Whether a refresh should only be initiated when the user has finished the touch event.
          */
         public boolean refreshOnUp = DEFAULT_REFRESH_ON_UP;
+
+        /**
+         * The delay after a refresh is started in which the header should be 'minimized'. By
+         * default, most of the header is faded out, leaving only the progress bar signifying that
+         * a refresh is taking place.
+         */
+        public int refreshMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
     }
 
     private class AnimationCallback implements Animation.AnimationListener {
@@ -656,6 +680,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Default Header Transformer.
      */
     public static class DefaultHeaderTransformer extends HeaderTransformer {
+        private ViewGroup mContentLayout;
         private TextView mHeaderTextView;
         private ProgressBar mHeaderProgressBar;
 
@@ -674,10 +699,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
             mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
 
-            View contentView = headerView.findViewById(R.id.ptr_content);
-            if (contentView != null) {
-                contentView.getLayoutParams().height = getActionBarSize(activity);
-                contentView.requestLayout();
+            mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
+            if (mContentLayout != null) {
+                mContentLayout.getLayoutParams().height = getActionBarSize(activity);
+                mContentLayout.requestLayout();
             }
 
             Drawable abBg = getActionBarBackground(activity);
@@ -711,6 +736,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 mHeaderTextView.setVisibility(View.VISIBLE);
                 mHeaderTextView.setText(mPullRefreshLabel);
             }
+
+            // Reset the Content Layout
+            if (mContentLayout != null) {
+                mContentLayout.setVisibility(View.VISIBLE);
+            }
         }
 
         @Override
@@ -740,6 +770,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             }
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setProgress(mHeaderProgressBar.getMax());
+            }
+        }
+
+        @Override
+        public void onRefreshMinimized() {
+            // Here we fade out most of the header, leaving just the progress bar
+            if (mContentLayout != null) {
+                mContentLayout.startAnimation(AnimationUtils
+                        .loadAnimation(mContentLayout.getContext(), R.anim.fade_out));
+                mContentLayout.setVisibility(View.INVISIBLE);
             }
         }
 
@@ -849,5 +889,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             viewDelegate = _viewDelegate;
         }
     }
+
+    private final Runnable mRefreshMinimizeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mHeaderTransformer.onRefreshMinimized();
+        }
+    };
 
 }

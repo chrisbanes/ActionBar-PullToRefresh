@@ -153,5 +153,10 @@ public class GridViewActivity extends SherlockActivity
         public void onReleaseToRefresh() {
             mMainTextView.setText(R.string.pull_to_refresh_release_label);
         }
+
+        @Override
+        public void onRefreshMinimized() {
+            // In this header transformer, we will ignore this call
+        }
     }
 }

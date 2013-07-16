@@ -85,7 +85,7 @@ So what if you want the view you want to use a view which isn't in the list abov
 
 ``` java
 // Create a PullToRefresh Attacher
-mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
 // Create ViewDelegate which can handle your scrollable view.
 // In this case we're creating a ficticious class

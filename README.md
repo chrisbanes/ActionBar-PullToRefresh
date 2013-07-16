@@ -53,7 +53,7 @@ public void onCreate(Bundle savedInstanceState) {
     View scrollableView = findViewById(R.id.blah); 
 
     // Create a PullToRefreshAttacher instance
-    mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+    mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
     // Add the Refreshable View and provide the refresh listener
     mPullToRefreshAttacher.addRefreshableView(scrollableView, this);

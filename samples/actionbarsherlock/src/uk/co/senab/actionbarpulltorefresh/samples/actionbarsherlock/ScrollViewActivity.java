@@ -69,7 +69,7 @@ public class ScrollViewActivity extends SherlockActivity
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Thread.sleep(4000);
+                    Thread.sleep(Constants.SIMULATED_REFRESH_LENGTH);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

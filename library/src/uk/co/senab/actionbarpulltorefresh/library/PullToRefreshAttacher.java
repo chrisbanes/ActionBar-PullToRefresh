@@ -18,6 +18,7 @@ package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;

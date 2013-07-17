@@ -62,6 +62,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     /* Member Variables */
 
+    private final Activity mActivity;
+
     private final EnvironmentDelegate mEnvironmentDelegate;
     private final HeaderTransformer mHeaderTransformer;
 
@@ -116,6 +118,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();
         }
+
+        mActivity = activity;
 
         mRefreshableViews = new WeakHashMap<View, ViewParams>();
 
@@ -222,6 +226,14 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mRefreshableViews.remove(view);
             view.setOnTouchListener(null);
         }
+    }
+
+    /**
+     * This method should be called by your Activity's or Fragment's onConfigurationChanged method.
+     * @param newConfig - The new configuration
+     */
+    public void onConfigurationChanged(Configuration newConfig) {
+        mHeaderTransformer.onViewCreated(mActivity, mHeaderView);
     }
 
     /**

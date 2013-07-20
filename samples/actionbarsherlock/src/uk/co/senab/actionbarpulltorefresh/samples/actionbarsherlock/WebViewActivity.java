@@ -24,6 +24,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
@@ -46,18 +47,22 @@ public class WebViewActivity extends SherlockActivity
         /**
          * Get ListView and give it an adapter to display the sample items
          */
-        mWebView = (WebView) findViewById(R.id.ptr_webview);
+        mWebView = (WebView) findViewById(R.id.webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new SampleWebViewClient());
 
         /**
-         * Here we create a PullToRefreshAttacher manually without an Options instance.
+         * Here we create a PullToRefreshAttacher without an Options instance.
          * PullToRefreshAttacher will manually create one using default values.
          */
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
-        // Set the Refreshable View to be the ListView and the refresh listener to be this.
-        mPullToRefreshAttacher.addRefreshableView(mWebView, this);
+        // Retrieve the PullToRefreshLayout from the content view
+        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_webview);
+
+        // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
+        // listener (this).
+        ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
 
         // Finally make the WebView load something...
         mWebView.loadUrl("http://www.google.com");

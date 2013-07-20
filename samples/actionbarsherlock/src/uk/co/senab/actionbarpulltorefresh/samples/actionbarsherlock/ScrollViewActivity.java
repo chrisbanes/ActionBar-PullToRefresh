@@ -45,7 +45,7 @@ public class ScrollViewActivity extends SherlockActivity
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Retrieve the PullToRefreshLayout from the content view
-        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_webview);
+        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
 
         // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
         // listener (this).

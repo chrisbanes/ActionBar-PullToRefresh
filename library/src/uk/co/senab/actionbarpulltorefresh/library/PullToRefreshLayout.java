@@ -59,17 +59,24 @@ public class PullToRefreshLayout extends FrameLayout {
 
         mPullToRefreshAttacher = attacher;
         if (attacher != null) {
-            attacher.addRefreshableView(mRefreshableView, refreshListener);
-            mRefreshableView.setOnTouchListener(null); // FIXME
+            attacher.addRefreshableView(mRefreshableView, null, refreshListener, false);
         }
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    public boolean onInterceptTouchEvent(MotionEvent event) {
         if (mPullToRefreshAttacher != null) {
-            mPullToRefreshAttacher.onTouch(mRefreshableView, ev);
+            return mPullToRefreshAttacher.onInterceptTouchEvent(mRefreshableView, event);
         }
-        return super.onInterceptTouchEvent(ev);
+        return super.onInterceptTouchEvent(event);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mPullToRefreshAttacher != null) {
+            return mPullToRefreshAttacher.onTouchEvent(mRefreshableView, event);
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override

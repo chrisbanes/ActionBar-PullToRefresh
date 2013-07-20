@@ -90,7 +90,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * attached to the Activity, the existing one is returned, otherwise a new instance is created.
      * This version of the method will use default configuration options for everything.
      *
-     * @param activity - Activity to attach to.
+     * @param activity Activity to attach to.
      * @return PullToRefresh attached to the Activity.
      */
     public static PullToRefreshAttacher get(Activity activity) {
@@ -101,8 +101,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Get a PullToRefreshAttacher for this Activity. If there is already a PullToRefreshAttacher
      * attached to the Activity, the existing one is returned, otherwise a new instance is created.
      *
-     * @param activity - Activity to attach to.
-     * @param options - Options used when creating the PullToRefreshAttacher.
+     * @param activity Activity to attach to.
+     * @param options Options used when creating the PullToRefreshAttacher.
      * @return PullToRefresh attached to the Activity.
      */
     public static PullToRefreshAttacher get(Activity activity, Options options) {
@@ -177,8 +177,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * when a refresh is started. This version of the method will try to find a handler for the
      * view from the built-in view delegates.
      *
-     * @param view - View which will be used to initiate refresh requests.
-     * @param refreshListener - Listener to be invoked when a refresh is started.
+     * @param view View which will be used to initiate refresh requests.
+     * @param refreshListener Listener to be invoked when a refresh is started.
      */
     public void addRefreshableView(View view, OnRefreshListener refreshListener) {
         addRefreshableView(view, null, refreshListener);
@@ -188,12 +188,26 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Add a view which will be used to initiate refresh requests, along with a delegate which
      * knows how to handle the given view, and a listener to be invoked when a refresh is started.
      *
-     * @param view - View which will be used to initiate refresh requests.
-     * @param viewDelegate - delegate which knows how to handle <code>view</code>.
-     * @param refreshListener - Listener to be invoked when a refresh is started.
+     * @param view View which will be used to initiate refresh requests.
+     * @param viewDelegate delegate which knows how to handle <code>view</code>.
+     * @param refreshListener Listener to be invoked when a refresh is started.
      */
     public void addRefreshableView(View view, ViewDelegate viewDelegate,
             OnRefreshListener refreshListener) {
+        addRefreshableView(view, viewDelegate, refreshListener, true);
+    }
+
+    /**
+     * Add a view which will be used to initiate refresh requests, along with a delegate which
+     * knows how to handle the given view, and a listener to be invoked when a refresh is started.
+     *
+     * @param view View which will be used to initiate refresh requests.
+     * @param viewDelegate delegate which knows how to handle <code>view</code>.
+     * @param refreshListener Listener to be invoked when a refresh is started.
+     * @param setTouchListener Whether to set this as the {@link android.view.View.OnTouchListener}.
+     */
+    void addRefreshableView(View view, ViewDelegate viewDelegate,
+            OnRefreshListener refreshListener, final boolean setTouchListener) {
         // Check to see if view is null
         if (view == null) {
             Log.i(LOG_TAG, "Refreshable View is null.");
@@ -214,7 +228,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // View to detect refreshes for
         mRefreshableViews.put(view, new ViewParams(viewDelegate, refreshListener));
-        view.setOnTouchListener(this);
+        if (setTouchListener) {
+            view.setOnTouchListener(this);
+        }
     }
 
     /**
@@ -299,11 +315,70 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     @Override
     public final boolean onTouch(final View view, final MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN && event.getEdgeFlags() != 0) {
+        if (!mIsHandlingTouchEvent && onInterceptTouchEvent(view, event)) {
+            mIsHandlingTouchEvent = true;
+        }
+
+        if (mIsHandlingTouchEvent) {
+            onTouchEvent(view, event);
+        }
+
+        // Always return false as we only want to observe events
+        return false;
+    }
+
+    final boolean onInterceptTouchEvent(View view, MotionEvent event) {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "onInterceptTouchEvent: " + event.toString());
+        }
+
+        // If we're not enabled or currently refreshing don't handle any touch events
+        if (!isEnabled() || isRefreshing()) {
             return false;
         }
 
-        // If we're not enabled don't handle any touch events
+        final ViewParams params = mRefreshableViews.get(view);
+        if (params == null) {
+            return false;
+        }
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_MOVE: {
+                final float y = event.getY();
+
+                // We're not currently being dragged so check to see if the user has scrolled enough
+                if (!mIsBeingDragged && (y - mInitialMotionY) > mTouchSlop) {
+                    mIsBeingDragged = true;
+                    onPullStarted(y);
+                }
+                break;
+            }
+
+            case MotionEvent.ACTION_DOWN: {
+                // If we're already refreshing, ignore
+                if (canRefresh(true, params.onRefreshListener) &&
+                        params.viewDelegate.isScrolledToTop(view)) {
+                    mInitialMotionY = event.getY();
+                }
+                break;
+            }
+
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP: {
+                resetTouch();
+                break;
+            }
+        }
+
+        return mIsBeingDragged;
+    }
+
+    final boolean onTouchEvent(View view, MotionEvent event) {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "onTouchEvent: " + event.toString());
+        }
+
+        // If we're not enabled or currently refreshing don't handle any touch events
         if (!isEnabled()) {
             return false;
         }
@@ -316,30 +391,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 // If we're already refreshing ignore it
-                if (mIsRefreshing) {
+                if (isRefreshing()) {
                     return false;
                 }
 
                 final float y = event.getY();
-
-                // As there are times when we are not given the ACTION_DOWN, we need to check here
-                // whether we should handle the event
-                if (!mIsHandlingTouchEvent) {
-                    if (canRefresh(true, params.onRefreshListener) &&
-                            params.viewDelegate.isScrolledToTop(view)) {
-                        mIsHandlingTouchEvent = true;
-                        mInitialMotionY = y;
-                    } else {
-                        // We're still not handling the event, so fail-fast
-                        return false;
-                    }
-                }
-
-                // We're not currently being dragged so check to see if the user has scrolled enough
-                if (!mIsBeingDragged && (y - mInitialMotionY) > mTouchSlop) {
-                    mIsBeingDragged = true;
-                    onPullStarted(y);
-                }
 
                 if (mIsBeingDragged) {
                     final float yDx = y - mLastMotionY;
@@ -362,16 +418,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 break;
             }
 
-            case MotionEvent.ACTION_DOWN: {
-                // If we're already refreshing, ignore
-                if (canRefresh(true, params.onRefreshListener) &&
-                        params.viewDelegate.isScrolledToTop(view)) {
-                    mIsHandlingTouchEvent = true;
-                    mInitialMotionY = event.getY();
-                }
-                break;
-            }
-
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
                 checkScrollForRefresh(view);
@@ -383,8 +429,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             }
         }
 
-        // Always return false as we only want to observe events
-        return false;
+        return true;
     }
 
     private void resetTouch() {

@@ -88,16 +88,6 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
         private ScrollView mScrollView;
 
         @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-
-            // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
-            // is to create an implicit interface instead of casting to the concrete Activity
-            mPullToRefreshAttacher = ((FragmentTabsViewPagerActivity) activity)
-                    .getPullToRefreshAttacher();
-        }
-
-        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             // Inflate the layout
@@ -105,6 +95,11 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
 
             // The ScrollView is what we'll be listening to for refresh starts
             mScrollView = (ScrollView) view.findViewById(R.id.ptr_scrollview);
+
+            // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
+            // is to create an implicit interface instead of casting to the concrete Activity
+            mPullToRefreshAttacher = ((FragmentTabsViewPagerActivity) getActivity())
+                    .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)
             mPullToRefreshAttacher.addRefreshableView(mScrollView, this);

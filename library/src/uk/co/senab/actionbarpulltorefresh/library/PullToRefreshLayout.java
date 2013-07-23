@@ -24,6 +24,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+/**
+ * FIXME
+ */
 public class PullToRefreshLayout extends FrameLayout {
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
@@ -51,21 +54,26 @@ public class PullToRefreshLayout extends FrameLayout {
         }
     }
 
+    /**
+     * Set the {@link PullToRefreshAttacher} to be used with this layout. The view which is added
+     * to this layout will automatically be added as a refreshable-view in the attacher.
+     */
     public void setPullToRefreshAttacher(PullToRefreshAttacher attacher,
             PullToRefreshAttacher.OnRefreshListener refreshListener) {
-        if (mPullToRefreshAttacher != null) {
+        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
             mPullToRefreshAttacher.removeRefreshableView(mRefreshableView);
         }
 
         mPullToRefreshAttacher = attacher;
-        if (attacher != null) {
+
+        if (attacher != null && mRefreshableView != null) {
             attacher.addRefreshableView(mRefreshableView, null, refreshListener, false);
         }
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mPullToRefreshAttacher != null) {
+        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
             return mPullToRefreshAttacher.onInterceptTouchEvent(mRefreshableView, event);
         }
         return super.onInterceptTouchEvent(event);
@@ -73,7 +81,7 @@ public class PullToRefreshLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mPullToRefreshAttacher != null) {
+        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
             return mPullToRefreshAttacher.onTouchEvent(mRefreshableView, event);
         }
         return super.onTouchEvent(event);
@@ -83,7 +91,7 @@ public class PullToRefreshLayout extends FrameLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if (mPullToRefreshAttacher != null) {
+        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
             mPullToRefreshAttacher.onConfigurationChanged(newConfig);
         }
     }

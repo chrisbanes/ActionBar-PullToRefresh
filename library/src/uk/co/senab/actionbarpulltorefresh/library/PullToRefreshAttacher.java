@@ -668,7 +668,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
     }
 
-    public static final class Options {
+    public static class Options {
         /**
          * EnvironmentDelegate instance which will be used. If null, we will create an instance of
          * the default class.

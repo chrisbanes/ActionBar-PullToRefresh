@@ -152,6 +152,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Get Window Decor View
         final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
 
+        // Check to see if there is already a Attacher view installed
+        if (decorView.getChildCount() == 1 && decorView.getChildAt(0) instanceof DecorChildLayout) {
+            throw new IllegalStateException("View already installed to DecorView. This shouldn't happen.");
+        }
+
         // Create Header view and then add to Decor View
         mHeaderView = LayoutInflater.from(mEnvironmentDelegate.getContextForInflater(activity))
                 .inflate(options.headerLayout, decorView, false);

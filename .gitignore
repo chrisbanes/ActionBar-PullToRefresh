@@ -25,5 +25,9 @@ build.xml
 local.properties
 proguard.cfg
 
+#Gradle
+.gradle
+build
+
 #OSX
 .DS_Store

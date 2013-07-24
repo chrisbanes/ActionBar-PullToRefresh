@@ -20,20 +20,32 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@id/ptr_text"
-        android:background="?android:attr/colorBackground"
+    <FrameLayout
+        android:id="@id/ptr_content"
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:gravity="center" />
+        android:layout_height="48dp">
+
+        <View
+            android:id="@id/ptr_text_opaque_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?android:attr/colorBackground"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@id/ptr_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:gravity="center" />
+
+    </FrameLayout>
 
     <ProgressBar
         android:id="@id/ptr_progress"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_marginTop="-6dp" />
+        style="@style/Widget.PullToRefresh.ProgressBar.Horizontal.Center" />
 
 </LinearLayout>
 

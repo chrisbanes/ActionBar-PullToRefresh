@@ -40,7 +40,42 @@ If the View you want to use is not listed above, you can easily add support in y
 ---
 
 ## Usage
-You just need to create an instance of `PullToRefreshAttacher`, giving it the Activity and the View for which will scroll.
+
+There are two ways to use this library.
+
+### PullToRefreshAttacher only
+
+This is the simplest method, as it's just two lines of code. You just need to create an instance of `PullToRefreshAttacher`, giving it the Activity and the View for which will scroll.
+
+``` java
+private PullToRefreshAttacher mPullToRefreshAttacher;
+
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+        
+    // Get View for which the user will scroll…
+    View scrollableView = findViewById(R.id.blah); 
+
+    // Create a PullToRefreshAttacher instance
+    mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
+
+    // Add the Refreshable View and provide the refresh listener
+    mPullToRefreshAttacher.addRefreshableView(scrollableView, this);
+}
+```
+See the [ListView](samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/ListViewActivity.java) sample for more info.
+
+### PullToRefreshLayout
+
+Using a `PullToRefreshLayout` gives the library better control over the touch events, and should be used if you find that using the above method is not working correctly.
+
+Examples of when you would use `PullToRefreshLayout` are:
+
+* Clickable view with refreshable View
+* Not being able to pull from 'empty' space within the refreshable view.
+
+The first thing you need to do is wrap your refreshable view in a `PullToRefreshLayout`:
 
 ```xml
 <uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
@@ -54,12 +89,13 @@ You just need to create an instance of `PullToRefreshAttacher`, giving it the Ac
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-        
             
     </ScrollView>
 
 </uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>
 ```
+
+Then in your Activity, get a `PullToRefreshAttacher` and give it to the `PullToRefreshLayout`, along with the `OnRefreshListener`.
 
 ``` java
 private PullToRefreshAttacher mPullToRefreshAttacher;
@@ -74,8 +110,7 @@ public void onCreate(Bundle savedInstanceState) {
     // Retrieve the PullToRefreshLayout from the content view
     PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
 
-    // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
-    // listener (this).
+    // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with a refresh listener.
     ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
     
 }

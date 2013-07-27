@@ -42,6 +42,25 @@ If the View you want to use is not listed above, you can easily add support in y
 ## Usage
 You just need to create an instance of `PullToRefreshAttacher`, giving it the Activity and the View for which will scroll.
 
+```xml
+<uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ptr_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <!-- Your content, here we're using a ScrollView -->
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        
+            
+    </ScrollView>
+
+</uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>
+```
+
 ``` java
 private PullToRefreshAttacher mPullToRefreshAttacher;
 
@@ -49,14 +68,16 @@ private PullToRefreshAttacher mPullToRefreshAttacher;
 public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
         
-    // Get View for which the user will scroll…
-    View scrollableView = findViewById(R.id.blah); 
-
     // Create a PullToRefreshAttacher instance
     mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
-    // Add the Refreshable View and provide the refresh listener
-    mPullToRefreshAttacher.addRefreshableView(scrollableView, this);
+    // Retrieve the PullToRefreshLayout from the content view
+    PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
+
+    // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
+    // listener (this).
+    ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
+    
 }
 ```
 See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/ListViewActivity.java) sample for more info.
@@ -71,64 +92,8 @@ An example is provided in the [Fragment & Tabs](https://github.com/chrisbanes/Ac
 
 ## Customisation
 
-There are many ways you can customise the pull-to-refresh experience to your needs. See the [GridView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/GridViewActivity.java) sample for more info on all of these.
+See the [Customisation](Customisation.md) page for more information.
     
-### ViewDelegate
-
-ViewDelegates provide support for handling scrollable Views. The main use of a `ViewDelegate` is to being able to tell when a scrollable view is scrolled to the top. There is currently inbuilt support for:
-
- * AbsListView classes (through [AbsListViewDelegate](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/library/src/uk/co/senab/actionbarpulltorefresh/library/viewdelegates/AbsListViewDelegate.java))
- * ScrollView (through [ScrollViewDelegate](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/library/src/uk/co/senab/actionbarpulltorefresh/library/viewdelegates/ScrollViewDelegate.java))
- * WebView (through [WebViewDelegate](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/library/src/uk/co/senab/actionbarpulltorefresh/library/viewdelegates/WebViewDelegate.java))
-
-So what if you want the view you want to use a view which isn't in the list above? Well you can just provide your own `ViewDelegate`.
-
-``` java
-// Create a PullToRefresh Attacher
-mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
-
-// Create ViewDelegate which can handle your scrollable view.
-// In this case we're creating a ficticious class
-PullToRefreshAttacher.ViewDelegate delegate = new XYZViewDelegate();
-
-// Set the Refreshable View, along with your ViewDelegate
-mPullToRefreshAttacher.setRefreshableView(xyzView, delegate, listener);
-```
-
-### Options
-When instatiating a `PullToRefreshAttacher` you can provide an `Options` instance which contains a number of configuration elements:
-
- * `headerLayout`: Layout resource to be inflated as the header view (see below).
- * `headerTransformer`: The HeaderTransformer for the heard view (see below).
- * `headerInAnimation`: The animation resource which is used when the header view is shown.
- * `headerOutAnimation`: The animation resource which is used when the header view is hidden.
- * `refreshScrollDistance`: The vertical distance (percentage of the scrollable view height) that the user needs to scroll for a refresh to start.
- * `refreshOnUp`: Whether to wait to start the refresh until when the user has lifted their finger.
-
-### HeaderTransformers
-HeaderTransformers are responsible for updating the header view to match the current state. If you do not provide a HeaderTransformer, there is a default implementation created for you called `DefaultHeaderTransformer`. This default implementation is what provides the default behaviour (growing progress bar, etc).
-
-### Customised Header View layout
-If you feel that the default header view layout does not provide what you require, you can provide your own which is inflated for you. For the majority of cases, you will probably want to provide your own `HeaderTransformer` as well, to update your custom layout.
-
-## Maven
-For the standard library (APIv14+) add the following as a dependency in you `pom.xml`:
-```
-<dependency>
-    <groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
-    <artifactId>library</artifactId>
-    <version>0.5</version>
-</dependency>
-```
-
-If you're using ActionBarSherlock (APIv7+) add the following as a dependency in you `pom.xml`:
-```
-<dependency>
-    <groupId>com.github.chrisbanes.actionbarpulltorefresh</groupId>
-    <artifactId>extra-abs</artifactId>
-    <version>0.5</version>
-</dependency>
-```
 ---
 
 ## License

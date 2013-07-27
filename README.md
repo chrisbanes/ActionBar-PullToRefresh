@@ -80,13 +80,13 @@ public void onCreate(Bundle savedInstanceState) {
     
 }
 ```
-See the [ListView](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/ListViewActivity.java) sample for more info.
+See the [ScrollView](samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/ScrollViewActivity.java) sample for more info.
 
 ### Fragments
 
 One thing to note is that the `PullToRefreshAttacher` **needs** to be created in the `onCreate()` phase of the Activity. If you plan on using this library with Fragments then the best practice is for your Activity to create the `PullToRefreshAttacher`, and then have your fragments retrieve it from the Activity.
 
-An example is provided in the [Fragment & Tabs](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/FragmentTabsActivity.java) sample.
+An example is provided in the [Fragment & Tabs](samples/stock/src/uk/co/senab/actionbarpulltorefresh/samples/stock/FragmentTabsActivity.java) sample.
 
 ---
 

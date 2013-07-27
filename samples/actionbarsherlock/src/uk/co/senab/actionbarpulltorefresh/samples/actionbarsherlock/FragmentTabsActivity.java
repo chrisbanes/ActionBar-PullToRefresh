@@ -50,7 +50,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
         setContentView(R.layout.activity_fragment_tabs);
 
         // The attacher should always be created in the Activity's onCreate
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Add 3 tabs which will switch fragments
         ActionBar ab = getSupportActionBar();
@@ -111,7 +111,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
                     .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)
-            mPullToRefreshAttacher.setRefreshableView(scrollView, this);
+            mPullToRefreshAttacher.addRefreshableView(scrollView, this);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);
@@ -133,7 +133,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
                 @Override
                 protected Void doInBackground(Void... params) {
                     try {
-                        Thread.sleep(4000);
+                        Thread.sleep(Constants.SIMULATED_REFRESH_LENGTH);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

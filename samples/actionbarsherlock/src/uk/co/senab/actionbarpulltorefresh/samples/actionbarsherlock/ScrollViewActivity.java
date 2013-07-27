@@ -25,6 +25,7 @@ import android.widget.ScrollView;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.DefaultHeaderTransformer;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
@@ -40,13 +41,15 @@ public class ScrollViewActivity extends SherlockActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrollview);
 
-        ScrollView scrollView = (ScrollView) findViewById(R.id.ptr_scrollview);
-
         // Create new PullToRefreshAttacher
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
-        // Set Refreshable View to be the ScrollView and the refresh listener to be this.
-        mPullToRefreshAttacher.setRefreshableView(scrollView, this);
+        // Retrieve the PullToRefreshLayout from the content view
+        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
+
+        // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
+        // listener (this).
+        ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
 
         // As we haven't set an explicit HeaderTransformer, we can safely cast the result of
         // getHeaderTransformer() to DefaultHeaderTransformer
@@ -69,7 +72,7 @@ public class ScrollViewActivity extends SherlockActivity
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Thread.sleep(4000);
+                    Thread.sleep(Constants.SIMULATED_REFRESH_LENGTH);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

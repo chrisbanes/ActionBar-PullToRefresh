@@ -1,0 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.4.+'
+    }
+}
+
+allprojects {
+    group = 'com.github.chrisbanes.actionbarpulltorefresh'
+    version = '0.6-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+apply plugin: 'android-reporting'

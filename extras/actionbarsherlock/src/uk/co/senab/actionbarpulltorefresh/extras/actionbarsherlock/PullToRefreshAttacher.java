@@ -29,14 +29,28 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.TypedValue;
 
+import java.util.WeakHashMap;
+
 public class PullToRefreshAttacher extends
         uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher {
 
-    public PullToRefreshAttacher(Activity activity) {
-        super(activity);
+    private static final WeakHashMap<Activity, PullToRefreshAttacher> ATTACHERS
+            = new WeakHashMap<Activity, PullToRefreshAttacher>();
+
+    public static PullToRefreshAttacher get(Activity activity) {
+        return get(activity, new Options());
     }
 
-    public PullToRefreshAttacher(Activity activity, Options options) {
+    public static PullToRefreshAttacher get(Activity activity, Options options) {
+        PullToRefreshAttacher attacher = ATTACHERS.get(activity);
+        if (attacher == null) {
+            attacher = new PullToRefreshAttacher(activity, options);
+            ATTACHERS.put(activity, attacher);
+        }
+        return attacher;
+    }
+
+    protected PullToRefreshAttacher(Activity activity, Options options) {
         super(activity, options);
     }
 

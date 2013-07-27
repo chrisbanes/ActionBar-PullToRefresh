@@ -59,10 +59,10 @@ public class ListViewActivity extends ListActivity
          * Here we create a PullToRefreshAttacher manually without an Options instance.
          * PullToRefreshAttacher will manually create one using default values.
          */
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Set the Refreshable View to be the ListView and the refresh listener to be this.
-        mPullToRefreshAttacher.setRefreshableView(listView, this);
+        mPullToRefreshAttacher.addRefreshableView(listView, this);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class ListViewActivity extends ListActivity
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Thread.sleep(4000);
+                    Thread.sleep(Constants.SIMULATED_REFRESH_LENGTH);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

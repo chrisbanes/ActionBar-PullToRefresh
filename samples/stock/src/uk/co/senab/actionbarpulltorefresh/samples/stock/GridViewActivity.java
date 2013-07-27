@@ -73,7 +73,7 @@ public class GridViewActivity extends Activity
         ptrOptions.headerTransformer = new CustomisedHeaderTransformer();
 
         // Here we create a PullToRefreshAttacher manually with the Options instance created above.
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this, ptrOptions);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this, ptrOptions);
 
         /**
          * As GridView is an AbsListView derived class, we create a new
@@ -82,7 +82,7 @@ public class GridViewActivity extends Activity
          * custom view delegate.
          */
         PullToRefreshAttacher.ViewDelegate handler = new AbsListViewDelegate();
-        mPullToRefreshAttacher.setRefreshableView(gridView, handler, this);
+        mPullToRefreshAttacher.addRefreshableView(gridView, handler, this);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class GridViewActivity extends Activity
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Thread.sleep(4000);
+                    Thread.sleep(Constants.SIMULATED_REFRESH_LENGTH);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -150,6 +150,11 @@ public class GridViewActivity extends Activity
         @Override
         public void onReleaseToRefresh() {
             mMainTextView.setText(R.string.pull_to_refresh_release_label);
+        }
+
+        @Override
+        public void onRefreshMinimized() {
+            // In this header transformer, we will ignore this call
         }
     }
 }

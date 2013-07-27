@@ -48,7 +48,7 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
         setContentView(R.layout.activity_fragment_tabs);
 
         // The attacher should always be created in the Activity's onCreate
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Add 3 tabs which will switch fragments
         ActionBar ab = getActionBar();
@@ -93,11 +93,6 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
             PullToRefreshAttacher.OnRefreshListener {
         private PullToRefreshAttacher mPullToRefreshAttacher;
 
-        // Allow Activity to pass us it's PullToRefreshAttacher
-        void setPullToRefreshAttacher(PullToRefreshAttacher attacher) {
-            mPullToRefreshAttacher = attacher;
-        }
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
@@ -113,7 +108,7 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
                     .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)
-            mPullToRefreshAttacher.setRefreshableView(scrollView, this);
+            mPullToRefreshAttacher.addRefreshableView(scrollView, this);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);
@@ -135,7 +130,7 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
                 @Override
                 protected Void doInBackground(Void... params) {
                     try {
-                        Thread.sleep(4000);
+                        Thread.sleep(Constants.SIMULATED_REFRESH_LENGTH);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

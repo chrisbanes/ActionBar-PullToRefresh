@@ -20,9 +20,9 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +55,7 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
         mFragmentTabPager = new FragmentTabPager(this, vp);
 
         // The attacher should always be created in the Activity's onCreate
-        mPullToRefreshAttacher = new PullToRefreshAttacher(this);
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Add 3 tabs which will switch fragments
         ActionBar ab = getSupportActionBar();
@@ -82,7 +82,7 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
      * Fragment Class
      */
     public static class SampleFragment extends SherlockFragment implements
-            PullToRefreshAttacher.OnRefreshListener, FragmentTabPager.Listener {
+            PullToRefreshAttacher.OnRefreshListener {
 
         private PullToRefreshAttacher mPullToRefreshAttacher;
         private ScrollView mScrollView;
@@ -95,6 +95,14 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
 
             // The ScrollView is what we'll be listening to for refresh starts
             mScrollView = (ScrollView) view.findViewById(R.id.ptr_scrollview);
+
+            // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
+            // is to create an implicit interface instead of casting to the concrete Activity
+            mPullToRefreshAttacher = ((FragmentTabsViewPagerActivity) getActivity())
+                    .getPullToRefreshAttacher();
+
+            // Now set the ScrollView as the refreshable view, and the refresh listener (this)
+            mPullToRefreshAttacher.addRefreshableView(mScrollView, this);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);
@@ -116,7 +124,7 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
                 @Override
                 protected Void doInBackground(Void... params) {
                     try {
-                        Thread.sleep(4000);
+                        Thread.sleep(Constants.SIMULATED_REFRESH_LENGTH);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -131,21 +139,6 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
                     mPullToRefreshAttacher.setRefreshComplete();
                 }
             }.execute();
-        }
-
-        /**
-         * Here we are notified that this fragment is the currently selected item in the ViewPager,
-         * so set-up the Pull-to-Refresh attacher now.
-         */
-        @Override
-        public void onPageSelected() {
-            // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
-            // is to create an implicit interface instead of casting to the concrete Activity
-            mPullToRefreshAttacher = ((FragmentTabsViewPagerActivity) getActivity())
-                    .getPullToRefreshAttacher();
-
-            // Now set the ScrollView as the refreshable view, and the refresh listener (this)
-            mPullToRefreshAttacher.setRefreshableView(mScrollView, this);
         }
     }
 }

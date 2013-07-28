@@ -604,6 +604,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         public void onRefreshStarted(View view);
     }
 
+    /**
+     * Simple helper to provide the PullToRefreshAttacher to a Fragment from it's Activity.
+     */
+    public interface PullToRefreshActivityHelper {
+        /**
+         * @return PullToRefreshAttacher retrieved from the Activity.
+         */
+        public PullToRefreshAttacher getPullToRefreshAttacher();
+    }
+
     public static abstract class HeaderTransformer {
         /**
          * Called whether the header view has been inflated from the resources defined in

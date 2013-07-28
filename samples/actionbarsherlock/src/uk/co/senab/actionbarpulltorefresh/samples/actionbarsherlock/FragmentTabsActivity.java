@@ -30,6 +30,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher.PullToRefreshActivityHelper;
 
 /**
  * A sample which show you how to use PullToRefreshAttacher with Fragments.
@@ -38,7 +39,7 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefresh
  * in {@link #onCreate(android.os.Bundle)} and then pulled in from your Fragments as necessary.
  */
 public class FragmentTabsActivity extends SherlockFragmentActivity
-        implements ActionBar.TabListener {
+        implements ActionBar.TabListener, PullToRefreshActivityHelper {
     private static String EXTRA_TITLE = "extra_title";
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
@@ -85,7 +86,8 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
     }
 
-    PullToRefreshAttacher getPullToRefreshAttacher() {
+    @Override
+    public PullToRefreshAttacher getPullToRefreshAttacher() {
         return mPullToRefreshAttacher;
     }
 
@@ -107,7 +109,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
 
             // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
             // is to create an implicit interface instead of casting to the concrete Activity
-            mPullToRefreshAttacher = ((FragmentTabsActivity) getActivity())
+            mPullToRefreshAttacher = ((PullToRefreshActivityHelper) getActivity())
                     .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)

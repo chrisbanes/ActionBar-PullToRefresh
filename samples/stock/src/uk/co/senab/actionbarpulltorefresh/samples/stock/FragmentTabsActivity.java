@@ -29,6 +29,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher.PullToRefreshActivityHelper;
 
 /**
  * A sample which show you how to use PullToRefreshAttacher with Fragments.
@@ -36,7 +37,8 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
  * The TL;DR version is that the {@link PullToRefreshAttacher} should always be created in your
  * in {@link #onCreate(android.os.Bundle)} and then pulled in from your Fragments as necessary.
  */
-public class FragmentTabsActivity extends Activity implements ActionBar.TabListener {
+public class FragmentTabsActivity extends Activity implements
+        ActionBar.TabListener, PullToRefreshActivityHelper {
     private static String EXTRA_TITLE = "extra_title";
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
@@ -82,7 +84,8 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
     }
 
-    PullToRefreshAttacher getPullToRefreshAttacher() {
+    @Override
+    public PullToRefreshAttacher getPullToRefreshAttacher() {
         return mPullToRefreshAttacher;
     }
 
@@ -104,7 +107,7 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
 
             // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
             // is to create an implicit interface instead of casting to the concrete Activity
-            mPullToRefreshAttacher = ((FragmentTabsActivity) getActivity())
+            mPullToRefreshAttacher = ((PullToRefreshActivityHelper) getActivity())
                     .getPullToRefreshAttacher();
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)

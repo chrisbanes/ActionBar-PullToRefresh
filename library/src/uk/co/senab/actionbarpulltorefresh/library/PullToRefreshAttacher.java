@@ -85,6 +85,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     private final Handler mHandler = new Handler();
 
+    private OnPullDownListener pullDownListener;
+
     /**
      * Get a PullToRefreshAttacher for this Activity. If there is already a PullToRefreshAttacher
      * attached to the Activity, the existing one is returned, otherwise a new instance is created.
@@ -392,6 +394,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
                     if (yDiff > mTouchSlop) {
                         mIsBeingDragged = true;
+                        if (pullDownListener != null) pullDownListener.onPullDown(true);
                         onPullStarted(y);
                     } else if (yDiff < -mTouchSlop) {
                         resetTouch();
@@ -480,6 +483,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     private void resetTouch() {
         mIsBeingDragged = false;
+        if (pullDownListener != null) pullDownListener.onPullDown(false);
         mIsHandlingTouchEvent = false;
         mInitialMotionY = mLastMotionY = mPullBeginY = -1f;
     }
@@ -638,6 +642,26 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * @param view - View which the user has started the refresh from.
          */
         public void onRefreshStarted(View view);
+    }
+
+    /**
+     * Simple Listener to listen if List gets pulled down
+     */
+    public interface OnPullDownListener {
+        /**
+         * Called when the user is pulling.
+         * @param pulledDown - true if users pulls down List
+         */
+        public void onPullDown(boolean pulledDown);
+    }
+
+    /**
+     * Allows you to set a PullDownListener
+     *
+     * @param pullDownListener - your OnPullDownListener
+     */
+    public void setPullDownListener(OnPullDownListener pullDownListener) {
+        this.pullDownListener = pullDownListener;
     }
 
     public static abstract class HeaderTransformer {

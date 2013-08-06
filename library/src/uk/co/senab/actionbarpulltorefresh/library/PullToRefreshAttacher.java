@@ -320,6 +320,42 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         return mHeaderTransformer;
     }
 
+    /**
+     * Allows you to set the PullText
+     *
+     * @param text - your text
+     */
+    public void setPullText(CharSequence text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setPullText(text);
+    }
+
+    /**
+     * Allows you to set the RefreshingText
+     *
+     * @param text - your text
+     */
+    public void setRefreshingText(CharSequence text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setRefreshingText(text);
+    }
+
+    /**
+     * Allows you to set the ReleaseText
+     *
+     * @param text - your text
+     */
+    public void setReleaseText(CharSequence text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setReleaseText(text);
+    }
+
+    /**
+     * Allows you to set the text color
+     *
+     * @param color - your preferred color
+     */
+    public void setTextColor(int color) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setTextColor(color);
+    }
+
     @Override
     public final boolean onTouch(final View view, final MotionEvent event) {
         if (!mIsHandlingTouchEvent && onInterceptTouchEvent(view, event)) {
@@ -667,6 +703,14 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * {@link Options#refreshMinimizeDelay}.
          */
         public abstract void onRefreshMinimized();
+
+        public abstract void setPullText(CharSequence pullText);
+
+        public abstract void setRefreshingText(CharSequence refreshingText);
+
+        public abstract void setReleaseText(CharSequence releaseText);
+
+        public abstract void setTextColor(int color);
     }
 
     /**
@@ -927,6 +971,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             } finally {
                 values.recycle();
             }
+        }
+
+        @Override
+        public void setTextColor(int color) {
+            if (mHeaderTextView != null) mHeaderTextView.setTextColor(color);
         }
     }
 

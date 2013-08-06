@@ -799,6 +799,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             Drawable abBg = getActionBarBackground(activity);
             if (abBg != null) {
+                // If we do not have a opaque background we just display a solid solid behind it
+                if (abBg.getOpacity() != PixelFormat.OPAQUE) {
+                    View view = headerView.findViewById(R.id.ptr_text_opaque_bg);
+                    if (view != null) {
+                        view.setVisibility(View.VISIBLE);
+                    }
+                }
 
                 mHeaderTextView.setBackgroundDrawable(abBg);
             }

@@ -875,6 +875,33 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             }
         }
 
+        /**
+         * Set Text to show to prompt the user is pull (or keep pulling).
+         * @param pullText - Text to display.
+         */
+        public void setPullText(CharSequence pullText) {
+            mPullRefreshLabel = pullText;
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(mPullRefreshLabel);
+            }
+        }
+
+        /**
+         * Set Text to show to tell the user that a refresh is currently in progress.
+         * @param refreshingText - Text to display.
+         */
+        public void setRefreshingText(CharSequence refreshingText) {
+            mRefreshingLabel = refreshingText;
+        }
+
+        /**
+         * Set Text to show to tell the user has scrolled enough to refresh.
+         * @param releaseText - Text to display.
+         */
+        public void setReleaseText(CharSequence releaseText) {
+            mReleaseLabel = releaseText;
+        }
+
         protected Drawable getActionBarBackground(Context context) {
             int[] android_styleable_ActionBar = { android.R.attr.background };
 

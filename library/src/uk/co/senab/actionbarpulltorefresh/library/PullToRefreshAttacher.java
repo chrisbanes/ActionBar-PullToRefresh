@@ -198,7 +198,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * @param refreshListener Listener to be invoked when a refresh is started.
      */
     public void addRefreshableView(View view, ViewDelegate viewDelegate,
-            OnRefreshListener refreshListener) {
+                                   OnRefreshListener refreshListener) {
         addRefreshableView(view, viewDelegate, refreshListener, true);
     }
 
@@ -212,7 +212,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * @param setTouchListener Whether to set this as the {@link android.view.View.OnTouchListener}.
      */
     void addRefreshableView(View view, ViewDelegate viewDelegate,
-            OnRefreshListener refreshListener, final boolean setTouchListener) {
+                            OnRefreshListener refreshListener, final boolean setTouchListener) {
         // Check to see if view is null
         if (view == null) {
             Log.i(LOG_TAG, "Refreshable View is null.");
@@ -316,6 +316,42 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public HeaderTransformer getHeaderTransformer() {
         return mHeaderTransformer;
+    }
+
+    /**
+     * Allows you to set the message for refreshLabel
+     *
+     * @param text - your message
+     */
+    public void setRefreshLabel(String text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setPullRefreshLabel(text);
+    }
+
+    /**
+     * Allows you to set the message for refreshingLabel
+     *
+     * @param text - your message
+     */
+    public void setRefreshingLabel(String text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setRefreshingLabel(text);
+    }
+
+    /**
+     * Allows you to set the message for releaseLabel
+     *
+     * @param text - your message
+     */
+    public void setReleaseLabel(String text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setReleaseLabel(text);
+    }
+
+    /**
+     * Allows you to set the text color
+     *
+     * @param color - your preferred color
+     */
+    public void setTextColor(int color) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setTextColor(color);
     }
 
     @Override
@@ -643,6 +679,14 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * {@link Options#refreshMinimizeDelay}.
          */
         public abstract void onRefreshMinimized();
+
+        public abstract void setPullRefreshLabel(String text);
+
+        public abstract void setRefreshingLabel(String text);
+
+        public abstract void setReleaseLabel(String text);
+
+        public abstract void setTextColor(int color);
     }
 
     /**
@@ -775,13 +819,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             Drawable abBg = getActionBarBackground(activity);
             if (abBg != null) {
-                // If we do not have a opaque background we just display a solid solid behind it
-                if (abBg.getOpacity() != PixelFormat.OPAQUE) {
-                    View view = headerView.findViewById(R.id.ptr_text_opaque_bg);
-                    if (view != null) {
-                        view.setVisibility(View.VISIBLE);
-                    }
-                }
 
                 mHeaderTextView.setBackgroundDrawable(abBg);
             }
@@ -904,6 +941,26 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 values.recycle();
             }
         }
+
+        @Override
+        public void setPullRefreshLabel(String text) {
+            mPullRefreshLabel = text;
+        }
+
+        @Override
+        public void setRefreshingLabel(String text) {
+            mRefreshingLabel = text;
+        }
+
+        @Override
+        public void setReleaseLabel(String text) {
+            mReleaseLabel = text;
+        }
+
+        @Override
+        public void setTextColor(int color) {
+            if (mHeaderTextView != null) mHeaderTextView.setTextColor(color);
+        }
     }
 
     /**
@@ -964,5 +1021,4 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mHeaderTransformer.onRefreshMinimized();
         }
     };
-
 }

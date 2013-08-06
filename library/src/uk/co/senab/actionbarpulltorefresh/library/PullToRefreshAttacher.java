@@ -319,30 +319,30 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
-     * Allows you to set the message for refreshLabel
+     * Allows you to set the PullText
      *
-     * @param text - your message
+     * @param text - your text
      */
-    public void setRefreshLabel(String text) {
-        if (getHeaderTransformer() != null) getHeaderTransformer().setPullRefreshLabel(text);
+    public void setPullText(CharSequence text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setPullText(text);
     }
 
     /**
-     * Allows you to set the message for refreshingLabel
+     * Allows you to set the RefreshingText
      *
-     * @param text - your message
+     * @param text - your text
      */
-    public void setRefreshingLabel(String text) {
-        if (getHeaderTransformer() != null) getHeaderTransformer().setRefreshingLabel(text);
+    public void setRefreshingText(CharSequence text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setRefreshingText(text);
     }
 
     /**
-     * Allows you to set the message for releaseLabel
+     * Allows you to set the ReleaseText
      *
-     * @param text - your message
+     * @param text - your text
      */
-    public void setReleaseLabel(String text) {
-        if (getHeaderTransformer() != null) getHeaderTransformer().setReleaseLabel(text);
+    public void setReleaseText(CharSequence text) {
+        if (getHeaderTransformer() != null) getHeaderTransformer().setReleaseText(text);
     }
 
     /**
@@ -680,11 +680,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          */
         public abstract void onRefreshMinimized();
 
-        public abstract void setPullRefreshLabel(String text);
+        public abstract void setPullText(CharSequence pullText);
 
-        public abstract void setRefreshingLabel(String text);
+        public abstract void setRefreshingText(CharSequence refreshingText);
 
-        public abstract void setReleaseLabel(String text);
+        public abstract void setReleaseText(CharSequence releaseText);
 
         public abstract void setTextColor(int color);
     }
@@ -819,6 +819,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             Drawable abBg = getActionBarBackground(activity);
             if (abBg != null) {
+                // If we do not have a opaque background we just display a solid solid behind it
+                if (abBg.getOpacity() != PixelFormat.OPAQUE) {
+                    View view = headerView.findViewById(R.id.ptr_text_opaque_bg);
+                    if (view != null) {
+                        view.setVisibility(View.VISIBLE);
+                    }
+                }
 
                 mHeaderTextView.setBackgroundDrawable(abBg);
             }
@@ -940,21 +947,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             } finally {
                 values.recycle();
             }
-        }
-
-        @Override
-        public void setPullRefreshLabel(String text) {
-            mPullRefreshLabel = text;
-        }
-
-        @Override
-        public void setRefreshingLabel(String text) {
-            mRefreshingLabel = text;
-        }
-
-        @Override
-        public void setReleaseLabel(String text) {
-            mReleaseLabel = text;
         }
 
         @Override

@@ -74,18 +74,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
 
-    private float mInitialMotionY, mLastMotionY, mPullBeginY;
+    private float mInitialMotionY, mPullBeginY, mLastMotionY = -1f;
     private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
 
     private final WeakHashMap<View, ViewParams> mRefreshableViews;
 
     private boolean mEnabled = true;
+    private boolean pullFromBottom = false;
     private boolean mRefreshOnUp;
     private int mRefreshMinimizeDelay;
 
     private final Handler mHandler = new Handler();
-
-    private OnPullDownListener pullDownListener;
 
     /**
      * Get a PullToRefreshAttacher for this Activity. If there is already a PullToRefreshAttacher
@@ -321,39 +320,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
-     * Allows you to set the PullText
+     * Allows you to pull from the bottom
      *
-     * @param text - your text
+     * @param pullFromBottom - enables pull from bottom instead of pulling down from top
      */
-    public void setPullText(CharSequence text) {
-        if (getHeaderTransformer() != null) getHeaderTransformer().setPullText(text);
-    }
-
-    /**
-     * Allows you to set the RefreshingText
-     *
-     * @param text - your text
-     */
-    public void setRefreshingText(CharSequence text) {
-        if (getHeaderTransformer() != null) getHeaderTransformer().setRefreshingText(text);
-    }
-
-    /**
-     * Allows you to set the ReleaseText
-     *
-     * @param text - your text
-     */
-    public void setReleaseText(CharSequence text) {
-        if (getHeaderTransformer() != null) getHeaderTransformer().setReleaseText(text);
-    }
-
-    /**
-     * Allows you to set the text color
-     *
-     * @param color - your preferred color
-     */
-    public void setTextColor(int color) {
-        if (getHeaderTransformer() != null) getHeaderTransformer().setTextColor(color);
+    public void setPullFromBottom(boolean pullFromBottom) {
+        this.pullFromBottom = pullFromBottom;
     }
 
     @Override
@@ -390,11 +362,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 // We're not currently being dragged so check to see if the user has scrolled enough
                 if (!mIsBeingDragged && mInitialMotionY > 0f) {
                     final float y = event.getY();
-                    final float yDiff = y - mInitialMotionY;
+                    final float yDiff = pullFromBottom ? mInitialMotionY - y : y - mInitialMotionY;
 
                     if (yDiff > mTouchSlop) {
                         mIsBeingDragged = true;
-                        if (pullDownListener != null) pullDownListener.onPullDown(true);
                         onPullStarted(y);
                     } else if (yDiff < -mTouchSlop) {
                         resetTouch();
@@ -453,10 +424,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                      * Check to see if the user is scrolling the right direction (down).
                      * We allow a small scroll up which is the check against negative touch slop.
                      */
-                    if (yDx >= -mTouchSlop) {
+                    if (pullFromBottom ? yDx <= mTouchSlop || mLastMotionY == -1f : yDx >= -mTouchSlop) {
                         onPull(view, y);
                         // Only record the y motion if the user has scrolled down.
-                        if (yDx > 0f) {
+                        if (pullFromBottom ? yDx < 0f || mLastMotionY == -1f : yDx > 0f) {
                             mLastMotionY = y;
                         }
                     } else {
@@ -483,7 +454,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     private void resetTouch() {
         mIsBeingDragged = false;
-        if (pullDownListener != null) pullDownListener.onPullDown(false);
         mIsHandlingTouchEvent = false;
         mInitialMotionY = mLastMotionY = mPullBeginY = -1f;
     }
@@ -644,26 +614,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         public void onRefreshStarted(View view);
     }
 
-    /**
-     * Simple Listener to listen if List gets pulled down
-     */
-    public interface OnPullDownListener {
-        /**
-         * Called when the user is pulling.
-         * @param pulledDown - true if users pulls down List
-         */
-        public void onPullDown(boolean pulledDown);
-    }
-
-    /**
-     * Allows you to set a PullDownListener
-     *
-     * @param pullDownListener - your OnPullDownListener
-     */
-    public void setPullDownListener(OnPullDownListener pullDownListener) {
-        this.pullDownListener = pullDownListener;
-    }
-
     public static abstract class HeaderTransformer {
         /**
          * Called whether the header view has been inflated from the resources defined in
@@ -703,14 +653,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * {@link Options#refreshMinimizeDelay}.
          */
         public abstract void onRefreshMinimized();
-
-        public abstract void setPullText(CharSequence pullText);
-
-        public abstract void setRefreshingText(CharSequence refreshingText);
-
-        public abstract void setReleaseText(CharSequence releaseText);
-
-        public abstract void setTextColor(int color);
     }
 
     /**
@@ -972,11 +914,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 values.recycle();
             }
         }
-
-        @Override
-        public void setTextColor(int color) {
-            if (mHeaderTextView != null) mHeaderTextView.setTextColor(color);
-        }
     }
 
     /**
@@ -1037,4 +974,5 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mHeaderTransformer.onRefreshMinimized();
         }
     };
+
 }

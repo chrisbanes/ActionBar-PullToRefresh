@@ -32,4 +32,12 @@ public class WebViewDelegate extends PullToRefreshAttacher.ViewDelegate {
     public boolean isScrolledToTop(View view) {
         return view.getScrollY() <= 0;
     }
+
+    @Override
+    public boolean isScrolledToBottom(View view) {
+        /**
+         * Implement this feature
+         */
+        return false;
+    }
 }

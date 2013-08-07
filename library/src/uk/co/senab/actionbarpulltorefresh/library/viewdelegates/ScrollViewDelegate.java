@@ -17,6 +17,7 @@
 package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
 
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ScrollView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
@@ -31,5 +32,13 @@ public class ScrollViewDelegate extends PullToRefreshAttacher.ViewDelegate {
     @Override
     public boolean isScrolledToTop(View view) {
         return view.getScrollY() <= 0;
+    }
+
+    @Override
+    public boolean isScrolledToBottom(View view) {
+        /**
+         * Implement this feature
+         */
+        return false;
     }
 }

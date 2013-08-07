@@ -477,7 +477,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
 
         final int pxScrollForRefresh = getScrollNeededForRefresh(view);
-        final float scrollLength = y - mPullBeginY;
+        final float scrollLength = pullFromBottom ? mPullBeginY - y : y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);

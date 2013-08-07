@@ -44,31 +44,26 @@ public class PullToRefreshLayout extends FrameLayout {
         super(context, attrs, defStyle);
     }
 
-    @Override
-    public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        if (getChildCount() == 0) {
-            super.addView(child, index, params);
-            mRefreshableView = child;
-        } else {
-            throw new IllegalArgumentException("PullToRefreshLayout can only have one child.");
-        }
-    }
-
     /**
      * Set the {@link PullToRefreshAttacher} to be used with this layout. The view which is added
      * to this layout will automatically be added as a refreshable-view in the attacher.
      */
     public void setPullToRefreshAttacher(PullToRefreshAttacher attacher,
             PullToRefreshAttacher.OnRefreshListener refreshListener) {
-        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
-            mPullToRefreshAttacher.removeRefreshableView(mRefreshableView);
+        View view;
+        for (int i = 0, z = getChildCount(); i < z; i++) {
+            view = getChildAt(0);
+
+            if (mPullToRefreshAttacher != null) {
+                mPullToRefreshAttacher.removeRefreshableView(view);
+            }
+
+            if (attacher != null) {
+                attacher.addRefreshableView(view, null, refreshListener, false);
+            }
         }
 
         mPullToRefreshAttacher = attacher;
-
-        if (attacher != null && mRefreshableView != null) {
-            attacher.addRefreshableView(mRefreshableView, null, refreshListener, false);
-        }
     }
 
     @Override

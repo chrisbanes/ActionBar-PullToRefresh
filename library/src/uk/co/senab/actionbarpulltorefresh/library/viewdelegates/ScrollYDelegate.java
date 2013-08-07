@@ -24,9 +24,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 /**
  * FIXME
  */
-public class ScrollViewDelegate extends PullToRefreshAttacher.ViewDelegate {
-
-    public static final Class SUPPORTED_VIEW_CLASS = ScrollView.class;
+public class ScrollYDelegate extends PullToRefreshAttacher.ViewDelegate {
 
     @Override
     public boolean isScrolledToTop(View view) {

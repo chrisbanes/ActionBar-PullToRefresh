@@ -40,6 +40,7 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -248,6 +249,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mRefreshableViews.remove(view);
             view.setOnTouchListener(null);
         }
+    }
+
+    /**
+     * Clear all views which were previously used to initiate refresh requests.
+     */
+    public void clearRefreshableViews() {
+        Set<View> views = mRefreshableViews.keySet();
+        for (View view : views) {
+            view.setOnTouchListener(null);
+        }
+        mRefreshableViews.clear();
     }
 
     /**

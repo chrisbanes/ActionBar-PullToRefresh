@@ -40,4 +40,32 @@ public class AbsListViewDelegate
         }
         return false;
     }
+
+    @Override
+    public boolean isScrolledToBottom(View view) {
+        AbsListView absListView = (AbsListView) view;
+        if (absListView.getCount() == 0) {
+            return true;
+        }
+
+        View last = absListView.getChildAt(absListView.getChildCount() - 1);
+        boolean atBottom = false;
+
+        if (last != null) {
+            int[] pos = new int[2];
+            int[] listPos = new int[2];
+
+            last.getLocationOnScreen(pos);
+            absListView.getLocationOnScreen(listPos);
+
+            int bottom = pos[1] + last.getMeasuredHeight();
+            int listBottom = listPos[1] + absListView.getMeasuredHeight();
+
+            if (bottom == listBottom) {
+                atBottom = true;
+            }
+        }
+
+        return atBottom;
+    }
 }

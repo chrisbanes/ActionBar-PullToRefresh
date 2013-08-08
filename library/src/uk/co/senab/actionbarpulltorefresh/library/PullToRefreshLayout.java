@@ -52,7 +52,7 @@ public class PullToRefreshLayout extends FrameLayout {
             PullToRefreshAttacher.OnRefreshListener refreshListener) {
         View view;
         for (int i = 0, z = getChildCount(); i < z; i++) {
-            view = getChildAt(0);
+            view = getChildAt(i);
 
             if (mPullToRefreshAttacher != null) {
                 mPullToRefreshAttacher.removeRefreshableView(view);

@@ -75,7 +75,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
 
-    private float mInitialMotionY, mLastMotionY, mPullBeginY;
+    private int mInitialMotionY, mLastMotionY, mPullBeginY;
     private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
 
     private final WeakHashMap<View, ViewParams> mRefreshableViews;
@@ -362,9 +362,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 // We're not currently being dragged so check to see if the user has scrolled enough
-                if (!mIsBeingDragged && mInitialMotionY > 0f) {
-                    final float y = event.getY();
-                    final float yDiff = y - mInitialMotionY;
+                if (!mIsBeingDragged && mInitialMotionY > 0) {
+                    final int y = (int) event.getY();
+                    final int yDiff = y - mInitialMotionY;
 
                     if (yDiff > mTouchSlop) {
                         mIsBeingDragged = true;
@@ -380,7 +380,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 // If we're already refreshing, ignore
                 if (canRefresh(true, params.onRefreshListener) &&
                         params.viewDelegate.isScrolledToTop(view)) {
-                    mInitialMotionY = event.getY();
+                    mInitialMotionY = (int) event.getY();
                 }
                 break;
             }
@@ -417,10 +417,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                     return false;
                 }
 
-                final float y = event.getY();
+                final int y = (int) event.getY();
 
-                if (mIsBeingDragged) {
-                    final float yDx = y - mLastMotionY;
+                if (mIsBeingDragged && y != mLastMotionY) {
+                    final int yDx = y - mLastMotionY;
 
                     /**
                      * Check to see if the user is scrolling the right direction (down).
@@ -429,7 +429,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                     if (yDx >= -mTouchSlop) {
                         onPull(view, y);
                         // Only record the y motion if the user has scrolled down.
-                        if (yDx > 0f) {
+                        if (yDx > 0) {
                             mLastMotionY = y;
                         }
                     } else {
@@ -457,10 +457,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private void resetTouch() {
         mIsBeingDragged = false;
         mIsHandlingTouchEvent = false;
-        mInitialMotionY = mLastMotionY = mPullBeginY = -1f;
+        mInitialMotionY = mLastMotionY = mPullBeginY = -1;
     }
 
-    void onPullStarted(float y) {
+    void onPullStarted(int y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPullStarted");
         }
@@ -472,13 +472,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mPullBeginY = y;
     }
 
-    void onPull(View view, float y) {
+    void onPull(View view, int y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPull");
         }
 
-        final int pxScrollForRefresh = getScrollNeededForRefresh(view);
-        final float scrollLength = y - mPullBeginY;
+        final float pxScrollForRefresh = getScrollNeededForRefresh(view);
+        final int scrollLength = y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);
@@ -554,8 +554,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         return !mIsRefreshing && (!fromTouch || listener != null);
     }
 
-    private int getScrollNeededForRefresh(View view) {
-        return Math.round(view.getHeight() * mRefreshScrollDistance);
+    private float getScrollNeededForRefresh(View view) {
+        return view.getHeight() * mRefreshScrollDistance;
     }
 
     private void reset(boolean fromTouch) {

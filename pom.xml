@@ -25,7 +25,7 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/chrisbanes/Android-BitmapCache</url>
+        <url>https://github.com/chrisbanes/ActionBar-PullToRefresh</url>
         <connection>scm:git:git://github.com/chrisbanes/ActionBar-PullToRefresh.git</connection>
         <developerConnection>scm:git:git@github.com:chrisbanes/ActionBar-PullToRefresh.git
         </developerConnection>

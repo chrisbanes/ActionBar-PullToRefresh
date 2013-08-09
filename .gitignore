@@ -3,6 +3,8 @@ bin
 gen
 gen*
 
+*.properties
+
 #Eclipse
 .project
 .classpath

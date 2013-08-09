@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat"
+    android:versionCode="060"
+    android:versionName="0.6">
+
+    <uses-sdk android:minSdkVersion="7" />
+    <application />
+</manifest> 

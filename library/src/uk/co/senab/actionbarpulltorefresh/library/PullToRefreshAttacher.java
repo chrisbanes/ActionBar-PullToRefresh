@@ -772,7 +772,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             final int min = getMinimumApiLevel();
             if (Build.VERSION.SDK_INT < min) {
                 throw new IllegalStateException("This HeaderTransformer is designed to run on SDK "
-                        + min + "+. If using ActionBarSherlock you should use the provided extra.");
+                        + min + "+. If using ActionBarSherlock or ActionBarCompat you should use the appropriate provided extra.");
             }
         }
 

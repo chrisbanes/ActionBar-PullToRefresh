@@ -768,8 +768,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
 
             mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
-            if (mContentLayout != null) {
-                mContentLayout.getLayoutParams().height = getActionBarSize(activity);
+            int actionBarSize = getActionBarSize(activity);
+            if (mContentLayout != null && actionBarSize != -1) {
+                mContentLayout.getLayoutParams().height = actionBarSize;
                 mContentLayout.requestLayout();
             }
 
@@ -899,7 +900,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             int[] attrs = { android.R.attr.actionBarSize };
             TypedArray values = context.getTheme().obtainStyledAttributes(attrs);
             try {
-                return values.getDimensionPixelSize(0, 0);
+                return values.getDimensionPixelSize(0, -1);
             } finally {
                 values.recycle();
             }

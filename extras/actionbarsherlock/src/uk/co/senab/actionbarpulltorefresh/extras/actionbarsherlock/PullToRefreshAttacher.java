@@ -125,5 +125,9 @@ public class PullToRefreshAttacher extends
             }
         }
 
+        @Override
+        protected int getMinimumApiLevel() {
+            return Build.VERSION_CODES.ECLAIR_MR1;
+        }
     }
 }

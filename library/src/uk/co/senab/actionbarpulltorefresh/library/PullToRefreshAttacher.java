@@ -768,6 +768,14 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         private final Interpolator mInterpolator = new AccelerateInterpolator();
 
+        protected DefaultHeaderTransformer() {
+            final int min = getMinimumApiLevel();
+            if (Build.VERSION.SDK_INT < min) {
+                throw new IllegalStateException("This HeaderTransformer is designed to run on SDK "
+                        + min + "+. If using ActionBarSherlock you should use the provided extra.");
+            }
+        }
+
         @Override
         public void onViewCreated(Activity activity, View headerView) {
             // Get ProgressBar and TextView. Also set initial text on TextView
@@ -915,6 +923,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             } finally {
                 values.recycle();
             }
+        }
+
+        protected int getMinimumApiLevel() {
+            return Build.VERSION_CODES.ICE_CREAM_SANDWICH;
         }
     }
 

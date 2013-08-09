@@ -1,2 +1,6 @@
 include 'library'
+include 'extras/actionbarcompat'
+include 'extras/actionbarsherlock'
 include 'samples/stock'
+include 'samples/actionbarcompat'
+include 'samples/actionbarsherlock'

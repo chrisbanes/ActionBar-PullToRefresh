@@ -1,7 +1,9 @@
-apply plugin: 'android'
+apply plugin: 'android-library'
 
 dependencies {
     compile project(':library')
+    compile 'com.android.support:support-v4:18.0.+'
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
 }
 
 android {
@@ -12,7 +14,6 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
-            res.srcDirs = ['res']
         }
     }
 }

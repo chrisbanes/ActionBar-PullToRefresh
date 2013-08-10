@@ -64,8 +64,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     /* Member Variables */
 
-    private final Activity mActivity;
-
     private final EnvironmentDelegate mEnvironmentDelegate;
     private final HeaderTransformer mHeaderTransformer;
 
@@ -121,8 +119,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             options = new Options();
         }
 
-        mActivity = activity;
-
         mRefreshableViews = new WeakHashMap<View, ViewParams>();
 
         // Copy necessary values from options
@@ -175,7 +171,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 ViewGroup.LayoutParams.MATCH_PARENT);
 
         // Notify transformer
-        mHeaderTransformer.onViewCreated(activity, mHeaderView);
+        mHeaderTransformer.onViewCreated(mHeaderView);
     }
 
     /**
@@ -267,7 +263,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * @param newConfig - The new configuration
      */
     public void onConfigurationChanged(Configuration newConfig) {
-        mHeaderTransformer.onViewCreated(mActivity, mHeaderView);
+        mHeaderTransformer.onViewCreated(mHeaderView);
     }
 
     /**
@@ -623,7 +619,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          *
          * @param headerView - inflated header view.
          */
-        public abstract void onViewCreated(Activity activity, View headerView);
+        public abstract void onViewCreated(View headerView);
 
         /**
          * Called when the header should be reset. You should update any child views to reflect this.
@@ -777,23 +773,25 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
 
         @Override
-        public void onViewCreated(Activity activity, View headerView) {
+        public void onViewCreated(View headerView) {
+            final Context context = headerView.getContext();
+
             // Get ProgressBar and TextView. Also set initial text on TextView
             mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
             mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
 
             // Labels to display
-            mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
-            mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
-            mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
+            mPullRefreshLabel = context.getString(R.string.pull_to_refresh_pull_label);
+            mRefreshingLabel = context.getString(R.string.pull_to_refresh_refreshing_label);
+            mReleaseLabel = context.getString(R.string.pull_to_refresh_release_label);
 
             mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
             if (mContentLayout != null) {
-                mContentLayout.getLayoutParams().height = getActionBarSize(activity);
+                mContentLayout.getLayoutParams().height = getActionBarSize(context);
                 mContentLayout.requestLayout();
             }
 
-            Drawable abBg = getActionBarBackground(activity);
+            Drawable abBg = getActionBarBackground(context);
             if (abBg != null) {
                 // If we do not have a opaque background we just display a solid solid behind it
                 if (abBg.getOpacity() != PixelFormat.OPAQUE) {

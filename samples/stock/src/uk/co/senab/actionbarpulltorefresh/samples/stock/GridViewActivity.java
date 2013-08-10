@@ -121,7 +121,7 @@ public class GridViewActivity extends Activity
         private TextView mProgressTextView;
 
         @Override
-        public void onViewCreated(Activity activity, View headerView) {
+        public void onViewCreated(View headerView) {
             mMainTextView = (TextView) headerView.findViewById(R.id.ptr_text);
             mProgressTextView = (TextView) headerView.findViewById(R.id.ptr_text_secondary);
         }

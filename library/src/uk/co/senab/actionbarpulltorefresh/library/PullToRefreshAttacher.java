@@ -59,9 +59,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
-    private static final WeakHashMap<Activity, PullToRefreshAttacher> ATTACHERS
-            = new WeakHashMap<Activity, PullToRefreshAttacher>();
-
     /* Member Variables */
 
     private final EnvironmentDelegate mEnvironmentDelegate;
@@ -105,12 +102,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * @return PullToRefresh attached to the Activity.
      */
     public static PullToRefreshAttacher get(Activity activity, Options options) {
-        PullToRefreshAttacher attacher = ATTACHERS.get(activity);
-        if (attacher == null) {
-            attacher = new PullToRefreshAttacher(activity, options);
-            ATTACHERS.put(activity, attacher);
-        }
-        return attacher;
+        return new PullToRefreshAttacher(activity, options);
     }
 
     protected PullToRefreshAttacher(Activity activity, Options options) {

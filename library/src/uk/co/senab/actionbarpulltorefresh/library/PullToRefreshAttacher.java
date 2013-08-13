@@ -54,6 +54,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
     private static final boolean DEFAULT_REFRESH_ON_UP = false;
     private static final int DEFAULT_REFRESH_MINIMIZED_DELAY = 3 * 1000;
+    private static final int DEFAULT_ERROR_MINIMIZED_DELAY = 3 * 1000;
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
@@ -82,6 +83,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private boolean mEnabled = true;
     private boolean mRefreshOnUp;
     private int mRefreshMinimizeDelay;
+    private int mErrorMinimizeDelay;
 
     private final Handler mHandler = new Handler();
 
@@ -128,6 +130,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mRefreshScrollDistance = options.refreshScrollDistance;
         mRefreshOnUp = options.refreshOnUp;
         mRefreshMinimizeDelay = options.refreshMinimizeDelay;
+        mErrorMinimizeDelay = options.errorMinimizeDelay;
 
         // EnvironmentDelegate
         mEnvironmentDelegate = options.environmentDelegate != null
@@ -309,6 +312,15 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public final void setRefreshComplete() {
         setRefreshingInt(null, false, false);
+    }
+
+    public final void setRefreshError() {
+        if (mIsRefreshing) {
+            mHeaderTransformer.onRefreshError();
+
+            mHandler.removeCallbacks(mRefreshMinimizeRunnable);
+            mHandler.postDelayed(mErrorMinimizeRunnable, mErrorMinimizeDelay);
+        }
     }
 
     /**
@@ -552,6 +564,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Remove any minimize callbacks
         mHandler.removeCallbacks(mRefreshMinimizeRunnable);
+        mHandler.removeCallbacks(mErrorMinimizeRunnable);
 
         if (mHeaderView.getVisibility() != View.GONE) {
             // Hide Header
@@ -643,6 +656,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * {@link Options#refreshMinimizeDelay}.
          */
         public abstract void onRefreshMinimized();
+
+        public abstract void onRefreshError();
     }
 
     /**
@@ -723,6 +738,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * a refresh is taking place.
          */
         public int refreshMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
+
+        /**
+         * The delay after an error occurs before the error message fades out.
+         */
+        public int errorMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
     }
 
     private class AnimationCallback implements Animation.AnimationListener {
@@ -748,11 +768,21 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Default Header Transformer.
      */
     public static class DefaultHeaderTransformer extends HeaderTransformer {
+        private static final int HIDDEN = 0;
+        private static final int PULLING = 1;
+        private static final int RELEASE_TO_REFRESH = 2;
+        private static final int REFRESHING = 3;
+        private static final int REFRESHING_MINIMIZED = 4;
+        private static final int ERROR = 5;
+
+
+        private int state = DefaultHeaderTransformer.HIDDEN;
+
         private ViewGroup mContentLayout;
         private TextView mHeaderTextView;
         private ProgressBar mHeaderProgressBar;
 
-        private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
+        private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel, mErrorLabel;
 
         private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -766,6 +796,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
             mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
             mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
+            mErrorLabel = activity.getString(R.string.pull_to_refresh_error_label);
 
             mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
             if (mContentLayout != null) {
@@ -792,6 +823,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         @Override
         public void onReset() {
+            state = DefaultHeaderTransformer.HIDDEN;
+
             // Reset Progress Bar
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setVisibility(View.GONE);
@@ -813,6 +846,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         @Override
         public void onPulled(float percentagePulled) {
+            state = DefaultHeaderTransformer.PULLING;
+
             if (mHeaderProgressBar != null) {
                 mHeaderProgressBar.setVisibility(View.VISIBLE);
                 final float progress = mInterpolator.getInterpolation(percentagePulled);
@@ -822,6 +857,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         @Override
         public void onRefreshStarted() {
+            state = DefaultHeaderTransformer.REFRESHING;
+
             if (mHeaderTextView != null) {
                 mHeaderTextView.setText(mRefreshingLabel);
             }
@@ -833,6 +870,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         @Override
         public void onReleaseToRefresh() {
+            state = DefaultHeaderTransformer.RELEASE_TO_REFRESH;
+
             if (mHeaderTextView != null) {
                 mHeaderTextView.setText(mReleaseLabel);
             }
@@ -843,11 +882,27 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         @Override
         public void onRefreshMinimized() {
+            state = DefaultHeaderTransformer.REFRESHING_MINIMIZED;
+
             // Here we fade out most of the header, leaving just the progress bar
             if (mContentLayout != null) {
                 mContentLayout.startAnimation(AnimationUtils
                         .loadAnimation(mContentLayout.getContext(), R.anim.fade_out));
                 mContentLayout.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        @Override
+        public void onRefreshError() {
+            state = DefaultHeaderTransformer.ERROR;
+
+            if (mHeaderTextView != null) {
+                mHeaderTextView.setText(mErrorLabel);
+            }
+            if (mHeaderProgressBar != null) {
+                mHeaderProgressBar.setVisibility(View.VISIBLE);
+                mHeaderProgressBar.setIndeterminate(false);
+                mHeaderProgressBar.setProgress(mHeaderProgressBar.getMax());
             }
         }
 
@@ -857,7 +912,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          */
         public void setPullText(CharSequence pullText) {
             mPullRefreshLabel = pullText;
-            if (mHeaderTextView != null) {
+
+            if (mHeaderTextView != null && (state == DefaultHeaderTransformer.PULLING || state == DefaultHeaderTransformer.HIDDEN)) {
                 mHeaderTextView.setText(mPullRefreshLabel);
             }
         }
@@ -868,6 +924,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          */
         public void setRefreshingText(CharSequence refreshingText) {
             mRefreshingLabel = refreshingText;
+
+            if (mHeaderTextView != null && state == DefaultHeaderTransformer.REFRESHING) {
+                mHeaderTextView.setText(mRefreshingLabel);
+            }
         }
 
         /**
@@ -876,6 +936,22 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          */
         public void setReleaseText(CharSequence releaseText) {
             mReleaseLabel = releaseText;
+
+            if (mHeaderTextView != null && state == DefaultHeaderTransformer.RELEASE_TO_REFRESH) {
+                mHeaderTextView.setText(mReleaseLabel);
+            }
+        }
+
+        /**
+         * Set Text to show to tell the user an error has occurred whilst refreshing.
+         * @param errorText - Text to display.
+         */
+        public void setErrorText(CharSequence errorText) {
+            mErrorLabel = errorText;
+
+            if (mHeaderTextView != null && state == DefaultHeaderTransformer.ERROR) {
+                mHeaderTextView.setText(mErrorLabel);
+            }
         }
 
         protected Drawable getActionBarBackground(Context context) {
@@ -965,4 +1041,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
     };
 
+    private final Runnable mErrorMinimizeRunnable = new Runnable() {
+        @Override
+        public void run()
+        {
+            reset(false);
+        }
+    };
 }

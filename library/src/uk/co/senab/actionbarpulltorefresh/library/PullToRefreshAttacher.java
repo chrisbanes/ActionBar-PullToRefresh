@@ -859,8 +859,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
         
         /**
-         * Set color to apply to the progress bar. Automatically enables usage of the custom color.
-         * Use {@link #setProgressBarColorEnabled(boolean) setProgressBarColorEnabled(boolean)} 
+         * Set color to apply to the progress bar. Automatically enables usage
+         * of the custom color. Use {@link #setProgressBarColorEnabled(boolean)} 
          * to disable and re-enable the custom color usage.
          * @param color The color to use.
          */
@@ -870,8 +870,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
         
         /**
-         * Enable or disable the use of a custom progress bar color. You can set what
-         * color to use with {@link #setProgressBarColor(int) setProgressBarColor(int)},
+         * Enable or disable the use of a custom progress bar color. You can
+         * set what color to use with {@link #setProgressBarColor(int)},
          * which also automatically enables custom color usage.
          * @param enabled
          */

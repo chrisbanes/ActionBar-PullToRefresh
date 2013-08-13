@@ -742,7 +742,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         /**
          * The delay after an error occurs before the error message fades out.
          */
-        public int errorMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
+        public int errorMinimizeDelay = DEFAULT_ERROR_MINIMIZED_DELAY;
     }
 
     private class AnimationCallback implements Animation.AnimationListener {

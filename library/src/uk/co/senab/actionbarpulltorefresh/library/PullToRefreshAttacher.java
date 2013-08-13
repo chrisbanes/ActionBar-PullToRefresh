@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -753,6 +754,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         private ProgressBar mHeaderProgressBar;
 
         private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
+        
+        private boolean mUseCustomProgressColor = false;
+        private int mProgressDrawableColor;
 
         private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -762,6 +766,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
             mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
 
+            // Apply any custom ProgressBar colors 
+            applyProgressBarColor();
+            
             // Labels to display
             mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
             mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
@@ -850,6 +857,28 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 mContentLayout.setVisibility(View.INVISIBLE);
             }
         }
+        
+        /**
+         * Set color to apply to the progress bar. Automatically enables usage of the custom color.
+         * Use {@link #setProgressBarColorEnabled(boolean) setProgressBarColorEnabled(boolean)} 
+         * to disable and re-enable the custom color usage.
+         * @param color The color to use.
+         */
+        public void setProgressBarColor(int color) {
+        	mProgressDrawableColor = color;
+        	setProgressBarColorEnabled(true);
+        }
+        
+        /**
+         * Enable or disable the use of a custom progress bar color. You can set what
+         * color to use with {@link #setProgressBarColor(int) setProgressBarColor(int)},
+         * which also automatically enables custom color usage.
+         * @param enabled
+         */
+        public void setProgressBarColorEnabled(boolean enabled) {
+        	mUseCustomProgressColor = enabled;
+        	applyProgressBarColor();
+        }
 
         /**
          * Set Text to show to prompt the user is pull (or keep pulling).
@@ -876,6 +905,19 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          */
         public void setReleaseText(CharSequence releaseText) {
             mReleaseLabel = releaseText;
+        }
+        
+        private void applyProgressBarColor() {
+        	if (mHeaderProgressBar != null) {
+        		if (mUseCustomProgressColor) {
+            		mHeaderProgressBar.getProgressDrawable().setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
+            		mHeaderProgressBar.getIndeterminateDrawable().setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
+            	}
+            	else {
+            		mHeaderProgressBar.getProgressDrawable().setColorFilter(null);
+            		mHeaderProgressBar.getIndeterminateDrawable().setColorFilter(null);
+            	}
+        	}
         }
 
         protected Drawable getActionBarBackground(Context context) {

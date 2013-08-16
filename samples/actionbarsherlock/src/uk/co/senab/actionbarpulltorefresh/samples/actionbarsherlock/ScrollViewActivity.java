@@ -21,10 +21,9 @@ import com.actionbarsherlock.app.SherlockActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ScrollView;
 
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.AbsDefaultHeaderTransformer;
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.DefaultHeaderTransformer;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
@@ -53,7 +52,7 @@ public class ScrollViewActivity extends SherlockActivity
 
         // As we haven't set an explicit HeaderTransformer, we can safely cast the result of
         // getHeaderTransformer() to DefaultHeaderTransformer
-        DefaultHeaderTransformer ht = (DefaultHeaderTransformer) mPullToRefreshAttacher
+        AbsDefaultHeaderTransformer ht = (AbsDefaultHeaderTransformer) mPullToRefreshAttacher
                 .getHeaderTransformer();
 
         // As we're using a DefaultHeaderTransformer we can change the text which is displayed.

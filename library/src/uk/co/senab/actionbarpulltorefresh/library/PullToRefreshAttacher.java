@@ -317,6 +317,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
+     * @return The Header View which is displayed when the user is pulling, or we are refreshing.
+     */
+    public final View getHeaderView() {
+        return mHeaderView;
+    }
+
+    /**
      * @return The HeaderTransformer currently used by this Attacher.
      */
     public HeaderTransformer getHeaderTransformer() {

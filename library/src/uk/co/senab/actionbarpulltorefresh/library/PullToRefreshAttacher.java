@@ -19,26 +19,18 @@ package uk.co.senab.actionbarpulltorefresh.library;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -65,6 +57,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final HeaderTransformer mHeaderTransformer;
 
     private final View mHeaderView;
+    private HeaderViewListener mHeaderViewListener;
     private final Animation mHeaderInAnimation, mHeaderOutAnimation;
 
     private final int mTouchSlop;
@@ -131,8 +124,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Create animations for use later
         mHeaderInAnimation = AnimationUtils.loadAnimation(activity, options.headerInAnimation);
         mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, options.headerOutAnimation);
-        if (mHeaderOutAnimation != null) {
-            mHeaderOutAnimation.setAnimationListener(new AnimationCallback());
+        if (mHeaderOutAnimation != null || mHeaderInAnimation != null) {
+            final AnimationCallback callback = new AnimationCallback();
+            if (mHeaderInAnimation != null) mHeaderInAnimation.setAnimationListener(callback);
+            if (mHeaderOutAnimation != null) mHeaderOutAnimation.setAnimationListener(callback);
         }
 
         // Get touch slop for use later
@@ -312,6 +307,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
+     * Set a {@link HeaderViewListener} which is called when the visibility state of the Header View
+     * has changed.
+     *
+     * @param listener
+     */
+    public final void setHeaderViewListener(HeaderViewListener listener) {
+        mHeaderViewListener = listener;
+    }
+
+    /**
      * @return The HeaderTransformer currently used by this Attacher.
      */
     public HeaderTransformer getHeaderTransformer() {
@@ -452,11 +457,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPullStarted");
         }
-        // Show Header
-        if (mHeaderInAnimation != null) {
-            mHeaderView.startAnimation(mHeaderInAnimation);
-        }
-        mHeaderView.setVisibility(View.VISIBLE);
+        showHeaderView();
         mPullBeginY = y;
     }
 
@@ -485,6 +486,42 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
         if (!mIsRefreshing) {
             reset(true);
+        }
+    }
+
+    void showHeaderView() {
+        if (mHeaderView.getVisibility() != View.VISIBLE) {
+            // Show Header
+            if (mHeaderInAnimation != null) {
+                // AnimationListener will call HeaderViewListener
+                mHeaderView.startAnimation(mHeaderInAnimation);
+            } else {
+                // Call HeaderViewListener now as we have no animation
+                if (mHeaderViewListener != null) {
+                    mHeaderViewListener
+                            .onStateChanged(mHeaderView, HeaderViewListener.STATE_VISIBLE);
+                }
+            }
+            mHeaderView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    void hideHeaderView() {
+        if (mHeaderView.getVisibility() != View.GONE) {
+            // Hide Header
+            if (mHeaderOutAnimation != null) {
+                // AnimationListener will call HeaderTransformer and HeaderViewListener
+                mHeaderView.startAnimation(mHeaderOutAnimation);
+            } else {
+                // As we're not animating, hide the header + call the header transformer now
+                mHeaderView.setVisibility(View.GONE);
+                mHeaderTransformer.onReset();
+
+                if (mHeaderViewListener != null) {
+                    mHeaderViewListener
+                            .onStateChanged(mHeaderView, HeaderViewListener.STATE_HIDDEN);
+                }
+            }
         }
     }
 
@@ -553,17 +590,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Remove any minimize callbacks
         mHandler.removeCallbacks(mRefreshMinimizeRunnable);
 
-        if (mHeaderView.getVisibility() != View.GONE) {
-            // Hide Header
-            if (mHeaderOutAnimation != null) {
-                mHeaderView.startAnimation(mHeaderOutAnimation);
-                // HeaderTransformer.onReset() is called once the animation has finished
-            } else {
-                // As we're not animating, hide the header + call the header transformer now
-                mHeaderView.setVisibility(View.GONE);
-                mHeaderTransformer.onReset();
-            }
-        }
+        // Hide Header View
+        hideHeaderView();
     }
 
     private void startRefresh(View view, boolean fromTouch) {
@@ -581,13 +609,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Call Transformer
         mHeaderTransformer.onRefreshStarted();
 
-        // Make sure header is visible.
-        if (mHeaderView.getVisibility() != View.VISIBLE) {
-            if (mHeaderInAnimation != null) {
-                mHeaderView.startAnimation(mHeaderInAnimation);
-            }
-            mHeaderView.setVisibility(View.VISIBLE);
-        }
+        // Show Header View
+        showHeaderView();
 
         // Post a delay runnable to minimize the refresh header
         mHandler.postDelayed(mRefreshMinimizeRunnable, mRefreshMinimizeDelay);
@@ -602,6 +625,21 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * @param view - View which the user has started the refresh from.
          */
         public void onRefreshStarted(View view);
+    }
+
+    public interface HeaderViewListener {
+        public static int STATE_VISIBLE = 0;
+        public static int STATE_MINIMIZED = 1;
+        public static int STATE_HIDDEN = 2;
+
+        /**
+         * Called when the visibility state of the Header View has changed.
+         *
+         * @param headerView HeaderView who's state has changed.
+         * @param state      The new state. One of {@link #STATE_VISIBLE}, {@link #STATE_MINIMIZED}
+         *                   and {@link #STATE_HIDDEN}
+         */
+        public void onStateChanged(View headerView, int state);
     }
 
     public static abstract class HeaderTransformer {
@@ -736,187 +774,20 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             if (animation == mHeaderOutAnimation) {
                 mHeaderView.setVisibility(View.GONE);
                 mHeaderTransformer.onReset();
+                if (mHeaderViewListener != null) {
+                    mHeaderViewListener
+                            .onStateChanged(mHeaderView, HeaderViewListener.STATE_VISIBLE);
+                }
+            } else if (animation == mHeaderOutAnimation) {
+                if (mHeaderViewListener != null) {
+                    mHeaderViewListener
+                            .onStateChanged(mHeaderView, HeaderViewListener.STATE_HIDDEN);
+                }
             }
         }
 
         @Override
         public void onAnimationRepeat(Animation animation) {
-        }
-    }
-
-    /**
-     * Default Header Transformer.
-     */
-    public static class DefaultHeaderTransformer extends HeaderTransformer {
-        private ViewGroup mContentLayout;
-        private TextView mHeaderTextView;
-        private ProgressBar mHeaderProgressBar;
-
-        private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
-
-        private final Interpolator mInterpolator = new AccelerateInterpolator();
-
-        protected DefaultHeaderTransformer() {
-            final int min = getMinimumApiLevel();
-            if (Build.VERSION.SDK_INT < min) {
-                throw new IllegalStateException("This HeaderTransformer is designed to run on SDK "
-                        + min + "+. If using ActionBarSherlock or ActionBarCompat you should use the appropriate provided extra.");
-            }
-        }
-
-        @Override
-        public void onViewCreated(View headerView) {
-            final Context context = headerView.getContext();
-
-            // Get ProgressBar and TextView. Also set initial text on TextView
-            mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
-            mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
-
-            // Labels to display
-            mPullRefreshLabel = context.getString(R.string.pull_to_refresh_pull_label);
-            mRefreshingLabel = context.getString(R.string.pull_to_refresh_refreshing_label);
-            mReleaseLabel = context.getString(R.string.pull_to_refresh_release_label);
-
-            mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
-            if (mContentLayout != null) {
-                mContentLayout.getLayoutParams().height = getActionBarSize(context);
-                mContentLayout.requestLayout();
-            }
-
-            Drawable abBg = getActionBarBackground(context);
-            if (abBg != null) {
-                // If we do not have a opaque background we just display a solid solid behind it
-                if (abBg.getOpacity() != PixelFormat.OPAQUE) {
-                    View view = headerView.findViewById(R.id.ptr_text_opaque_bg);
-                    if (view != null) {
-                        view.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                mHeaderTextView.setBackgroundDrawable(abBg);
-            }
-
-            // Call onReset to make sure that the View is consistent
-            onReset();
-        }
-
-        @Override
-        public void onReset() {
-            // Reset Progress Bar
-            if (mHeaderProgressBar != null) {
-                mHeaderProgressBar.setVisibility(View.GONE);
-                mHeaderProgressBar.setProgress(0);
-                mHeaderProgressBar.setIndeterminate(false);
-            }
-
-            // Reset Text View
-            if (mHeaderTextView != null) {
-                mHeaderTextView.setVisibility(View.VISIBLE);
-                mHeaderTextView.setText(mPullRefreshLabel);
-            }
-
-            // Reset the Content Layout
-            if (mContentLayout != null) {
-                mContentLayout.setVisibility(View.VISIBLE);
-            }
-        }
-
-        @Override
-        public void onPulled(float percentagePulled) {
-            if (mHeaderProgressBar != null) {
-                mHeaderProgressBar.setVisibility(View.VISIBLE);
-                final float progress = mInterpolator.getInterpolation(percentagePulled);
-                mHeaderProgressBar.setProgress(Math.round(mHeaderProgressBar.getMax() * progress));
-            }
-        }
-
-        @Override
-        public void onRefreshStarted() {
-            if (mHeaderTextView != null) {
-                mHeaderTextView.setText(mRefreshingLabel);
-            }
-            if (mHeaderProgressBar != null) {
-                mHeaderProgressBar.setVisibility(View.VISIBLE);
-                mHeaderProgressBar.setIndeterminate(true);
-            }
-        }
-
-        @Override
-        public void onReleaseToRefresh() {
-            if (mHeaderTextView != null) {
-                mHeaderTextView.setText(mReleaseLabel);
-            }
-            if (mHeaderProgressBar != null) {
-                mHeaderProgressBar.setProgress(mHeaderProgressBar.getMax());
-            }
-        }
-
-        @Override
-        public void onRefreshMinimized() {
-            // Here we fade out most of the header, leaving just the progress bar
-            if (mContentLayout != null) {
-                mContentLayout.startAnimation(AnimationUtils
-                        .loadAnimation(mContentLayout.getContext(), R.anim.fade_out));
-                mContentLayout.setVisibility(View.INVISIBLE);
-            }
-        }
-
-        /**
-         * Set Text to show to prompt the user is pull (or keep pulling).
-         * @param pullText - Text to display.
-         */
-        public void setPullText(CharSequence pullText) {
-            mPullRefreshLabel = pullText;
-            if (mHeaderTextView != null) {
-                mHeaderTextView.setText(mPullRefreshLabel);
-            }
-        }
-
-        /**
-         * Set Text to show to tell the user that a refresh is currently in progress.
-         * @param refreshingText - Text to display.
-         */
-        public void setRefreshingText(CharSequence refreshingText) {
-            mRefreshingLabel = refreshingText;
-        }
-
-        /**
-         * Set Text to show to tell the user has scrolled enough to refresh.
-         * @param releaseText - Text to display.
-         */
-        public void setReleaseText(CharSequence releaseText) {
-            mReleaseLabel = releaseText;
-        }
-
-        protected Drawable getActionBarBackground(Context context) {
-            int[] android_styleable_ActionBar = { android.R.attr.background };
-
-            // Need to get resource id of style pointed to from actionBarStyle
-            TypedValue outValue = new TypedValue();
-            context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
-            // Now get action bar style values...
-            TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
-                    android_styleable_ActionBar);
-            try {
-                // background is the first attr in the array above so it's index is 0.
-                return abStyle.getDrawable(0);
-            } finally {
-                abStyle.recycle();
-            }
-        }
-
-        protected int getActionBarSize(Context context) {
-            int[] attrs = { android.R.attr.actionBarSize };
-            TypedArray values = context.getTheme().obtainStyledAttributes(attrs);
-            try {
-                return values.getDimensionPixelSize(0, 0);
-            } finally {
-                values.recycle();
-            }
-        }
-
-        protected int getMinimumApiLevel() {
-            return Build.VERSION_CODES.ICE_CREAM_SANDWICH;
         }
     }
 
@@ -976,6 +847,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         @Override
         public void run() {
             mHeaderTransformer.onRefreshMinimized();
+
+            if (mHeaderViewListener != null) {
+                mHeaderViewListener.onStateChanged(mHeaderView, HeaderViewListener.STATE_MINIMIZED);
+            }
         }
     };
 

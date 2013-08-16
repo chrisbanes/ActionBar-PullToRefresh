@@ -63,6 +63,26 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     }
 
     @Override
+    protected int getActionBarTitleStyle(Context context) {
+        // Super handles ICS+ anyway...
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            return super.getActionBarSize(context);
+        }
+
+        // Need to get resource id of style pointed to from actionBarStyle
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.actionBarStyle, outValue, true);
+        // Now get action bar style values...
+        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+                R.styleable.ActionBar);
+        try {
+            return abStyle.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
+        } finally {
+            abStyle.recycle();
+        }
+    }
+
+    @Override
     protected int getMinimumApiLevel() {
         return Build.VERSION_CODES.ECLAIR_MR1;
     }

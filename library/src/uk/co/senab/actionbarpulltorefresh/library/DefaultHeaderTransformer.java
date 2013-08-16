@@ -82,6 +82,11 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
             mHeaderTextView.setBackgroundDrawable(abBg);
         }
 
+        final int titleTextStyle = getActionBarTitleStyle(context);
+        if (titleTextStyle != 0) {
+            mHeaderTextView.setTextAppearance(context, titleTextStyle);
+        }
+
         // Call onReset to make sure that the View is consistent
         onReset();
     }
@@ -198,6 +203,23 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
             return values.getDimensionPixelSize(0, 0);
         } finally {
             values.recycle();
+        }
+    }
+
+    protected int getActionBarTitleStyle(Context context) {
+        int[] android_styleable_ActionBar = { android.R.attr.titleTextStyle };
+
+        // Need to get resource id of style pointed to from actionBarStyle
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
+        // Now get action bar style values...
+        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+                android_styleable_ActionBar);
+        try {
+            // titleTextStyle is the first attr in the array above so it's index is 0.
+            return abStyle.getResourceId(0, 0);
+        } finally {
+            abStyle.recycle();
         }
     }
 

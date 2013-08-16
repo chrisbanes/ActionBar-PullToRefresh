@@ -447,7 +447,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         return true;
     }
 
-    private void resetTouch() {
+    void resetTouch() {
         mIsBeingDragged = false;
         mIsHandlingTouchEvent = false;
         mInitialMotionY = mLastMotionY = mPullBeginY = -1;
@@ -628,8 +628,20 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     public interface HeaderViewListener {
+        /**
+         * The state when the header view is completely visible.
+         */
         public static int STATE_VISIBLE = 0;
+
+        /**
+         * The state when the header view is minimized. By default this means that the progress bar
+         * is still visible, but the rest of the view is hidden, showing the Action Bar behind.
+         */
         public static int STATE_MINIMIZED = 1;
+
+        /**
+         * The state when the header view is completely hidden.
+         */
         public static int STATE_HIDDEN = 2;
 
         /**

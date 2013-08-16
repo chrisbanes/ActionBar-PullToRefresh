@@ -190,6 +190,15 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	}
 
 	/**
+	 * Get the header view
+	 * 
+	 * @return
+	 */
+	public View getHeaderView() {
+		return mHeaderView;
+	}
+
+	/**
 	 * Add a view which will be used to initiate refresh requests and a listener
 	 * to be invoked when a refresh is started. This version of the method will
 	 * try to find a handler for the view from the built-in view delegates.
@@ -503,7 +512,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 		// Notify HeaderViewListener
 		if (mHeaderViewListener != null)
-			mHeaderViewListener.onBecomingVisible();
+			mHeaderViewListener.onVisible();
 
 		// Show Header
 		if (mHeaderInAnimation != null) {
@@ -617,18 +626,20 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			if (mHeaderOutAnimation != null) {
 				mHeaderView.startAnimation(mHeaderOutAnimation);
 				// HeaderTransformer.onReset() is called once the animation has
-				// finished
+				// finished, also the HeaderViewListener gets informed once the
+				// animation has finished
 			} else {
 				// As we're not animating, hide the header + call the header
 				// transformer now
 				mHeaderView.setVisibility(View.GONE);
 				mHeaderTransformer.onReset();
+
+				// Notify HeaderViewListener
+				if (mHeaderViewListener != null)
+					mHeaderViewListener.onHidden();
 			}
 		}
 
-		// Notify HeaderViewListener
-		if (mHeaderViewListener != null)
-			mHeaderViewListener.onHiding();
 	}
 
 	private void startRefresh(View view, boolean fromTouch) {
@@ -669,20 +680,20 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 		/**
 		 * This method gets called to notify, that the actionbar header view is
-		 * now visible on screen. To be more precise: The "show animation" has
-		 * been started but, the animation could be running while this method
-		 * has been called
+		 * now visible on screen. To be more precise: The "in animation" has
+		 * been started. So the animation could be running while this method has
+		 * been called
 		 * 
 		 */
-		public void onBecomingVisible();
+		public void onVisible();
 
 		/**
 		 * The method gets called to notify, that the actionbar header view is
-		 * not visible anymore on screen. To be more precise: The hide animation
-		 * has been started but, the animation could be running while this
-		 * method has been called
+		 * not visible anymore on screen. To be more precise: If there is a "out
+		 * animation" this method gets called after the method animation is
+		 * finished and the header view is definetly not visible anymore
 		 */
-		public void onHiding();
+		public void onHidden();
 
 	}
 
@@ -844,6 +855,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			if (animation == mHeaderOutAnimation) {
 				mHeaderView.setVisibility(View.GONE);
 				mHeaderTransformer.onReset();
+
+				if (mHeaderViewListener != null)
+					mHeaderViewListener.onHidden();
 			}
 		}
 

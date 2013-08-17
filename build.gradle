@@ -1,4 +1,7 @@
 buildscript {
+    VERSION_NAME = '0.7-SNAPSHOT'
+    VERSION_CODE = 61
+
     repositories {
         mavenCentral()
     }
@@ -10,7 +13,7 @@ buildscript {
 
 allprojects {
     group = 'com.github.chrisbanes.actionbarpulltorefresh'
-    version = '0.6-SNAPSHOT'
+    version = VERSION_NAME
 
     repositories {
         mavenCentral()

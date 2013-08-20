@@ -646,7 +646,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		mIsRefreshing = false;
 
 		// Remove any minimize callbacks
-		mHandler.removeCallbacks(mRefreshMinimizeRunnable);
+        if (mRefreshMinimize) {
+		    mHandler.removeCallbacks(mRefreshMinimizeRunnable);
+        }
 
 		// Hide Header View
 		hideHeaderView();
@@ -671,9 +673,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		showHeaderView();
 
 		// Post a delay runnable to minimize the refresh header
-		if (mRefreshMinimize)
-			mHandler.postDelayed(mRefreshMinimizeRunnable,
-					mRefreshMinimizeDelay);
+		if (mRefreshMinimize) {
+			mHandler.postDelayed(mRefreshMinimizeRunnable, mRefreshMinimizeDelay);
+        }
 	}
 
 	/**
@@ -699,6 +701,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 * The state when the header view is minimized. By default this means
 		 * that the progress bar is still visible, but the rest of the view is
 		 * hidden, showing the Action Bar behind.
+         * <p/>
+         * This will not be called in header minimization is disabled.
 		 */
 		public static int STATE_MINIMIZED = 1;
 
@@ -854,11 +858,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		public int refreshMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
 
 		/**
-		 * Enable or disable the header 'minimization' . Set this to false if
-		 * you want that the header should never be minimized (as specified in
-		 * {@link #refreshMinimizeDelay}). So the header will be hidden at the
-		 * same time as the progress bar (after calling
-		 * {@link PullToRefreshAttacher#setRefreshComplete()}
+		 * Enable or disable the header 'minimization', which by default means that the majority of
+         * the header is hidden, leaving only the progress bar still showing.
+         * <p/>
+         * If set to true, the header will be minimized after the delay set in
+         * {@link #refreshMinimizeDelay}. If set to false then the whole header will be displayed
+         * until the refresh is finished.
 		 */
 		public boolean refreshMinimize = DEFAULT_REFRESH_MINIMIZE;
 	}

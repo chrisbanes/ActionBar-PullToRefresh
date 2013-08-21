@@ -59,6 +59,10 @@ public class ScrollViewActivity extends SherlockActivity
         // You should load these values from localised resources, but we'll just use static strings.
         ht.setPullText("Swipe Me!!!");
         ht.setRefreshingText("Refreshing :)");
+
+        // DefaultHeaderTransformer allows you to change the color of the progress bar. Here
+        // we set it to a dark holo green, loaded from our resources
+        ht.setProgressBarColor(getResources().getColor(R.color.holo_dark_green));
     }
 
     @Override

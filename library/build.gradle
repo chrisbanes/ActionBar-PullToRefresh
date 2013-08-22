@@ -1,4 +1,6 @@
 apply plugin: 'android-library'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 android {
     compileSdkVersion 18
@@ -11,4 +13,89 @@ android {
             res.srcDirs = ['res']
         }
     }
+}
+
+configurations {
+    archives {
+        extendsFrom configurations.default
+    }
+}
+
+def sonatypeRepositoryUrl
+def isDevBuild
+def isReleaseBuild
+
+if (hasProperty("release")) {
+    isReleaseBuild = true
+    sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+} else {
+    isDevBuild = true
+    version += "-SNAPSHOT"
+    sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+}
+
+signing {
+    required { has("release") && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+    configuration = configurations.archives
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: sonatypeRepositoryUrl) {
+            authentication(userName: nexusUsername, password: nexusPassword)
+        }
+
+        pom.project {
+            name 'ActionBar-PullToRefresh Library'
+            packaging 'aar'
+            description 'A modern implementation of the pull-to-refresh for Android'
+            url 'https://github.com/chrisbanes/ActionBar-PullToRefresh'
+
+            scm {
+                url 'https://github.com/chrisbanes/ActionBar-PullToRefresh'
+                connection 'scm:git@github.com:chrisbanes/ActionBar-PullToRefresh.git'
+                developerConnection 'scm:git@github.com:chrisbanes/ActionBar-PullToRefresh.git'
+            }
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'chrisbanes'
+                    name 'Chris Banes'
+                }
+            }
+        }
+    }
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.allJava
+}
+
+task androidJavadocsJar(type: Jar) {
+    classifier = 'javadoc'
+    basename = artifact_id
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    basename = artifact_id
+    from android.sourceSets.main.allSource 
+} 
+
+artifacts {
+    archives packageReleaseJar
+    archives androidSourcesJar
+    archives androidJavadocsJar
 }

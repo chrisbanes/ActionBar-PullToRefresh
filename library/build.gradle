@@ -44,7 +44,7 @@ uploadArchives {
         }
 
         pom.project {
-            name 'ActionBar-PullToRefresh Library'
+            name POM_NAME
             packaging 'aar'
             description 'A modern implementation of the pull-to-refresh for Android'
             url 'https://github.com/chrisbanes/ActionBar-PullToRefresh'
@@ -70,6 +70,8 @@ uploadArchives {
                 }
             }
         }
+
+        pom.artifactId = POM_ARTIFACT_ID
     }
 }
 

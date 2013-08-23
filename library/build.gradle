@@ -22,16 +22,11 @@ configurations {
 }
 
 def sonatypeRepositoryUrl
-def isDevBuild
-def isReleaseBuild
 
-if (hasProperty("release")) {
-    isReleaseBuild = true
-    sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-} else {
-    isDevBuild = true
-    version += "-SNAPSHOT"
+if (isReleaseBuild()) {
     sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+} else {
+    sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 }
 
 signing {
@@ -84,18 +79,18 @@ task androidJavadocs(type: Javadoc) {
 
 task androidJavadocsJar(type: Jar) {
     classifier = 'javadoc'
-    basename = artifact_id
+    //basename = artifact_id
     from androidJavadocs.destinationDir
 }
 
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
-    basename = artifact_id
+    //basename = artifact_id
     from android.sourceSets.main.allSource 
 } 
 
 artifacts {
-    archives packageReleaseJar
+    //archives packageReleaseJar
     archives androidSourcesJar
     archives androidJavadocsJar
 }

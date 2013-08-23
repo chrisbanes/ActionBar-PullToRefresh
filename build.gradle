@@ -1,8 +1,4 @@
 buildscript {
-    VERSION_NAME = '0.7-SNAPSHOT'
-    VERSION_CODE = 61
-    MAVEN_GROUP = 'com.github.chrisbanes.actionbarpulltorefresh'
-
     repositories {
         mavenCentral()
     }
@@ -10,6 +6,10 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:0.5.+'
     }
+}
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT")
 }
 
 allprojects {

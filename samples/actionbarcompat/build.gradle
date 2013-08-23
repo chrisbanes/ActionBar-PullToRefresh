@@ -9,8 +9,8 @@ android {
     buildToolsVersion '17.0.0'
     
     defaultConfig {
-        versionName VERSION_NAME
-        versionCode VERSION_CODE
+        versionName project.VERSION_NAME
+        versionCode Integer.parseInt(project.VERSION_CODE)
     }
 
     sourceSets {

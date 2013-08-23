@@ -14,7 +14,7 @@ def isReleaseBuild() {
 
 allprojects {
     version = VERSION_NAME
-    group = MAVEN_GROUP
+    group = GROUP
 
     repositories {
         mavenCentral()

@@ -2,7 +2,7 @@ apply plugin: 'android-library'
 
 android {
     compileSdkVersion 18
-    buildToolsVersion '18'
+    buildToolsVersion '17.0.0'
 
     sourceSets {
         main {
@@ -12,3 +12,5 @@ android {
         }
     }
 }
+
+apply from: '../maven_push.gradle'

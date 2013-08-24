@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock"
-    android:versionCode="050"
-    android:versionName="0.5">
+    package="uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock">
 
-    <uses-sdk android:minSdkVersion="7" />
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="18" />
     <application />
 </manifest> 

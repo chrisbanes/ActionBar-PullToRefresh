@@ -47,7 +47,7 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_fragment_tabs);
+        setContentView(R.layout.activity_fragment);
 
         // The attacher should always be created in the Activity's onCreate
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this);

@@ -36,9 +36,8 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefresh
  * A sample which show you how to use PullToRefreshAttacher with Fragments in a ViewPager.
  * <p/>
  * The TL;DR version is that the
- * {@link uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher} should
- * always be created in your in {@link #onCreate(android.os.Bundle)} and then pulled in from your
- * Fragments as necessary.
+ * {@link PullToRefreshAttacher} should always be created in your in
+ * {@link #onCreate(android.os.Bundle)} and then pulled in from your Fragments as necessary.
  */
 public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
     private static String EXTRA_TITLE = "extra_title";

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="uk.co.senab.actionbarpulltorefresh.samples.actionbarcompat">
+
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="18" />
+    <application
+        android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher"
+        android:theme="@style/Theme.AppCompat">
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ListViewActivity"
+            android:label="@string/activity_listview"
+            android:theme="@style/Theme.AppCompat.Light"/>
+
+        <activity
+            android:name=".ScrollViewActivity"
+            android:label="@string/activity_scrollview" />
+
+        <activity
+            android:name=".GridViewActivity"
+            android:label="@string/activity_gridview"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+
+        <activity
+            android:name=".WebViewActivity"
+            android:label="@string/activity_webview" />
+
+        <activity
+            android:name=".FragmentTabsActivity"
+            android:label="@string/activity_fragment_tabs"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+
+        <activity
+            android:name=".FragmentTabsViewPagerActivity"
+            android:label="@string/activity_fragment_tabs_vp"
+            android:theme="@style/Theme.AppCompat.Light"/>
+
+    </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+</manifest>

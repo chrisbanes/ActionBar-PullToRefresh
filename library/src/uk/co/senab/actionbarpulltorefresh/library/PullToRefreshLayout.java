@@ -21,7 +21,6 @@ import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 /**
@@ -30,7 +29,6 @@ import android.widget.FrameLayout;
 public class PullToRefreshLayout extends FrameLayout {
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
-    private View mRefreshableView;
 
     public PullToRefreshLayout(Context context) {
         this(context, null);
@@ -44,45 +42,40 @@ public class PullToRefreshLayout extends FrameLayout {
         super(context, attrs, defStyle);
     }
 
-    @Override
-    public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        if (getChildCount() == 0) {
-            super.addView(child, index, params);
-            mRefreshableView = child;
-        } else {
-            throw new IllegalArgumentException("PullToRefreshLayout can only have one child.");
-        }
-    }
-
     /**
      * Set the {@link PullToRefreshAttacher} to be used with this layout. The view which is added
      * to this layout will automatically be added as a refreshable-view in the attacher.
      */
     public void setPullToRefreshAttacher(PullToRefreshAttacher attacher,
             PullToRefreshAttacher.OnRefreshListener refreshListener) {
-        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
-            mPullToRefreshAttacher.removeRefreshableView(mRefreshableView);
+        View view;
+        for (int i = 0, z = getChildCount(); i < z; i++) {
+            view = getChildAt(i);
+
+            if (mPullToRefreshAttacher != null) {
+                mPullToRefreshAttacher.removeRefreshableView(view);
+            }
+
+            if (attacher != null) {
+                attacher.addRefreshableView(view, null, refreshListener, false);
+            }
         }
 
         mPullToRefreshAttacher = attacher;
-
-        if (attacher != null && mRefreshableView != null) {
-            attacher.addRefreshableView(mRefreshableView, null, refreshListener, false);
-        }
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
-            return mPullToRefreshAttacher.onInterceptTouchEvent(mRefreshableView, event);
+        if (mPullToRefreshAttacher != null && getChildCount() > 0) {
+            return mPullToRefreshAttacher.onInterceptTouchEvent(getChildAt(0), event);
         }
         return super.onInterceptTouchEvent(event);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
-            return mPullToRefreshAttacher.onTouchEvent(mRefreshableView, event);
+        if (mPullToRefreshAttacher != null && getChildCount() > 0) {
+            return mPullToRefreshAttacher.onTouchEvent(getChildAt(0), event);
         }
         return super.onTouchEvent(event);
     }
@@ -91,7 +84,7 @@ public class PullToRefreshLayout extends FrameLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if (mPullToRefreshAttacher != null && mRefreshableView != null) {
+        if (mPullToRefreshAttacher != null) {
             mPullToRefreshAttacher.onConfigurationChanged(newConfig);
         }
     }

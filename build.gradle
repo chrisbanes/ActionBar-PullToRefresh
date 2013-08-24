@@ -4,13 +4,17 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.4.+'
+        classpath 'com.android.tools.build:gradle:0.5.+'
     }
 }
 
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
 allprojects {
-    group = 'com.github.chrisbanes.actionbarpulltorefresh'
-    version = '0.6-SNAPSHOT'
+    version = VERSION_NAME
+    group = GROUP
 
     repositories {
         mavenCentral()

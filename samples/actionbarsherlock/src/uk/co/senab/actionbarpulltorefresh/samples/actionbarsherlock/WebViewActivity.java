@@ -29,8 +29,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
  * {@link android.webkit.WebView WebView}, and manually creating (and attaching) a
- * {@link uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher} to
- * the view.
+ * {@link PullToRefreshAttacher} to the view.
  */
 public class WebViewActivity extends SherlockActivity
         implements PullToRefreshAttacher.OnRefreshListener {

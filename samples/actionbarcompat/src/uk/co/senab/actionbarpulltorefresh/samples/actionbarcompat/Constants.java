@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
+package uk.co.senab.actionbarpulltorefresh.samples.actionbarcompat;
 
-import android.view.View;
-import android.widget.ScrollView;
+public class Constants {
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+    public static final int SIMULATED_REFRESH_LENGTH = 5000;
 
-/**
- * FIXME
- */
-public class ScrollViewDelegate extends PullToRefreshAttacher.ViewDelegate {
-
-    public static final Class SUPPORTED_VIEW_CLASS = ScrollView.class;
-
-    @Override
-    public boolean isScrolledToTop(View view) {
-        return view.getScrollY() <= 0;
-    }
 }

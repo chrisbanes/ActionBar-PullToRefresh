@@ -7,7 +7,7 @@ There are many ways you can customise the pull-to-refresh experience to your nee
 ViewDelegates provide support for handling scrollable Views. The main use of a `ViewDelegate` is to being able to tell when a scrollable view is scrolled to the top. There is currently inbuilt support for:
 
  * AbsListView classes (through [AbsListViewDelegate](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/library/src/uk/co/senab/actionbarpulltorefresh/library/viewdelegates/AbsListViewDelegate.java))
- * ScrollView (through [ScrollViewDelegate](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/library/src/uk/co/senab/actionbarpulltorefresh/library/viewdelegates/ScrollViewDelegate.java))
+ * ScrollView (through [ScrollYDelegate](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/library/src/uk/co/senab/actionbarpulltorefresh/library/viewdelegates/ScrollYDelegate.java))
  * WebView (through [WebViewDelegate](https://github.com/chrisbanes/ActionBar-PullToRefresh/blob/master/library/src/uk/co/senab/actionbarpulltorefresh/library/viewdelegates/WebViewDelegate.java))
 
 So what if you want the view you want to use a view which isn't in the list above? Well you can just provide your own `ViewDelegate`.
@@ -33,6 +33,8 @@ When instatiating a `PullToRefreshAttacher` you can provide an `Options` instanc
  * `headerOutAnimation`: The animation resource which is used when the header view is hidden.
  * `refreshScrollDistance`: The vertical distance (percentage of the scrollable view height) that the user needs to scroll for a refresh to start.
  * `refreshOnUp`: Whether to wait to start the refresh until when the user has lifted their finger.
+ * `refreshMinimize`: Whether to minimize the header so that the Action Bar isn't hidden for a long refresh.
+ * `refreshMinimizeDelay`: The delay after a refresh starts after which the header should be minimized.
 
 ### HeaderTransformers
 HeaderTransformers are responsible for updating the header view to match the current state. If you do not provide a HeaderTransformer, there is a default implementation created for you called `DefaultHeaderTransformer`. This default implementation is what provides the default behaviour (growing progress bar, etc).

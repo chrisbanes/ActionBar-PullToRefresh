@@ -129,6 +129,22 @@ An example is provided in the [Fragment & Tabs](samples/stock/src/uk/co/senab/ac
 
 See the [Customisation](Customisation.md) page for more information.
 
+## Gradle
+
+Action Bar is now pushed to Maven Central as a AAR, so you just need to add the following dependency to your `build.gradle`.
+    
+    dependencies {
+        compile 'com.github.chrisbanes.actionbarpulltorefresh:library:0.7'
+    }
+    
+Or if you are using one of the ActionBarSherlock or ActionBarCompat extras, you would use the following:
+
+    dependencies {
+        // Use ONE of the following, depending on which library you are using
+        compile 'com.github.chrisbanes.actionbarpulltorefresh:extra-abc:0.7'
+        compile 'com.github.chrisbanes.actionbarpulltorefresh:extra-abs:0.7'
+    }
+
 ## License
 
     Copyright 2013 Chris Banes

@@ -31,3 +31,6 @@ build
 
 #OSX
 .DS_Store
+
+#Personal Files
+signing.properties

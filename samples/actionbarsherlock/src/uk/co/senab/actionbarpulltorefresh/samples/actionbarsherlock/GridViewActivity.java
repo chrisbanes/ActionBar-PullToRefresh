@@ -123,7 +123,7 @@ public class GridViewActivity extends SherlockActivity
         private TextView mProgressTextView;
 
         @Override
-        public void onViewCreated(View headerView) {
+        public void onViewCreated(Activity activity, View headerView) {
             mMainTextView = (TextView) headerView.findViewById(R.id.ptr_text);
             mProgressTextView = (TextView) headerView.findViewById(R.id.ptr_text_secondary);
         }

@@ -16,6 +16,7 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
@@ -57,7 +58,7 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     }
 
     @Override
-    public void onViewCreated(View headerView) {
+    public void onViewCreated(Activity activity, View headerView) {
         final Context context = headerView.getContext();
 
         // Get ProgressBar and TextView. Also set initial text on TextView
@@ -78,7 +79,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
             mContentLayout.requestLayout();
         }
 
-        Drawable abBg = getActionBarBackground(context);
+        // Make sure to use the Activity's theme rather than the Action Bar's. See #93.
+        Drawable abBg = getActionBarBackground(activity);
         if (abBg != null) {
             // If we do not have a opaque background we just display a solid solid behind it
             if (abBg.getOpacity() != PixelFormat.OPAQUE) {

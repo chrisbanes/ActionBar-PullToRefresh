@@ -175,6 +175,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 				ViewGroup.LayoutParams.MATCH_PARENT);
 
 		// Notify transformer
+        mHeaderTransformer.onViewCreated(activity, mHeaderView);
+        // TODO Remove the follow deprecated method call before v1.0
 		mHeaderTransformer.onViewCreated(mHeaderView);
 	}
 
@@ -724,14 +726,21 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	}
 
 	public static abstract class HeaderTransformer {
+
+        /**
+         * Called whether the header view has been inflated from the resources
+         * defined in {@link Options#headerLayout}.
+         *
+         * @param activity The {@link Activity} that the header view is attached to.
+         * @param headerView The inflated header view.
+         */
+        public void onViewCreated(Activity activity, View headerView) {}
+
 		/**
-		 * Called whether the header view has been inflated from the resources
-		 * defined in {@link Options#headerLayout}.
-		 * 
-		 * @param headerView
-		 *            - inflated header view.
+		 * @deprecated This will be removed before v1.0. Override
+         * {@link #onViewCreated(android.app.Activity, android.view.View)} instead.
 		 */
-		public abstract void onViewCreated(View headerView);
+		public void onViewCreated(View headerView) {}
 
 		/**
 		 * Called when the header should be reset. You should update any child
@@ -740,7 +749,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 * You should <strong>not</strong> change the visibility of the header
 		 * view.
 		 */
-		public abstract void onReset();
+		public void onReset() {}
 
 		/**
 		 * Called the user has pulled on the scrollable view.
@@ -749,27 +758,27 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 *            - value between 0.0f and 1.0f depending on how far the
 		 *            user has pulled.
 		 */
-		public abstract void onPulled(float percentagePulled);
+		public void onPulled(float percentagePulled) {}
 
 		/**
 		 * Called when a refresh has begun. Theoretically this call is similar
 		 * to that provided from {@link OnRefreshListener} but is more suitable
 		 * for header view updates.
 		 */
-		public abstract void onRefreshStarted();
+		public void onRefreshStarted() {}
 
 		/**
 		 * Called when a refresh can be initiated when the user ends the touch
 		 * event. This is only called when {@link Options#refreshOnUp} is set to
 		 * true.
 		 */
-		public abstract void onReleaseToRefresh();
+		public void onReleaseToRefresh() {}
 
 		/**
 		 * Called when the current refresh has taken longer than the time
 		 * specified in {@link Options#refreshMinimizeDelay}.
 		 */
-		public abstract void onRefreshMinimized();
+		public void onRefreshMinimized() {}
 	}
 
 	/**

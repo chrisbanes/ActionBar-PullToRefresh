@@ -881,12 +881,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 				mHeaderTransformer.onReset();
 				if (mHeaderViewListener != null) {
 					mHeaderViewListener.onStateChanged(mHeaderView,
-							HeaderViewListener.STATE_VISIBLE);
+							HeaderViewListener.STATE_HIDDEN);
 				}
-			} else if (animation == mHeaderOutAnimation) {
+			} else if (animation == mHeaderInAnimation) {
 				if (mHeaderViewListener != null) {
 					mHeaderViewListener.onStateChanged(mHeaderView,
-							HeaderViewListener.STATE_HIDDEN);
+							HeaderViewListener.STATE_VISIBLE);
 				}
 			}
 		}

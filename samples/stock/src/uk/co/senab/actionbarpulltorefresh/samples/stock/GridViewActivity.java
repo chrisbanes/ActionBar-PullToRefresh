@@ -61,10 +61,6 @@ public class GridViewActivity extends Activity
         // Here we make the refresh scroll distance to 75% of the GridView height
         ptrOptions.refreshScrollDistance = 0.75f;
 
-        // Here we customise the animations which are used when showing/hiding the header view
-        ptrOptions.headerInAnimation = R.anim.slide_in_top;
-        ptrOptions.headerOutAnimation = R.anim.slide_out_top;
-
         // Here we define a custom header layout which will be inflated and used
         ptrOptions.headerLayout = R.layout.customised_header;
 
@@ -117,11 +113,13 @@ public class GridViewActivity extends Activity
      */
     static class CustomisedHeaderTransformer extends PullToRefreshAttacher.HeaderTransformer {
 
+        private View mHeaderView;
         private TextView mMainTextView;
         private TextView mProgressTextView;
 
         @Override
         public void onViewCreated(Activity activity, View headerView) {
+            mHeaderView = headerView;
             mMainTextView = (TextView) headerView.findViewById(R.id.ptr_text);
             mProgressTextView = (TextView) headerView.findViewById(R.id.ptr_text_secondary);
         }
@@ -155,6 +153,16 @@ public class GridViewActivity extends Activity
         @Override
         public void onRefreshMinimized() {
             // In this header transformer, we will ignore this call
+        }
+
+        @Override
+        public void showHeaderView() {
+            mHeaderView.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void hideHeaderView() {
+            mHeaderView.setVisibility(View.GONE);
         }
     }
 }

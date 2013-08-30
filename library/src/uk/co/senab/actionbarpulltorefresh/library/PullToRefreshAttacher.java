@@ -16,9 +16,6 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -31,9 +28,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * FIXME
@@ -42,8 +40,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 	/* Default configuration values */
 	private static final int DEFAULT_HEADER_LAYOUT = R.layout.default_header;
-	private static final int DEFAULT_ANIM_HEADER_IN = R.anim.fade_in;
-	private static final int DEFAULT_ANIM_HEADER_OUT = R.anim.fade_out;
 	private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
 	private static final boolean DEFAULT_REFRESH_ON_UP = false;
 	private static final int DEFAULT_REFRESH_MINIMIZED_DELAY = 3 * 1000;
@@ -59,7 +55,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 	private final View mHeaderView;
 	private HeaderViewListener mHeaderViewListener;
-	private final Animation mHeaderInAnimation, mHeaderOutAnimation;
 
 	private final int mTouchSlop;
 	private final float mRefreshScrollDistance;
@@ -126,19 +121,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		// Header Transformer
 		mHeaderTransformer = options.headerTransformer != null ? options.headerTransformer
 				: createDefaultHeaderTransformer();
-
-		// Create animations for use later
-		mHeaderInAnimation = AnimationUtils.loadAnimation(activity,
-				options.headerInAnimation);
-		mHeaderOutAnimation = AnimationUtils.loadAnimation(activity,
-				options.headerOutAnimation);
-		if (mHeaderOutAnimation != null || mHeaderInAnimation != null) {
-			final AnimationCallback callback = new AnimationCallback();
-			if (mHeaderInAnimation != null)
-				mHeaderInAnimation.setAnimationListener(callback);
-			if (mHeaderOutAnimation != null)
-				mHeaderOutAnimation.setAnimationListener(callback);
-		}
 
 		// Get touch slop for use later
 		mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
@@ -546,38 +528,24 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	void showHeaderView() {
 		if (mHeaderView.getVisibility() != View.VISIBLE) {
 			// Show Header
-			if (mHeaderInAnimation != null) {
-				// AnimationListener will call HeaderViewListener
-				mHeaderView.startAnimation(mHeaderInAnimation);
-			} else {
-				// Call HeaderViewListener now as we have no animation
-				if (mHeaderViewListener != null) {
-					mHeaderViewListener.onStateChanged(mHeaderView,
-							HeaderViewListener.STATE_VISIBLE);
-				}
-			}
-			mHeaderView.setVisibility(View.VISIBLE);
+            mHeaderTransformer.showHeaderView();
+
+            if (mHeaderViewListener != null) {
+                mHeaderViewListener.onStateChanged(mHeaderView,
+                        HeaderViewListener.STATE_VISIBLE);
+            }
 		}
 	}
 
 	void hideHeaderView() {
 		if (mHeaderView.getVisibility() != View.GONE) {
 			// Hide Header
-			if (mHeaderOutAnimation != null) {
-				// AnimationListener will call HeaderTransformer and
-				// HeaderViewListener
-				mHeaderView.startAnimation(mHeaderOutAnimation);
-			} else {
-				// As we're not animating, hide the header + call the header
-				// transformer now
-				mHeaderView.setVisibility(View.GONE);
-				mHeaderTransformer.onReset();
+            mHeaderTransformer.hideHeaderView();
 
-				if (mHeaderViewListener != null) {
-					mHeaderViewListener.onStateChanged(mHeaderView,
-							HeaderViewListener.STATE_HIDDEN);
-				}
-			}
+            if (mHeaderViewListener != null) {
+                mHeaderViewListener.onStateChanged(mHeaderView,
+                        HeaderViewListener.STATE_HIDDEN);
+            }
 		}
 	}
 
@@ -779,6 +747,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 * specified in {@link Options#refreshMinimizeDelay}.
 		 */
 		public void onRefreshMinimized() {}
+
+        public abstract void showHeaderView();
+
+        public abstract void hideHeaderView();
 	}
 
 	/**
@@ -836,18 +808,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		public HeaderTransformer headerTransformer = null;
 
 		/**
-		 * The anim resource ID which should be started when the header is being
-		 * hidden.
-		 */
-		public int headerOutAnimation = DEFAULT_ANIM_HEADER_OUT;
-
-		/**
-		 * The anim resource ID which should be started when the header is being
-		 * shown.
-		 */
-		public int headerInAnimation = DEFAULT_ANIM_HEADER_IN;
-
-		/**
 		 * The percentage of the refreshable view that needs to be scrolled
 		 * before a refresh is initiated.
 		 */
@@ -875,34 +835,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * until the refresh is finished.
 		 */
 		public boolean refreshMinimize = DEFAULT_REFRESH_MINIMIZE;
-	}
-
-	private class AnimationCallback implements Animation.AnimationListener {
-
-		@Override
-		public void onAnimationStart(Animation animation) {
-		}
-
-		@Override
-		public void onAnimationEnd(Animation animation) {
-			if (animation == mHeaderOutAnimation) {
-				mHeaderView.setVisibility(View.GONE);
-				mHeaderTransformer.onReset();
-				if (mHeaderViewListener != null) {
-					mHeaderViewListener.onStateChanged(mHeaderView,
-							HeaderViewListener.STATE_HIDDEN);
-				}
-			} else if (animation == mHeaderInAnimation) {
-				if (mHeaderViewListener != null) {
-					mHeaderViewListener.onStateChanged(mHeaderView,
-							HeaderViewListener.STATE_VISIBLE);
-				}
-			}
-		}
-
-		@Override
-		public void onAnimationRepeat(Animation animation) {
-		}
 	}
 
 	/**

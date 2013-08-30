@@ -37,6 +37,7 @@ import android.widget.TextView;
  */
 public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransformer {
 
+    protected View mHeaderView;
     private ViewGroup mContentLayout;
     private TextView mHeaderTextView;
     private ProgressBar mHeaderProgressBar;
@@ -59,6 +60,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
     @Override
     public void onViewCreated(Activity activity, View headerView) {
+        mHeaderView = headerView;
+
         // Get ProgressBar and TextView. Also set initial text on TextView
         mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
         mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
@@ -162,6 +165,16 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
                     .loadAnimation(mContentLayout.getContext(), R.anim.fade_out));
             mContentLayout.setVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    public void showHeaderView() {
+        mHeaderView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideHeaderView() {
+        mHeaderView.setVisibility(View.GONE);
     }
 
     /**

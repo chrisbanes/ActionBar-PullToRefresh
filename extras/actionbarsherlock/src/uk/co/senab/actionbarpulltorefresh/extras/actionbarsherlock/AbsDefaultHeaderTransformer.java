@@ -16,15 +16,37 @@
 
 package uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import uk.co.senab.actionbarpulltorefresh.library.DefaultHeaderTransformer;
 
 public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
+
+    private Animation mHeaderInAnimation, mHeaderOutAnimation;
+
+    @Override
+    public void onViewCreated(Activity activity, View headerView) {
+        super.onViewCreated(activity, headerView);
+
+        // Create animations for use later
+        mHeaderInAnimation = AnimationUtils.loadAnimation(activity, R.anim.fade_in);
+        mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, R.anim.fade_out);
+
+        if (mHeaderOutAnimation != null || mHeaderInAnimation != null) {
+            final AnimationCallback callback = new AnimationCallback();
+            if (mHeaderOutAnimation != null) {
+                mHeaderOutAnimation.setAnimationListener(callback);
+            }
+        }
+    }
 
     @Override
     protected Drawable getActionBarBackground(Context context) {
@@ -83,7 +105,67 @@ public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
     }
 
     @Override
+    public void showHeaderView() {
+        // Super handles ICS+ anyway...
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            super.showHeaderView();
+            return;
+        }
+
+        if (mHeaderView.getVisibility() != View.VISIBLE) {
+            // Show Header
+            if (mHeaderInAnimation != null) {
+                // AnimationListener will call HeaderViewListener
+                mHeaderView.startAnimation(mHeaderInAnimation);
+            }
+            mHeaderView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void hideHeaderView() {
+        // Super handles ICS+ anyway...
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            super.hideHeaderView();
+            return;
+        }
+
+        if (mHeaderView.getVisibility() != View.GONE) {
+            // Hide Header
+            if (mHeaderOutAnimation != null) {
+                // AnimationListener will call HeaderTransformer and
+                // HeaderViewListener
+                mHeaderView.startAnimation(mHeaderOutAnimation);
+            } else {
+                // As we're not animating, hide the header + call the header
+                // transformer now
+                mHeaderView.setVisibility(View.GONE);
+                onReset();
+            }
+        }
+    }
+
+    @Override
     protected int getMinimumApiLevel() {
         return Build.VERSION_CODES.ECLAIR_MR1;
+    }
+
+    class AnimationCallback implements Animation.AnimationListener {
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+            if (animation == mHeaderOutAnimation) {
+                mHeaderView.setVisibility(View.GONE);
+                onReset();
+            }
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+        }
     }
 }

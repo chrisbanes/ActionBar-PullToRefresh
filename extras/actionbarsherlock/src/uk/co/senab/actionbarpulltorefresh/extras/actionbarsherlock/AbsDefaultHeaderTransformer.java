@@ -112,13 +112,14 @@ public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
             return;
         }
 
-        if (mHeaderView.getVisibility() != View.VISIBLE) {
+        final View headerView = getHeaderView();
+        if (headerView != null && headerView.getVisibility() != View.VISIBLE) {
             // Show Header
             if (mHeaderInAnimation != null) {
                 // AnimationListener will call HeaderViewListener
-                mHeaderView.startAnimation(mHeaderInAnimation);
+                headerView.startAnimation(mHeaderInAnimation);
             }
-            mHeaderView.setVisibility(View.VISIBLE);
+            headerView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -130,16 +131,17 @@ public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
             return;
         }
 
-        if (mHeaderView.getVisibility() != View.GONE) {
+        final View headerView = getHeaderView();
+        if (headerView != null && headerView.getVisibility() != View.GONE) {
             // Hide Header
             if (mHeaderOutAnimation != null) {
                 // AnimationListener will call HeaderTransformer and
                 // HeaderViewListener
-                mHeaderView.startAnimation(mHeaderOutAnimation);
+                headerView.startAnimation(mHeaderOutAnimation);
             } else {
                 // As we're not animating, hide the header + call the header
                 // transformer now
-                mHeaderView.setVisibility(View.GONE);
+                headerView.setVisibility(View.GONE);
                 onReset();
             }
         }
@@ -159,7 +161,10 @@ public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
         @Override
         public void onAnimationEnd(Animation animation) {
             if (animation == mHeaderOutAnimation) {
-                mHeaderView.setVisibility(View.GONE);
+                View headerView = getHeaderView();
+                if (headerView != null) {
+                    headerView.setVisibility(View.GONE);
+                }
                 onReset();
             }
         }

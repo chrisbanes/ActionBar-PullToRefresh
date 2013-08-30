@@ -37,7 +37,7 @@ import android.widget.TextView;
  */
 public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransformer {
 
-    protected View mHeaderView;
+    private View mHeaderView;
     private ViewGroup mContentLayout;
     private TextView mHeaderTextView;
     private ProgressBar mHeaderProgressBar;
@@ -165,6 +165,10 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
                     .loadAnimation(mContentLayout.getContext(), R.anim.fade_out));
             mContentLayout.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public View getHeaderView() {
+        return mHeaderView;
     }
 
     @Override

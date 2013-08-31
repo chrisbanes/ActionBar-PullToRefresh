@@ -66,7 +66,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     protected int getActionBarTitleStyle(Context context) {
         // Super handles ICS+ anyway...
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            return super.getActionBarSize(context);
+            return super.getActionBarTitleStyle(context);
         }
 
         // Need to get resource id of style pointed to from actionBarStyle

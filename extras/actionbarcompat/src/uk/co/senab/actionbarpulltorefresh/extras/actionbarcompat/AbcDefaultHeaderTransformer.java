@@ -51,7 +51,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     protected Drawable getActionBarBackground(Context context) {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.getActionBarBackground(context);
         }
 
@@ -71,7 +71,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     protected int getActionBarSize(Context context) {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.getActionBarSize(context);
         }
 
@@ -87,7 +87,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     protected int getActionBarTitleStyle(Context context) {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.getActionBarTitleStyle(context);
         }
 
@@ -107,7 +107,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     public boolean showHeaderView() {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.showHeaderView();
         }
 
@@ -127,7 +127,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     public boolean hideHeaderView() {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.hideHeaderView();
         }
 
@@ -147,6 +147,23 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
             }
         }
         return changeVis;
+    }
+
+    @Override
+    public void onRefreshMinimized() {
+        // Super handles ICS+ anyway...
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
+            super.onRefreshMinimized();
+            return;
+        }
+
+        // Here we fade out most of the header, leaving just the progress bar
+        View contentLayout = getHeaderView().findViewById(R.id.ptr_content);
+        if (contentLayout != null) {
+            contentLayout.startAnimation(AnimationUtils
+                    .loadAnimation(contentLayout.getContext(), R.anim.fade_out));
+            contentLayout.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

@@ -35,6 +35,8 @@ import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import uk.co.senab.actionbarpulltorefresh.library.platform.SDK11;
+
 /**
  * Default Header Transformer.
  */
@@ -130,7 +132,9 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
         // Reset the Content Layout
         if (mContentLayout != null) {
             mContentLayout.setVisibility(View.VISIBLE);
-            mContentLayout.setAlpha(1f);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                SDK11.setAlpha(mContentLayout, 1f);
+            }
         }
     }
 

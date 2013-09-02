@@ -18,6 +18,7 @@ package uk.co.senab.actionbarpulltorefresh.library;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
@@ -30,7 +31,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
@@ -180,15 +180,17 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
     @Override
     public boolean showHeaderView() {
-        boolean changeVis = mHeaderView.getVisibility() != View.VISIBLE;
+        final boolean changeVis = mHeaderView.getVisibility() != View.VISIBLE;
 
         if (changeVis) {
-            mHeaderView.setTranslationY(-mHeaderView.getHeight());
             mHeaderView.setVisibility(View.VISIBLE);
-            ObjectAnimator anim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
+            AnimatorSet animSet = new AnimatorSet();
+            ObjectAnimator transAnim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
                     -mHeaderView.getHeight(), 0f);
-            anim.setDuration(mAnimationDuration);
-            anim.start();
+            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mHeaderView, "alpha", 0f, 1f);
+            animSet.playTogether(transAnim, alphaAnim);
+            animSet.setDuration(mAnimationDuration);
+            animSet.start();
         }
 
         return changeVis;
@@ -196,15 +198,17 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
     @Override
     public boolean hideHeaderView() {
-        boolean changeVis = mHeaderView.getVisibility() != View.GONE;
+        final boolean changeVis = mHeaderView.getVisibility() != View.GONE;
 
         if (changeVis) {
-            mHeaderView.setTranslationY(0f);
-            ObjectAnimator anim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
+            AnimatorSet animSet = new AnimatorSet();
+            ObjectAnimator transAnim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
                     0f, -mHeaderView.getHeight());
-            anim.addListener(new HideAnimationCallback());
-            anim.setDuration(mAnimationDuration);
-            anim.start();
+            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mHeaderView, "alpha", 1f, 0f);
+            animSet.playTogether(transAnim, alphaAnim);
+            animSet.setDuration(mAnimationDuration);
+            animSet.addListener(new HideAnimationCallback());
+            animSet.start();
         }
 
         return changeVis;

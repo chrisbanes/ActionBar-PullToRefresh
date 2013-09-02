@@ -16,6 +16,9 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -27,6 +30,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
@@ -46,6 +50,7 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
     private boolean mUseCustomProgressColor = false;
     private int mProgressDrawableColor;
+    private long mAnimationDuration;
 
     private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -94,6 +99,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
             mHeaderTextView.setBackgroundDrawable(abBg);
         }
+
+        mAnimationDuration = activity.getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         // Retrieve the Action Bar Title Style from the Action Bar's theme
         Context abContext = headerView.getContext();
@@ -173,14 +180,34 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
     @Override
     public boolean showHeaderView() {
-        mHeaderView.setVisibility(View.VISIBLE);
-        return true;
+        boolean changeVis = mHeaderView.getVisibility() != View.VISIBLE;
+
+        if (changeVis) {
+            mHeaderView.setTranslationY(-mHeaderView.getHeight());
+            mHeaderView.setVisibility(View.VISIBLE);
+            ObjectAnimator anim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
+                    -mHeaderView.getHeight(), 0f);
+            anim.setDuration(mAnimationDuration);
+            anim.start();
+        }
+
+        return changeVis;
     }
 
     @Override
     public boolean hideHeaderView() {
-        mHeaderView.setVisibility(View.GONE);
-        return true;
+        boolean changeVis = mHeaderView.getVisibility() != View.GONE;
+
+        if (changeVis) {
+            mHeaderView.setTranslationY(0f);
+            ObjectAnimator anim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
+                    0f, -mHeaderView.getHeight());
+            anim.addListener(new HideAnimationCallback());
+            anim.setDuration(mAnimationDuration);
+            anim.start();
+        }
+
+        return changeVis;
     }
 
     /**
@@ -297,5 +324,16 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
     protected int getMinimumApiLevel() {
         return Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+    }
+
+    class HideAnimationCallback extends AnimatorListenerAdapter {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            View headerView = getHeaderView();
+            if (headerView != null) {
+                headerView.setVisibility(View.GONE);
+            }
+            onReset();
+        }
     }
 }

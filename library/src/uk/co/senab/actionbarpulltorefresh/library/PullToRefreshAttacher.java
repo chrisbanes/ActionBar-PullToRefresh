@@ -144,7 +144,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			throw new IllegalArgumentException(
 					"Must supply valid layout id for header.");
 		}
-		mHeaderView.setVisibility(View.GONE);
+        // Make Header View invisible so it still gets a layout pass
+		mHeaderView.setVisibility(View.INVISIBLE);
 
 		// Create DecorChildLayout which will move all of the system's decor
 		// view's children + the

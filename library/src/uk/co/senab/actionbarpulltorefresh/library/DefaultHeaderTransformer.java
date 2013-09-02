@@ -31,7 +31,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -131,6 +130,7 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
         // Reset the Content Layout
         if (mContentLayout != null) {
             mContentLayout.setVisibility(View.VISIBLE);
+            mContentLayout.setAlpha(1f);
         }
     }
 
@@ -168,9 +168,7 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     public void onRefreshMinimized() {
         // Here we fade out most of the header, leaving just the progress bar
         if (mContentLayout != null) {
-            mContentLayout.startAnimation(AnimationUtils
-                    .loadAnimation(mContentLayout.getContext(), R.anim.fade_out));
-            mContentLayout.setVisibility(View.INVISIBLE);
+            ObjectAnimator.ofFloat(mContentLayout, "alpha", 1f, 0f).start();
         }
     }
 
@@ -201,14 +199,21 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
         final boolean changeVis = mHeaderView.getVisibility() != View.GONE;
 
         if (changeVis) {
-            AnimatorSet animSet = new AnimatorSet();
-            ObjectAnimator transAnim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
-                    0f, -mHeaderView.getHeight());
-            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mHeaderView, "alpha", 1f, 0f);
-            animSet.playTogether(transAnim, alphaAnim);
-            animSet.setDuration(mAnimationDuration);
-            animSet.addListener(new HideAnimationCallback());
-            animSet.start();
+            Animator animator;
+            if (mContentLayout.getAlpha() >= 0.1f) {
+                // If the content layout is showing, translate and fade out
+                animator = new AnimatorSet();
+                ObjectAnimator transAnim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
+                        0f, -mHeaderView.getHeight());
+                ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mHeaderView, "alpha", 1f, 0f);
+                ((AnimatorSet) animator).playTogether(transAnim, alphaAnim);
+            } else {
+                // If the content layout isn't showing (minimized), just fade out
+                animator = ObjectAnimator.ofFloat(mHeaderView, "alpha", 1f, 0f);
+            }
+            animator.setDuration(mAnimationDuration);
+            animator.addListener(new HideAnimationCallback());
+            animator.start();
         }
 
         return changeVis;

@@ -156,13 +156,21 @@ public class GridViewActivity extends Activity
         }
 
         @Override
-        public void showHeaderView() {
-            mHeaderView.setVisibility(View.VISIBLE);
+        public boolean showHeaderView() {
+            final boolean changeVis = mHeaderView.getVisibility() != View.VISIBLE;
+            if (changeVis) {
+                mHeaderView.setVisibility(View.VISIBLE);
+            }
+            return changeVis;
         }
 
         @Override
-        public void hideHeaderView() {
-            mHeaderView.setVisibility(View.GONE);
+        public boolean hideHeaderView() {
+            final boolean changeVis = mHeaderView.getVisibility() != View.GONE;
+            if (changeVis) {
+                mHeaderView.setVisibility(View.GONE);
+            }
+            return changeVis;
         }
     }
 }

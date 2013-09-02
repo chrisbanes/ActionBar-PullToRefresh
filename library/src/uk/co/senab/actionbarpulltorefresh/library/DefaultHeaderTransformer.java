@@ -183,8 +183,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
         if (changeVis) {
             mHeaderView.setVisibility(View.VISIBLE);
             AnimatorSet animSet = new AnimatorSet();
-            ObjectAnimator transAnim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
-                    -mHeaderView.getHeight(), 0f);
+            ObjectAnimator transAnim = ObjectAnimator.ofFloat(mContentLayout, "translationY",
+                    -mContentLayout.getHeight(), 0f);
             ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mHeaderView, "alpha", 0f, 1f);
             animSet.playTogether(transAnim, alphaAnim);
             animSet.setDuration(mAnimationDuration);
@@ -200,11 +200,11 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
         if (changeVis) {
             Animator animator;
-            if (mContentLayout.getAlpha() >= 0.1f) {
+            if (mContentLayout.getAlpha() >= 0.5f) {
                 // If the content layout is showing, translate and fade out
                 animator = new AnimatorSet();
-                ObjectAnimator transAnim = ObjectAnimator.ofFloat(mHeaderView, "translationY",
-                        0f, -mHeaderView.getHeight());
+                ObjectAnimator transAnim = ObjectAnimator.ofFloat(mContentLayout, "translationY",
+                        0f, -mContentLayout.getHeight());
                 ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mHeaderView, "alpha", 1f, 0f);
                 ((AnimatorSet) animator).playTogether(transAnim, alphaAnim);
             } else {

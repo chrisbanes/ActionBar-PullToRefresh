@@ -526,10 +526,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	}
 
 	void showHeaderView() {
-		if (mHeaderView.getVisibility() != View.VISIBLE) {
-			// Show Header
-            mHeaderTransformer.showHeaderView();
-
+		if (mHeaderTransformer.showHeaderView()) {
             if (mHeaderViewListener != null) {
                 mHeaderViewListener.onStateChanged(mHeaderView,
                         HeaderViewListener.STATE_VISIBLE);
@@ -538,10 +535,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	}
 
 	void hideHeaderView() {
-		if (mHeaderView.getVisibility() != View.GONE) {
-			// Hide Header
-            mHeaderTransformer.hideHeaderView();
-
+		if (mHeaderTransformer.hideHeaderView()) {
             if (mHeaderViewListener != null) {
                 mHeaderViewListener.onStateChanged(mHeaderView,
                         HeaderViewListener.STATE_HIDDEN);
@@ -748,9 +742,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 */
 		public void onRefreshMinimized() {}
 
-        public abstract void showHeaderView();
+        public abstract boolean showHeaderView();
 
-        public abstract void hideHeaderView();
+        public abstract boolean hideHeaderView();
 	}
 
 	/**

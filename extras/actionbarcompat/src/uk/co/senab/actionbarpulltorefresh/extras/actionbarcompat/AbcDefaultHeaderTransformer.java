@@ -105,15 +105,15 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     }
 
     @Override
-    public void showHeaderView() {
+    public boolean showHeaderView() {
         // Super handles ICS+ anyway...
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            super.showHeaderView();
-            return;
+            return super.showHeaderView();
         }
 
         final View headerView = getHeaderView();
-        if (headerView != null && headerView.getVisibility() != View.VISIBLE) {
+        final boolean changeVis = headerView != null && headerView.getVisibility() != View.VISIBLE;
+        if (changeVis) {
             // Show Header
             if (mHeaderInAnimation != null) {
                 // AnimationListener will call HeaderViewListener
@@ -121,18 +121,19 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
             }
             headerView.setVisibility(View.VISIBLE);
         }
+        return changeVis;
     }
 
     @Override
-    public void hideHeaderView() {
+    public boolean hideHeaderView() {
         // Super handles ICS+ anyway...
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            super.hideHeaderView();
-            return;
+            return super.hideHeaderView();
         }
 
         final View headerView = getHeaderView();
-        if (headerView != null && headerView.getVisibility() != View.GONE) {
+        final boolean changeVis = headerView != null && headerView.getVisibility() != View.GONE;
+        if (changeVis) {
             // Hide Header
             if (mHeaderOutAnimation != null) {
                 // AnimationListener will call HeaderTransformer and
@@ -145,6 +146,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
                 onReset();
             }
         }
+        return changeVis;
     }
 
     @Override

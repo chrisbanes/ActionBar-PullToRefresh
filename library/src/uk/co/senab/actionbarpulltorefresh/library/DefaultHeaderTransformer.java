@@ -172,13 +172,15 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     }
 
     @Override
-    public void showHeaderView() {
+    public boolean showHeaderView() {
         mHeaderView.setVisibility(View.VISIBLE);
+        return true;
     }
 
     @Override
-    public void hideHeaderView() {
+    public boolean hideHeaderView() {
         mHeaderView.setVisibility(View.GONE);
+        return true;
     }
 
     /**

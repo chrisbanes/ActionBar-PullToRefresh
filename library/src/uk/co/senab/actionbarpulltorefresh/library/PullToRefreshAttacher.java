@@ -133,7 +133,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		if (decorView.getChildCount() == 1
 				&& decorView.getChildAt(0) instanceof DecorChildLayout) {
 			throw new IllegalStateException(
-					"View already installed to DecorView. This shouldn't happen.");
+					"You should only create one PullToRefreshAttacher per Activity");
 		}
 
 		// Create Header view and then add to Decor View

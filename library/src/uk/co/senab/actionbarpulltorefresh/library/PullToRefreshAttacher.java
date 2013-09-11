@@ -562,8 +562,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		return false;
 	}
 
-	private void setRefreshingInt(View view, boolean refreshing,
-			boolean fromTouch) {
+	private void setRefreshingInt(View view, boolean refreshing, boolean fromTouch) {
 		if (DEBUG) {
 			Log.d(LOG_TAG, "setRefreshingInt: " + refreshing);
 		}
@@ -574,8 +573,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 		resetTouch();
 
-		if (refreshing
-				&& canRefresh(fromTouch, getRefreshListenerForView(view))) {
+		if (refreshing && canRefresh(fromTouch, getRefreshListenerForView(view))) {
 			startRefresh(view, fromTouch);
 		} else {
 			reset(fromTouch);
@@ -688,6 +686,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		public void onStateChanged(View headerView, int state);
 	}
 
+    /**
+     * HeaderTransformers are what controls and update the Header View to reflect the current state
+     * of the pull-to-refresh interaction. They are responsible for showing and hiding the header
+     * view, as well as update the state.
+     */
 	public static abstract class HeaderTransformer {
 
         /**
@@ -743,13 +746,24 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 */
 		public void onRefreshMinimized() {}
 
+        /**
+         * Called when the Header View should be made visible, usually with an animation.
+         *
+         * @return true if the visibility has changed.
+         */
         public abstract boolean showHeaderView();
 
+        /**
+         * Called when the Header View should be made invisible, usually with an animation.
+         *
+         * @return true if the visibility has changed.
+         */
         public abstract boolean hideHeaderView();
 	}
 
 	/**
-	 * FIXME
+	 * ViewDelegates are what are used to de-couple the Attacher from the different types of
+     * scrollable views.
 	 */
 	public static abstract class ViewDelegate {
 
@@ -766,7 +780,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	}
 
 	/**
-	 * FIXME
+	 * This is used to provide platform and environment specific functionality for the Attacher.
 	 */
 	public static class EnvironmentDelegate {
 
@@ -782,6 +796,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		}
 	}
 
+    /**
+     * Allows you to specify a number of configuration options when instantiating a
+     * {@link PullToRefreshAttacher}. Used with {@link #get(Activity, Options) get()}.
+     */
 	public static class Options {
 
 		/**

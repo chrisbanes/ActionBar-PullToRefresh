@@ -90,15 +90,12 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
         // Retrieve the Action Bar background from the Activity's theme (see #93).
         Drawable abBg = getActionBarBackground(activity);
         if (abBg != null) {
-            // If we do not have a opaque background we just display a solid solid behind it
-            if (abBg.getOpacity() != PixelFormat.OPAQUE) {
-                View view = headerView.findViewById(R.id.ptr_text_opaque_bg);
-                if (view != null) {
-                    view.setVisibility(View.VISIBLE);
-                }
-            }
-
             mHeaderTextView.setBackgroundDrawable(abBg);
+
+            // If we have an opaque background we can remove the background from the content layout
+            if (mContentLayout != null && abBg.getOpacity() == PixelFormat.OPAQUE) {
+                mContentLayout.setBackgroundResource(0);
+            }
         }
 
         mAnimationDuration = activity.getResources().getInteger(android.R.integer.config_shortAnimTime);

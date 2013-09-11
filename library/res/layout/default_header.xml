@@ -23,14 +23,8 @@
     <FrameLayout
         android:id="@id/ptr_content"
         android:layout_width="match_parent"
-        android:layout_height="48dp">
-
-        <View
-            android:id="@id/ptr_text_opaque_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?android:attr/colorBackground"
-            android:visibility="gone" />
+        android:layout_height="48dp"
+        android:background="?android:attr/colorBackground">
 
         <TextView
             android:id="@id/ptr_text"

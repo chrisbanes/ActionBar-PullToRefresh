@@ -22,6 +22,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -68,47 +69,29 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     public void onViewCreated(Activity activity, View headerView) {
         mHeaderView = headerView;
 
-        // Get ProgressBar and TextView. Also set initial text on TextView
+        // Get ProgressBar and TextView
         mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
         mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
-
-        // Apply any custom ProgressBar colors
-        applyProgressBarColor();
+        mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
 
         // Labels to display
         mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
         mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
         mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
 
-        // Retrieve the Action Bar size from the Activity's theme
-        mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
-        if (mContentLayout != null) {
-            mContentLayout.getLayoutParams().height = getActionBarSize(activity);
-            mContentLayout.requestLayout();
-        }
+        mAnimationDuration = activity.getResources()
+                .getInteger(android.R.integer.config_shortAnimTime);
 
-        // Retrieve the Action Bar background from the Activity's theme (see #93).
-        Drawable abBg = getActionBarBackground(activity);
-        if (abBg != null) {
-            mHeaderTextView.setBackgroundDrawable(abBg);
+        // Apply any custom ProgressBar colors
+        applyProgressBarColor();
 
-            // If we have an opaque background we can remove the background from the content layout
-            if (mContentLayout != null && abBg.getOpacity() == PixelFormat.OPAQUE) {
-                mContentLayout.setBackgroundResource(0);
-            }
-        }
+        // Finally setup the View styles
+        setupViewsFromStyles(activity, headerView);
+    }
 
-        mAnimationDuration = activity.getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        // Retrieve the Action Bar Title Style from the Action Bar's theme
-        Context abContext = headerView.getContext();
-        final int titleTextStyle = getActionBarTitleStyle(abContext);
-        if (titleTextStyle != 0) {
-            mHeaderTextView.setTextAppearance(abContext, titleTextStyle);
-        }
-
-        // Call onReset to make sure that the View is consistent
-        onReset();
+    @Override
+    public void onConfigurationChanged(Activity activity, Configuration newConfig) {
+        setupViewsFromStyles(activity, getHeaderView());
     }
 
     @Override
@@ -272,6 +255,32 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
      */
     public void setReleaseText(CharSequence releaseText) {
         mReleaseLabel = releaseText;
+    }
+
+    private void setupViewsFromStyles(Activity activity, View headerView) {
+        // Retrieve the Action Bar size from the Activity's theme
+        if (mContentLayout != null) {
+            mContentLayout.getLayoutParams().height = getActionBarSize(activity);
+            mContentLayout.requestLayout();
+        }
+
+        // Retrieve the Action Bar background from the Activity's theme (see #93).
+        Drawable abBg = getActionBarBackground(activity);
+        if (abBg != null) {
+            mHeaderTextView.setBackgroundDrawable(abBg);
+
+            // If we have an opaque background we can remove the background from the content layout
+            if (mContentLayout != null && abBg.getOpacity() == PixelFormat.OPAQUE) {
+                mContentLayout.setBackgroundResource(0);
+            }
+        }
+
+        // Retrieve the Action Bar Title Style from the Action Bar's theme
+        Context abContext = headerView.getContext();
+        final int titleTextStyle = getActionBarTitleStyle(abContext);
+        if (titleTextStyle != 0) {
+            mHeaderTextView.setTextAppearance(abContext, titleTextStyle);
+        }
     }
 
     private void applyProgressBarColor() {

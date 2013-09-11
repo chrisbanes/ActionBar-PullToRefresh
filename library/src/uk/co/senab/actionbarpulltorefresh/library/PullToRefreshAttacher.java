@@ -53,6 +53,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	private final EnvironmentDelegate mEnvironmentDelegate;
 	private final HeaderTransformer mHeaderTransformer;
 
+    private final Activity mActivity;
 	private final View mHeaderView;
 	private HeaderViewListener mHeaderViewListener;
 
@@ -106,6 +107,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			options = new Options();
 		}
 
+        mActivity = activity;
 		mRefreshableViews = new WeakHashMap<View, ViewParams>();
 
 		// Copy necessary values from options
@@ -267,11 +269,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	 * This method should be called by your Activity's or Fragment's
 	 * onConfigurationChanged method.
 	 * 
-	 * @param newConfig
-	 *            - The new configuration
+	 * @param newConfig The new configuration
 	 */
 	public void onConfigurationChanged(Configuration newConfig) {
-		mHeaderTransformer.onViewCreated(mHeaderView);
+		mHeaderTransformer.onConfigurationChanged(mActivity, newConfig);
 	}
 
 	/**
@@ -719,11 +720,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 		/**
 		 * Called the user has pulled on the scrollable view.
-		 * 
-		 * @param percentagePulled
-		 *            - value between 0.0f and 1.0f depending on how far the
-		 *            user has pulled.
-		 */
+		 *
+         * @param percentagePulled value between 0.0f and 1.0f depending on how far the
+         *                         user has pulled.
+         */
 		public void onPulled(float percentagePulled) {}
 
 		/**
@@ -759,6 +759,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * @return true if the visibility has changed.
          */
         public abstract boolean hideHeaderView();
+
+        /**
+         * Called when the Activity's configuration has changed.
+         *
+         * @param activity The {@link Activity} that the header view is attached to.
+         * @param newConfig New configuration.
+         *
+         * @see android.app.Activity#onConfigurationChanged(android.content.res.Configuration)
+         */
+        public void onConfigurationChanged(Activity activity, Configuration newConfig) {}
 	}
 
 	/**

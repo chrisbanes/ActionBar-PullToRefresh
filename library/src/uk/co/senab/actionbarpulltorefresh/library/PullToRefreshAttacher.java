@@ -387,39 +387,39 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			return false;
 		}
 
-		switch (event.getAction()) {
-		case MotionEvent.ACTION_MOVE: {
-			// We're not currently being dragged so check to see if the user has
-			// scrolled enough
-			if (!mIsBeingDragged && mInitialMotionY > 0) {
-				final int y = (int) event.getY();
-				final int yDiff = y - mInitialMotionY;
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_MOVE: {
+                // We're not currently being dragged so check to see if the user has
+                // scrolled enough
+                if (!mIsBeingDragged && mInitialMotionY > 0) {
+                    final int y = (int) event.getY();
+                    final int yDiff = y - mInitialMotionY;
 
-				if (yDiff > mTouchSlop) {
-					mIsBeingDragged = true;
-					onPullStarted(y);
-				} else if (yDiff < -mTouchSlop) {
-					resetTouch();
-				}
-			}
-			break;
-		}
+                    if (yDiff > mTouchSlop) {
+                        mIsBeingDragged = true;
+                        onPullStarted(y);
+                    } else if (yDiff < -mTouchSlop) {
+                        resetTouch();
+                    }
+                }
+                break;
+            }
 
-		case MotionEvent.ACTION_DOWN: {
-			// If we're already refreshing, ignore
-			if (canRefresh(true, params.onRefreshListener)
-					&& params.viewDelegate.isScrolledToTop(view)) {
-				mInitialMotionY = (int) event.getY();
-			}
-			break;
-		}
+            case MotionEvent.ACTION_DOWN: {
+                // If we're already refreshing, ignore
+                if (canRefresh(true, params.onRefreshListener)
+                        && params.viewDelegate.isScrolledToTop(view)) {
+                    mInitialMotionY = (int) event.getY();
+                }
+                break;
+            }
 
-		case MotionEvent.ACTION_CANCEL:
-		case MotionEvent.ACTION_UP: {
-			resetTouch();
-			break;
-		}
-		}
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP: {
+                resetTouch();
+                break;
+            }
+        }
 
 		return mIsBeingDragged;
 	}

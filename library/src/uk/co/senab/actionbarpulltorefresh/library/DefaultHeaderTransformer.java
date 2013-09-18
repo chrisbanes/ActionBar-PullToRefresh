@@ -87,6 +87,9 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
         // Finally setup the View styles
         setupViewsFromStyles(activity, headerView);
+
+        // FIXME: I do not like this call here
+        onReset();
     }
 
     @Override

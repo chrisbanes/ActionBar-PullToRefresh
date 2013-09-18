@@ -33,6 +33,7 @@ public class PullToRefreshLayout extends FrameLayout {
     private static final String LOG_TAG = "PullToRefreshLayout";
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
+    private View mCurrentTouchTarget;
 
     public PullToRefreshLayout(Context context) {
         this(context, null);
@@ -74,12 +75,14 @@ public class PullToRefreshLayout extends FrameLayout {
         if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. " + event.toString());
 
         if (mPullToRefreshAttacher != null && getChildCount() > 0) {
-            View touchTarget = getChildForTouchEvent(event.getX(), event.getY());
-            if (touchTarget != null && mPullToRefreshAttacher
-                    .onInterceptTouchEvent(touchTarget, event)) {
+            View target = getChildForTouchEvent(event);
+            if (target != null && mPullToRefreshAttacher.onInterceptTouchEvent(target, event)) {
+                mCurrentTouchTarget = target;
                 return true;
             }
         }
+        // Reset Current Touch Target
+        mCurrentTouchTarget = null;
         return false;
     }
 
@@ -88,9 +91,20 @@ public class PullToRefreshLayout extends FrameLayout {
         if (DEBUG) Log.d(LOG_TAG, "onTouchEvent. " + event.toString());
 
         if (mPullToRefreshAttacher != null) {
-            View touchTarget = getChildForTouchEvent(event.getX(), event.getY());
-            return mPullToRefreshAttacher.onTouchEvent(touchTarget, event);
+            // This is an edge-case. If the ViewGroup does not contain a valid touch target then
+            // Android calls onTouchEvent after onInterceptTouchEvent with ACTION_DOWN event.
+            // If that happens then we need to find the visible view and pass it to the attacher as
+            // usual.
+            if (mCurrentTouchTarget == null && event.getAction() == MotionEvent.ACTION_DOWN) {
+                mCurrentTouchTarget = getChildForTouchEvent(event);
+            }
+
+            if (mCurrentTouchTarget != null) {
+                return mPullToRefreshAttacher.onTouchEvent(mCurrentTouchTarget, event);
+            }
         }
+        // Reset Current Touch Target
+        mCurrentTouchTarget = null;
         return super.onTouchEvent(event);
     }
 
@@ -103,7 +117,8 @@ public class PullToRefreshLayout extends FrameLayout {
         }
     }
 
-    private View getChildForTouchEvent(final float x, final float y) {
+    private View getChildForTouchEvent(MotionEvent event) {
+        final float x = event.getX(), y = event.getY();
         View child;
         for (int z = getChildCount() - 1;  z >= 0 ; z--) {
             child = getChildAt(z);

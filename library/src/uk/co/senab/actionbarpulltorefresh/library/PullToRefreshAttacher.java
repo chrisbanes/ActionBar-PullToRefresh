@@ -61,7 +61,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	private final float mRefreshScrollDistance;
 
 	private int mInitialMotionY, mLastMotionY, mPullBeginY;
-	private boolean mIsBeingDragged, mIsRefreshing, mIsHandlingTouchEvent;
+	private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
 
 	private final WeakHashMap<View, ViewParams> mRefreshableViews;
 
@@ -358,14 +358,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 	@Override
 	public final boolean onTouch(final View view, final MotionEvent event) {
-		if (!mIsHandlingTouchEvent && onInterceptTouchEvent(view, event)) {
-			mIsHandlingTouchEvent = true;
-		}
-
-		if (mIsHandlingTouchEvent) {
-			onTouchEvent(view, event);
-		}
-
+        // Just call onTouchEvent. It now handles the proper calling of onInterceptTouchEvent
+		onTouchEvent(view, event);
 		// Always return false as we only want to observe events
 		return false;
 	}
@@ -444,6 +438,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			return false;
 		}
 
+        // Record whether our handling is started from ACTION_DOWN
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            mHandlingTouchEventFromDown = true;
+        }
+
+        // If we're being called from ACTION_DOWN then we must call through to
+        // onInterceptTouchEvent until it sets mIsBeingDragged
+        if (mHandlingTouchEventFromDown && !mIsBeingDragged) {
+            onInterceptTouchEvent(view, event);
+        }
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 // If we're already refreshing ignore it
@@ -491,7 +496,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 	void resetTouch() {
 		mIsBeingDragged = false;
-		mIsHandlingTouchEvent = false;
+		mHandlingTouchEventFromDown = false;
 		mInitialMotionY = mLastMotionY = mPullBeginY = -1;
 	}
 

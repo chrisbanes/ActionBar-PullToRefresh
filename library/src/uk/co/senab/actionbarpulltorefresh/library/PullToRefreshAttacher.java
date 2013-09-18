@@ -77,7 +77,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	 * PullToRefreshAttacher attached to the Activity, the existing one is
 	 * returned, otherwise a new instance is created. This version of the method
 	 * will use default configuration options for everything.
-	 * 
+	 *
 	 * @param activity
 	 *            Activity to attach to.
 	 * @return PullToRefresh attached to the Activity.
@@ -90,7 +90,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	 * Get a PullToRefreshAttacher for this Activity. If there is already a
 	 * PullToRefreshAttacher attached to the Activity, the existing one is
 	 * returned, otherwise a new instance is created.
-	 * 
+	 *
 	 * @param activity
 	 *            Activity to attach to.
 	 * @param options
@@ -169,7 +169,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	 * Add a view which will be used to initiate refresh requests and a listener
 	 * to be invoked when a refresh is started. This version of the method will
 	 * try to find a handler for the view from the built-in view delegates.
-	 * 
+	 *
 	 * @param view
 	 *            View which will be used to initiate refresh requests.
 	 * @param refreshListener
@@ -183,7 +183,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	 * Add a view which will be used to initiate refresh requests, along with a
 	 * delegate which knows how to handle the given view, and a listener to be
 	 * invoked when a refresh is started.
-	 * 
+	 *
 	 * @param view
 	 *            View which will be used to initiate refresh requests.
 	 * @param viewDelegate
@@ -200,7 +200,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	 * Add a view which will be used to initiate refresh requests, along with a
 	 * delegate which knows how to handle the given view, and a listener to be
 	 * invoked when a refresh is started.
-	 * 
+	 *
 	 * @param view
 	 *            View which will be used to initiate refresh requests.
 	 * @param viewDelegate
@@ -234,8 +234,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		}
 
 		// View to detect refreshes for
-		mRefreshableViews.put(view, new ViewParams(viewDelegate,
-				refreshListener));
+		mRefreshableViews.put(view, new ViewParams(viewDelegate, refreshListener));
 		if (setTouchListener) {
 			view.setOnTouchListener(this);
 		}
@@ -243,7 +242,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 	/**
 	 * Remove a view which was previously used to initiate refresh requests.
-	 * 
+	 *
 	 * @param view
 	 *            - View which will be used to initiate refresh requests.
 	 */
@@ -268,7 +267,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	/**
 	 * This method should be called by your Activity's or Fragment's
 	 * onConfigurationChanged method.
-	 * 
+	 *
 	 * @param newConfig The new configuration
 	 */
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -278,7 +277,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	/**
 	 * Manually set this Attacher's refreshing state. The header will be
 	 * displayed or hidden as requested.
-	 * 
+	 *
 	 * @param refreshing
 	 *            - Whether the attacher should be in a refreshing state,
 	 */
@@ -304,7 +303,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	/**
 	 * Allows the enable/disable of this PullToRefreshAttacher. If disabled when
 	 * refreshing then the UI is automatically reset.
-	 * 
+	 *
 	 * @param enabled
 	 *            - Whether this PullToRefreshAttacher is enabled.
 	 */
@@ -325,7 +324,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	/**
 	 * Call this when your refresh is complete and this view should reset itself
 	 * (header view will be hidden).
-	 * 
+	 *
 	 * This is the equivalent of calling <code>setRefreshing(false)</code>.
 	 */
 	public final void setRefreshComplete() {
@@ -335,7 +334,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	/**
 	 * Set a {@link HeaderViewListener} which is called when the visibility
 	 * state of the Header View has changed.
-	 * 
+	 *
 	 * @param listener
 	 */
 	public final void setHeaderViewListener(HeaderViewListener listener) {
@@ -387,6 +386,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			return false;
 		}
 
+        if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. Got ViewParams. " + view.toString());
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 // We're not currently being dragged so check to see if the user has
@@ -421,6 +422,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             }
         }
 
+        if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. Returning " + mIsBeingDragged);
+
 		return mIsBeingDragged;
 	}
 
@@ -437,50 +440,51 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 		final ViewParams params = mRefreshableViews.get(view);
 		if (params == null) {
+            Log.i(LOG_TAG, "View does not have ViewParams");
 			return false;
 		}
 
-		switch (event.getAction()) {
-		case MotionEvent.ACTION_MOVE: {
-			// If we're already refreshing ignore it
-			if (isRefreshing()) {
-				return false;
-			}
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_MOVE: {
+                // If we're already refreshing ignore it
+                if (isRefreshing()) {
+                    return false;
+                }
 
-			final int y = (int) event.getY();
+                final int y = (int) event.getY();
 
-			if (mIsBeingDragged && y != mLastMotionY) {
-				final int yDx = y - mLastMotionY;
+                if (mIsBeingDragged && y != mLastMotionY) {
+                    final int yDx = y - mLastMotionY;
 
-				/**
-				 * Check to see if the user is scrolling the right direction
-				 * (down). We allow a small scroll up which is the check against
-				 * negative touch slop.
-				 */
-				if (yDx >= -mTouchSlop) {
-					onPull(view, y);
-					// Only record the y motion if the user has scrolled down.
-					if (yDx > 0) {
-						mLastMotionY = y;
-					}
-				} else {
-					onPullEnded();
-					resetTouch();
-				}
-			}
-			break;
-		}
+                    /**
+                     * Check to see if the user is scrolling the right direction
+                     * (down). We allow a small scroll up which is the check against
+                     * negative touch slop.
+                     */
+                    if (yDx >= -mTouchSlop) {
+                        onPull(view, y);
+                        // Only record the y motion if the user has scrolled down.
+                        if (yDx > 0) {
+                            mLastMotionY = y;
+                        }
+                    } else {
+                        onPullEnded();
+                        resetTouch();
+                    }
+                }
+                break;
+            }
 
-		case MotionEvent.ACTION_CANCEL:
-		case MotionEvent.ACTION_UP: {
-			checkScrollForRefresh(view);
-			if (mIsBeingDragged) {
-				onPullEnded();
-			}
-			resetTouch();
-			break;
-		}
-		}
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP: {
+                checkScrollForRefresh(view);
+                if (mIsBeingDragged) {
+                    onPullEnded();
+                }
+                resetTouch();
+                break;
+            }
+        }
 
 		return true;
 	}
@@ -648,7 +652,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	public interface OnRefreshListener {
 		/**
 		 * Called when the user has initiated a refresh by pulling.
-		 * 
+		 *
 		 * @param view
 		 *            - View which the user has started the refresh from.
 		 */
@@ -677,7 +681,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 		/**
 		 * Called when the visibility state of the Header View has changed.
-		 * 
+		 *
 		 * @param headerView
 		 *            HeaderView who's state has changed.
 		 * @param state
@@ -781,7 +785,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 * Allows you to provide support for View which do not have built-in
 		 * support. In this method you should cast <code>view</code> to it's
 		 * native class, and check if it is scrolled to the top.
-		 * 
+		 *
 		 * @param view
 		 *            The view which has should be checked against.
 		 * @return true if <code>view</code> is scrolled to the top.

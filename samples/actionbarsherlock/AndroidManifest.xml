@@ -23,6 +23,10 @@
             android:theme="@style/Theme.Sherlock.Light"/>
 
         <activity
+              android:name=".ListViewWithEmptyActivity"
+              android:label="@string/activity_listview_empty" />
+
+        <activity
             android:name=".ScrollViewActivity"
             android:label="@string/activity_scrollview" />
 

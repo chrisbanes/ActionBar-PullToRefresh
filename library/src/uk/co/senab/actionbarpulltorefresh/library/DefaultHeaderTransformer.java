@@ -50,11 +50,6 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
 
     protected DefaultHeaderTransformer() {
         final int min = getMinimumApiLevel();
-        if (Build.VERSION.SDK_INT < min) {
-            throw new IllegalStateException("This HeaderTransformer is designed to run on SDK "
-                    + min
-                    + "+. If using ActionBarSherlock or ActionBarCompat you should use the appropriate provided extra.");
-        }
     }
 
     @Override

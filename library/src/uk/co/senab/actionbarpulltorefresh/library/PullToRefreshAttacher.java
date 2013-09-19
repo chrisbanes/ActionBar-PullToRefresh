@@ -79,7 +79,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	/**
 	 * Get a PullToRefreshAttacher for this Activity. If there is already a
 	 * PullToRefreshAttacher attached to the Activity, the existing one is
-	 * returned, otherwise a new instance is created. This version of the method
+	 * removed and a new instance is created. This version of the method
 	 * will use default configuration options for everything.
 	 * 
 	 * @param activity
@@ -93,7 +93,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	/**
 	 * Get a PullToRefreshAttacher for this Activity. If there is already a
 	 * PullToRefreshAttacher attached to the Activity, the existing one is
-	 * returned, otherwise a new instance is created.
+	 * removed and a new instance is created.
 	 * 
 	 * @param activity
 	 *            Activity to attach to.
@@ -144,15 +144,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
 
 		// Get Window Decor View
-		final ViewGroup decorView = (ViewGroup) activity.getWindow()
-				.getDecorView();
-
-		// Check to see if there is already a Attacher view installed
-		if (decorView.getChildCount() == 1
-				&& decorView.getChildAt(0) instanceof DecorChildLayout) {
-			throw new IllegalStateException(
-					"View already installed to DecorView. This shouldn't happen.");
-		}
+		final ViewGroup decorView = checkAndRemoveOldView(activity, (ViewGroup) activity.getWindow()
+				.getDecorView());
 
 		// Create Header view and then add to Decor View
 		mHeaderView = LayoutInflater.from(
@@ -176,8 +169,30 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 		// Notify transformer
         mHeaderTransformer.onViewCreated(activity, mHeaderView);
-        // TODO Remove the follow deprecated method call before v1.0
-		mHeaderTransformer.onViewCreated(mHeaderView);
+        
+        //resizes the window to account for the height of the status bar. 
+        Rect screenDimen = new Rect();
+        decorView.getWindowVisibleDisplayFrame(screenDimen);
+        decorContents.fitSystemWindows(new Rect(0, screenDimen.top, 0, 0));
+	}
+	
+	/**
+	 * Helper method to remove an old refreshing view, if present
+	 * @param ctx the Context
+	 * @param view the ViewGroup to be worked on
+	 * @return the given ViewGroup without any old refresh view. 
+	 */
+	private ViewGroup checkAndRemoveOldView(Context ctx, ViewGroup view) {
+		if (view.getChildCount() != 1
+				|| !(view.getChildAt(0) instanceof DecorChildLayout)) {
+			return view;
+		}
+		
+		ViewGroup childView = (ViewGroup) view.getChildAt(0);
+		//if there is a 2nd view it is a FrameLayout wrapping the refresh view. 
+		if (childView.getChildAt(1) != null)
+			childView.removeView(childView.getChildAt(1));
+		return childView;
 	}
 
 	/**
@@ -912,28 +927,22 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	 * to fit the system windows too.
 	 */
 	final static class DecorChildLayout extends FrameLayout {
-		private final ViewGroup mHeaderViewWrapper;
+		private final ViewGroup mHeaderView;
 
 		DecorChildLayout(Context context, ViewGroup systemDecorView,
 				View headerView) {
 			super(context);
 
+			mHeaderView = (ViewGroup) headerView;
+
 			// Move all children from decor view to here
 			for (int i = 0, z = systemDecorView.getChildCount(); i < z; i++) {
-				View child = systemDecorView.getChildAt(i);
+				View child = systemDecorView.getChildAt(0);
 				systemDecorView.removeView(child);
 				addView(child);
 			}
-
-			/**
-			 * Wrap the Header View in a FrameLayout and add it to this view. It
-			 * is wrapped so any inset changes do not affect the actual header
-			 * view.
-			 */
-			mHeaderViewWrapper = new FrameLayout(context);
-			mHeaderViewWrapper.addView(headerView);
-			addView(mHeaderViewWrapper, ViewGroup.LayoutParams.MATCH_PARENT,
-					ViewGroup.LayoutParams.WRAP_CONTENT);
+			
+			addView(mHeaderView);
 		}
 
 		@Override
@@ -943,7 +952,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			}
 
 			// Adjust the Header View's padding to take the insets into account
-			mHeaderViewWrapper.setPadding(insets.left, insets.top,
+			mHeaderView.setPadding(insets.left, insets.top,
 					insets.right, insets.bottom);
 
 			// Call return super so that the rest of the

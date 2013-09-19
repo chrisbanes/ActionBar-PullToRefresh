@@ -645,9 +645,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		// Show Header View
 		showHeaderView();
 
-		// Post a delay runnable to minimize the refresh header
+		// Post a runnable to minimize the refresh header
 		if (mRefreshMinimize) {
-			mHandler.postDelayed(mRefreshMinimizeRunnable, mRefreshMinimizeDelay);
+            if (mRefreshMinimizeDelay > 0) {
+                mHandler.postDelayed(mRefreshMinimizeRunnable, mRefreshMinimizeDelay);
+            } else {
+                mHandler.post(mRefreshMinimizeRunnable);
+            }
         }
 	}
 

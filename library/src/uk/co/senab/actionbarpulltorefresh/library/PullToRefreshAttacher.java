@@ -447,6 +447,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // onInterceptTouchEvent until it sets mIsBeingDragged
         if (mHandlingTouchEventFromDown && !mIsBeingDragged) {
             onInterceptTouchEvent(view, event);
+            return true;
         }
 
         switch (event.getAction()) {

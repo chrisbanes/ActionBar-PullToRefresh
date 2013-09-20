@@ -303,11 +303,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     protected Drawable getActionBarBackground(Context context) {
         int[] android_styleable_ActionBar = {android.R.attr.background};
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Now get the action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, android.R.attr.actionBarStyle,
                 android_styleable_ActionBar);
         try {
             // background is the first attr in the array above so it's index is 0.
@@ -330,11 +327,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     protected int getActionBarTitleStyle(Context context) {
         int[] android_styleable_ActionBar = {android.R.attr.titleTextStyle};
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Now get the action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, android.R.attr.actionBarStyle,
                 android_styleable_ActionBar);
         try {
             // titleTextStyle is the first attr in the array above so it's index is 0.
@@ -357,5 +351,16 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
             }
             onReset();
         }
+    }
+
+    protected static TypedArray obtainStyledAttrsFromThemeAttr(Context context, int themeAttr,
+            int[] styleAttrs) {
+        // Need to get resource id of style pointed to from the theme attr
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(themeAttr, outValue, true);
+        final int styleResId =  outValue.resourceId;
+
+        // Now return the values (from styleAttrs) from the style
+        return context.obtainStyledAttributes(styleResId, styleAttrs);
     }
 }

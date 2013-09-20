@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -55,11 +54,8 @@ public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
             return super.getActionBarBackground(context);
         }
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Get action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, R.attr.actionBarStyle,
                 R.styleable.SherlockActionBar);
         try {
             return abStyle.getDrawable(R.styleable.SherlockActionBar_background);
@@ -75,8 +71,7 @@ public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
             return super.getActionBarSize(context);
         }
 
-        TypedArray values = context.getTheme()
-                .obtainStyledAttributes(R.styleable.SherlockTheme);
+        TypedArray values = context.obtainStyledAttributes(R.styleable.SherlockTheme);
         try {
             return values.getDimensionPixelSize(R.styleable.SherlockTheme_actionBarSize, 0);
         } finally {
@@ -91,11 +86,8 @@ public class AbsDefaultHeaderTransformer extends DefaultHeaderTransformer {
             return super.getActionBarTitleStyle(context);
         }
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Get action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, R.attr.actionBarStyle,
                 R.styleable.SherlockActionBar);
         try {
             return abStyle.getResourceId(R.styleable.SherlockActionBar_titleTextStyle, 0);

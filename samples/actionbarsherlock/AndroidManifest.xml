@@ -28,7 +28,8 @@
 
         <activity
             android:name=".ScrollViewActivity"
-            android:label="@string/activity_scrollview" />
+            android:label="@string/activity_scrollview"
+            android:theme="@style/Theme.Sherlock.CustomPtrHeader" />
 
         <activity
             android:name=".GridViewActivity"

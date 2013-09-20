@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2013 Chris Banes
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+
+    <style name="Theme.Holo.CustomPtrHeader" parent="android:Theme.Holo">
+        <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader</item>
+    </style>
+
+    <style name="Widget.Custom.PtrHeader" parent="android:Widget">
+        <item name="ptrHeaderBackground">@color/holo_dark_green</item>
+
+        <!-- This is commented out as you should not set this unless you know what you're doing -->
+        <!--<item name="ptrHeaderHeight"></item>-->
+
+        <item name="ptrHeaderTitleTextAppearance">@style/TextAppearance.Custom.PtrHeader.Title</item>
+        <item name="ptrProgressBarColor">@color/holo_dark_green</item>
+
+        <item name="ptrPullText">Keep going...</item>
+        <item name="ptrRefreshingText">Pulling down the internet</item>
+        <item name="ptrReleaseText">Let go if you want me to refresh!</item>
+    </style>
+
+    <style name="TextAppearance.Custom.PtrHeader.Title"
+           parent="android:TextAppearance.Large.Inverse">
+        <item name="android:textSize">20dp</item>
+    </style>
+
+</resources>

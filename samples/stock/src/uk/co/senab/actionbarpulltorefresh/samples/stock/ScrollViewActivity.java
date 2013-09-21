@@ -21,7 +21,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 
-import uk.co.senab.actionbarpulltorefresh.library.DefaultHeaderTransformer;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
@@ -48,20 +47,6 @@ public class ScrollViewActivity extends Activity
         // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
         // listener (this).
         ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
-
-        // As we haven't set an explicit HeaderTransformer, we can safely cast the result of
-        // getHeaderTransformer() to DefaultHeaderTransformer
-        DefaultHeaderTransformer ht = (DefaultHeaderTransformer) mPullToRefreshAttacher
-                .getHeaderTransformer();
-
-        // As we're using a DefaultHeaderTransformer we can change the text which is displayed.
-        // You should load these values from localised resources, but we'll just use static strings.
-        ht.setPullText("Swipe Me!!!");
-        ht.setRefreshingText("Refreshing :)");
-
-        // DefaultHeaderTransformer allows you to change the color of the progress bar. Here
-        // we set it to a dark holo green, loaded from our resources
-        ht.setProgressBarColor(getResources().getColor(R.color.holo_dark_green));
     }
 
     @Override

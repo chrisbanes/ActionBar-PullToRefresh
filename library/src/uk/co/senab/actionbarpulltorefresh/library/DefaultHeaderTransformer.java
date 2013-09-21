@@ -74,7 +74,7 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
         mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
         mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
 
-        // Labels to display
+        // Default Labels to display
         mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
         mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
         mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
@@ -82,11 +82,11 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
         mAnimationDuration = activity.getResources()
                 .getInteger(android.R.integer.config_shortAnimTime);
 
+        // Setup the View styles
+        setupViewsFromStyles(activity, headerView);
+
         // Apply any custom ProgressBar colors
         applyProgressBarColor();
-
-        // Finally setup the View styles
-        setupViewsFromStyles(activity, headerView);
 
         // FIXME: I do not like this call here
         onReset();
@@ -261,29 +261,60 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     }
 
     private void setupViewsFromStyles(Activity activity, View headerView) {
-        // Retrieve the Action Bar size from the Activity's theme
+        final TypedArray styleAttrs = obtainStyledAttrsFromThemeAttr(activity,
+                R.attr.ptrHeaderStyle, R.styleable.PullToRefreshHeader);
+
+        // Retrieve the Action Bar size from the app theme or the Action Bar's style
         if (mContentLayout != null) {
-            mContentLayout.getLayoutParams().height = getActionBarSize(activity);
+            final int height = styleAttrs
+                    .getDimensionPixelSize(R.styleable.PullToRefreshHeader_ptrHeaderHeight,
+                            getActionBarSize(activity));
+            mContentLayout.getLayoutParams().height = height;
             mContentLayout.requestLayout();
         }
 
-        // Retrieve the Action Bar background from the Activity's theme (see #93).
-        Drawable abBg = getActionBarBackground(activity);
-        if (abBg != null) {
-            mHeaderTextView.setBackgroundDrawable(abBg);
+        // Retrieve the Action Bar background from the app theme or the Action Bar's style (see #93)
+        Drawable bg = styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrHeaderBackground)
+                ? styleAttrs.getDrawable(R.styleable.PullToRefreshHeader_ptrHeaderBackground)
+                : getActionBarBackground(activity);
+        if (bg != null) {
+            mHeaderTextView.setBackgroundDrawable(bg);
 
             // If we have an opaque background we can remove the background from the content layout
-            if (mContentLayout != null && abBg.getOpacity() == PixelFormat.OPAQUE) {
+            if (mContentLayout != null && bg.getOpacity() == PixelFormat.OPAQUE) {
                 mContentLayout.setBackgroundResource(0);
             }
         }
 
-        // Retrieve the Action Bar Title Style from the Action Bar's theme
+        // Retrieve the Action Bar Title Style from the app theme or the Action Bar's style
         Context abContext = headerView.getContext();
-        final int titleTextStyle = getActionBarTitleStyle(abContext);
+        final int titleTextStyle = styleAttrs
+                .getResourceId(R.styleable.PullToRefreshHeader_ptrHeaderTitleTextAppearance,
+                        getActionBarTitleStyle(abContext));
         if (titleTextStyle != 0) {
             mHeaderTextView.setTextAppearance(abContext, titleTextStyle);
         }
+
+        // Retrieve the Progress Bar Color the style
+        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarColor)) {
+            mUseCustomProgressColor = true;
+            mProgressDrawableColor = styleAttrs
+                    .getColor(R.styleable.PullToRefreshHeader_ptrProgressBarColor, 0);
+        }
+
+        // Retrieve the text strings from the style (if they're set)
+        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrPullText)) {
+            mPullRefreshLabel = styleAttrs.getString(R.styleable.PullToRefreshHeader_ptrPullText);
+        }
+        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrRefreshingText)) {
+            mRefreshingLabel = styleAttrs
+                    .getString(R.styleable.PullToRefreshHeader_ptrRefreshingText);
+        }
+        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrReleaseText)) {
+            mReleaseLabel = styleAttrs.getString(R.styleable.PullToRefreshHeader_ptrReleaseText);
+        }
+
+        styleAttrs.recycle();
     }
 
     private void applyProgressBarColor() {
@@ -303,11 +334,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     protected Drawable getActionBarBackground(Context context) {
         int[] android_styleable_ActionBar = {android.R.attr.background};
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Now get the action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, android.R.attr.actionBarStyle,
                 android_styleable_ActionBar);
         try {
             // background is the first attr in the array above so it's index is 0.
@@ -330,11 +358,8 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     protected int getActionBarTitleStyle(Context context) {
         int[] android_styleable_ActionBar = {android.R.attr.titleTextStyle};
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Now get the action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, android.R.attr.actionBarStyle,
                 android_styleable_ActionBar);
         try {
             // titleTextStyle is the first attr in the array above so it's index is 0.
@@ -357,5 +382,16 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
             }
             onReset();
         }
+    }
+
+    protected static TypedArray obtainStyledAttrsFromThemeAttr(Context context, int themeAttr,
+            int[] styleAttrs) {
+        // Need to get resource id of style pointed to from the theme attr
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(themeAttr, outValue, true);
+        final int styleResId =  outValue.resourceId;
+
+        // Now return the values (from styleAttrs) from the style
+        return context.obtainStyledAttributes(styleResId, styleAttrs);
     }
 }

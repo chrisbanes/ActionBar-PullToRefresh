@@ -30,7 +30,7 @@ public class AbsListViewDelegate
     public static final Class SUPPORTED_VIEW_CLASS = AbsListView.class;
 
     @Override
-    public boolean isScrolledToTop(View view) {
+    public boolean isReadyForPull(View view, float x, float y) {
         AbsListView absListView = (AbsListView) view;
         if (absListView.getCount() == 0) {
             return true;

@@ -29,7 +29,7 @@ public class WebViewDelegate extends PullToRefreshAttacher.ViewDelegate {
     public static final Class SUPPORTED_VIEW_CLASS = WebView.class;
 
     @Override
-    public boolean isScrolledToTop(View view) {
+    public boolean isReadyForPull(View view, float x, float y) {
         return view.getScrollY() <= 0;
     }
 }

@@ -403,7 +403,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
                 if (canRefresh(true, params.onRefreshListener)
-                        && params.viewDelegate.isScrolledToTop(view)) {
+                        && params.viewDelegate.isReadyForPull(view, event.getX(), event.getY())) {
                     mInitialMotionY = (int) event.getY();
                 }
                 break;
@@ -798,9 +798,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 *
 		 * @param view
 		 *            The view which has should be checked against.
+         * @param x The X co-ordinate of the touch event
+         * @param y The Y co-ordinate of the touch event
 		 * @return true if <code>view</code> is scrolled to the top.
 		 */
-		public abstract boolean isScrolledToTop(View view);
+		public abstract boolean isReadyForPull(View view, float x, float y);
 	}
 
 	/**

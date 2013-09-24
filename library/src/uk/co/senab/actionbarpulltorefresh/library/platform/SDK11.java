@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
+package uk.co.senab.actionbarpulltorefresh.library.platform;
 
 import android.view.View;
-import android.webkit.WebView;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+public class SDK11 {
 
-/**
- * FIXME
- */
-public class WebViewDelegate extends PullToRefreshAttacher.ViewDelegate {
-
-    public static final Class SUPPORTED_VIEW_CLASS = WebView.class;
-
-    @Override
-    public boolean isReadyForPull(View view, float x, float y) {
-        return view.getScrollY() <= 0;
+    public static void setAlpha(View view, float alpha) {
+        view.setAlpha(alpha);
     }
+
 }

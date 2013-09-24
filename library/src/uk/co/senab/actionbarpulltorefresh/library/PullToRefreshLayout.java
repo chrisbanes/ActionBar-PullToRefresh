@@ -19,6 +19,7 @@ package uk.co.senab.actionbarpulltorefresh.library;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -28,7 +29,11 @@ import android.widget.FrameLayout;
  */
 public class PullToRefreshLayout extends FrameLayout {
 
+    private static final boolean DEBUG = false;
+    private static final String LOG_TAG = "PullToRefreshLayout";
+
     private PullToRefreshAttacher mPullToRefreshAttacher;
+    private View mCurrentTouchTarget;
 
     public PullToRefreshLayout(Context context) {
         this(context, null);
@@ -57,6 +62,7 @@ public class PullToRefreshLayout extends FrameLayout {
             }
 
             if (attacher != null) {
+                if (DEBUG) Log.d(LOG_TAG, "Adding View to Attacher: " + view);
                 attacher.addRefreshableView(view, null, refreshListener, false);
             }
         }
@@ -66,17 +72,39 @@ public class PullToRefreshLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. " + event.toString());
+
         if (mPullToRefreshAttacher != null && getChildCount() > 0) {
-            return mPullToRefreshAttacher.onInterceptTouchEvent(getChildAt(0), event);
+            View target = getChildForTouchEvent(event);
+            if (target != null && mPullToRefreshAttacher.onInterceptTouchEvent(target, event)) {
+                mCurrentTouchTarget = target;
+                return true;
+            }
         }
-        return super.onInterceptTouchEvent(event);
+        // Reset Current Touch Target
+        mCurrentTouchTarget = null;
+        return false;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mPullToRefreshAttacher != null && getChildCount() > 0) {
-            return mPullToRefreshAttacher.onTouchEvent(getChildAt(0), event);
+        if (DEBUG) Log.d(LOG_TAG, "onTouchEvent. " + event.toString());
+
+        if (mPullToRefreshAttacher != null) {
+            // This is an edge-case. If the ViewGroup does not contain a valid touch target then
+            // Android calls onTouchEvent after onInterceptTouchEvent with ACTION_DOWN event.
+            // If that happens then we need to find the visible view and pass it to the attacher as
+            // usual.
+            if (mCurrentTouchTarget == null && event.getAction() == MotionEvent.ACTION_DOWN) {
+                mCurrentTouchTarget = getChildForTouchEvent(event);
+            }
+
+            if (mCurrentTouchTarget != null) {
+                return mPullToRefreshAttacher.onTouchEvent(mCurrentTouchTarget, event);
+            }
         }
+        // Reset Current Touch Target
+        mCurrentTouchTarget = null;
         return super.onTouchEvent(event);
     }
 
@@ -87,5 +115,19 @@ public class PullToRefreshLayout extends FrameLayout {
         if (mPullToRefreshAttacher != null) {
             mPullToRefreshAttacher.onConfigurationChanged(newConfig);
         }
+    }
+
+    private View getChildForTouchEvent(MotionEvent event) {
+        final float x = event.getX(), y = event.getY();
+        View child;
+        for (int z = getChildCount() - 1;  z >= 0 ; z--) {
+            child = getChildAt(z);
+            if (child.isShown() && x >= child.getLeft() && x <= child.getRight()
+                    && y >= child.getTop() && y <= child.getBottom()) {
+                if (DEBUG) Log.d(LOG_TAG, "Got Child for Touch Event: " + child);
+                return child;
+            }
+        }
+        return null;
     }
 }

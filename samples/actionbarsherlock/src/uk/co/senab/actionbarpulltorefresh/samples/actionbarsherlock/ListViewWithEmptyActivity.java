@@ -14,38 +14,60 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.samples.actionbarcompat;
+package uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
+import java.util.ArrayList;
+
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
- * {@link android.widget.ScrollView ScrollView}.
+ * {@link android.widget.ListView ListView} which has an Empty View attached to it.
  */
-public class ScrollViewActivity extends ActionBarActivity
+public class ListViewWithEmptyActivity extends Activity
         implements PullToRefreshAttacher.OnRefreshListener {
 
+    private static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
+            "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
+            "Airag", "Airedale", "Aisy Cendre", "Allgauer Emmentaler", "Abbaye de Belloc",
+            "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi", "Acorn", "Adelost",
+            "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
+            "Allgauer Emmentaler"};
+
     private PullToRefreshAttacher mPullToRefreshAttacher;
+
+    private ArrayAdapter<String> mAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scrollview);
+        setContentView(R.layout.activity_listview_empty);
 
-        // Create new PullToRefreshAttacher
+        /**
+         * Get ListView and give it an adapter to display the sample items
+         */
+        ListView listView = (ListView) findViewById(R.id.ptr_listview);
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                new ArrayList<String>());
+        listView.setEmptyView(findViewById(android.R.id.empty));
+        listView.setAdapter(mAdapter);
+
+        /**
+         * Here we create a PullToRefreshAttacher manually without an Options instance.
+         * PullToRefreshAttacher will manually create one using default values.
+         */
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
-        // Retrieve the PullToRefreshLayout from the content view
+        // Set the Refreshable View to be the ListView and the refresh listener to be this.
         PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
-
-        // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
-        // listener (this).
         ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
     }
 
@@ -69,6 +91,9 @@ public class ScrollViewActivity extends ActionBarActivity
             @Override
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
+
+                mAdapter.addAll(ITEMS);
+                mAdapter.notifyDataSetChanged();
 
                 // Notify PullToRefreshAttacher that the refresh has finished
                 mPullToRefreshAttacher.setRefreshComplete();

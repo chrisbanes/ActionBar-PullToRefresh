@@ -16,28 +16,46 @@
 
 package uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.TypedValue;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import uk.co.senab.actionbarpulltorefresh.library.DefaultHeaderTransformer;
 
 public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
 
+    private Animation mHeaderInAnimation, mHeaderOutAnimation;
+
+    @Override
+    public void onViewCreated(Activity activity, View headerView) {
+        super.onViewCreated(activity, headerView);
+
+        // Create animations for use later
+        mHeaderInAnimation = AnimationUtils.loadAnimation(activity, R.anim.fade_in);
+        mHeaderOutAnimation = AnimationUtils.loadAnimation(activity, R.anim.fade_out);
+
+        if (mHeaderOutAnimation != null || mHeaderInAnimation != null) {
+            final AnimationCallback callback = new AnimationCallback();
+            if (mHeaderOutAnimation != null) {
+                mHeaderOutAnimation.setAnimationListener(callback);
+            }
+        }
+    }
+
     @Override
     protected Drawable getActionBarBackground(Context context) {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.getActionBarBackground(context);
         }
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Get action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, R.attr.actionBarStyle,
                 R.styleable.ActionBar);
         try {
             return abStyle.getDrawable(R.styleable.ActionBar_background);
@@ -49,12 +67,12 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     protected int getActionBarSize(Context context) {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.getActionBarSize(context);
         }
 
         int[] attrs = { R.attr.actionBarSize };
-        TypedArray values = context.getTheme().obtainStyledAttributes(attrs);
+        TypedArray values = context.obtainStyledAttributes(attrs);
         try {
             return values.getDimensionPixelSize(0, 0);
         } finally {
@@ -65,15 +83,12 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     protected int getActionBarTitleStyle(Context context) {
         // Super handles ICS+ anyway...
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.getActionBarTitleStyle(context);
         }
 
-        // Need to get resource id of style pointed to from actionBarStyle
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.actionBarStyle, outValue, true);
-        // Now get action bar style values...
-        TypedArray abStyle = context.getTheme().obtainStyledAttributes(outValue.resourceId,
+        // Get action bar style values...
+        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, R.attr.actionBarStyle,
                 R.styleable.ActionBar);
         try {
             return abStyle.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
@@ -83,7 +98,91 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     }
 
     @Override
+    public boolean showHeaderView() {
+        // Super handles ICS+ anyway...
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
+            return super.showHeaderView();
+        }
+
+        final View headerView = getHeaderView();
+        final boolean changeVis = headerView != null && headerView.getVisibility() != View.VISIBLE;
+        if (changeVis) {
+            // Show Header
+            if (mHeaderInAnimation != null) {
+                // AnimationListener will call HeaderViewListener
+                headerView.startAnimation(mHeaderInAnimation);
+            }
+            headerView.setVisibility(View.VISIBLE);
+        }
+        return changeVis;
+    }
+
+    @Override
+    public boolean hideHeaderView() {
+        // Super handles ICS+ anyway...
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
+            return super.hideHeaderView();
+        }
+
+        final View headerView = getHeaderView();
+        final boolean changeVis = headerView != null && headerView.getVisibility() != View.GONE;
+        if (changeVis) {
+            // Hide Header
+            if (mHeaderOutAnimation != null) {
+                // AnimationListener will call HeaderTransformer and
+                // HeaderViewListener
+                headerView.startAnimation(mHeaderOutAnimation);
+            } else {
+                // As we're not animating, hide the header + call the header
+                // transformer now
+                headerView.setVisibility(View.GONE);
+                onReset();
+            }
+        }
+        return changeVis;
+    }
+
+    @Override
+    public void onRefreshMinimized() {
+        // Super handles ICS+ anyway...
+        if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
+            super.onRefreshMinimized();
+            return;
+        }
+
+        // Here we fade out most of the header, leaving just the progress bar
+        View contentLayout = getHeaderView().findViewById(R.id.ptr_content);
+        if (contentLayout != null) {
+            contentLayout.startAnimation(AnimationUtils
+                    .loadAnimation(contentLayout.getContext(), R.anim.fade_out));
+            contentLayout.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
     protected int getMinimumApiLevel() {
         return Build.VERSION_CODES.ECLAIR_MR1;
+    }
+
+    class AnimationCallback implements Animation.AnimationListener {
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+            if (animation == mHeaderOutAnimation) {
+                View headerView = getHeaderView();
+                if (headerView != null) {
+                    headerView.setVisibility(View.GONE);
+                }
+                onReset();
+            }
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+        }
     }
 }

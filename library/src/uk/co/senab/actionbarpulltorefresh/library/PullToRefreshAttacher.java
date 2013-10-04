@@ -16,6 +16,7 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -814,11 +815,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 * @return Context which should be used for inflating the header layout
 		 */
 		public Context getContextForInflater(Activity activity) {
+            Context context = null;
 			if (Build.VERSION.SDK_INT >= 14) {
-				return activity.getActionBar().getThemedContext();
-			} else {
-				return activity;
+                ActionBar ab = activity.getActionBar();
+                if (ab != null) {
+                    context = ab.getThemedContext();
+                }
 			}
+            if (context == null) {
+                context = activity;
+            }
+            return context;
 		}
 	}
 

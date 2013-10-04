@@ -16,6 +16,7 @@
 
 package uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockExpandableListActivity;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -55,21 +56,27 @@ public class PullToRefreshAttacher extends
          * @return Context which should be used for inflating the header layout
          */
         public Context getContextForInflater(Activity activity) {
+            ActionBar ab = null;
             if (activity instanceof SherlockActivity) {
-                return ((SherlockActivity) activity).getSupportActionBar().getThemedContext();
+                ab = ((SherlockActivity) activity).getSupportActionBar();
             } else if (activity instanceof SherlockListActivity) {
-                return ((SherlockListActivity) activity).getSupportActionBar().getThemedContext();
+                ab = ((SherlockListActivity) activity).getSupportActionBar();
             } else if (activity instanceof SherlockFragmentActivity) {
-                return ((SherlockFragmentActivity) activity).getSupportActionBar()
-                        .getThemedContext();
+                ab = ((SherlockFragmentActivity) activity).getSupportActionBar();
             } else if (activity instanceof SherlockExpandableListActivity) {
-                return ((SherlockExpandableListActivity) activity).getSupportActionBar()
-                        .getThemedContext();
+                ab = ((SherlockExpandableListActivity) activity).getSupportActionBar();
             } else if (activity instanceof SherlockPreferenceActivity) {
-                return ((SherlockPreferenceActivity) activity).getSupportActionBar()
-                        .getThemedContext();
+                ab = ((SherlockPreferenceActivity) activity).getSupportActionBar();
             }
-            return super.getContextForInflater(activity);
+
+            Context context = null;
+            if (ab != null) {
+                context = ab.getThemedContext();
+            }
+            if (context == null) {
+                context = super.getContextForInflater(activity);
+            }
+            return context;
         }
     }
 }

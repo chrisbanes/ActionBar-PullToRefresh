@@ -61,7 +61,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	private final float mRefreshScrollDistance;
 
 	private int mInitialMotionY, mLastMotionY, mPullBeginY;
-	private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
+	private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEvent;
 
 	private final WeakHashMap<View, ViewParams> mRefreshableViews;
 
@@ -386,15 +386,22 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE: {
                 // We're not currently being dragged so check to see if the user has
                 // scrolled enough
-                if (!mIsBeingDragged && mInitialMotionY > 0) {
-                    final int y = (int) event.getY();
-                    final int yDiff = y - mInitialMotionY;
+                if (!mIsBeingDragged) {
+                    if (mInitialMotionY > 0) {
+                        final int y = (int) event.getY();
+                        final int yDiff = y - mInitialMotionY;
 
-                    if (yDiff > mTouchSlop) {
-                        mIsBeingDragged = true;
-                        onPullStarted(y);
-                    } else if (yDiff < -mTouchSlop) {
-                        resetTouch();
+                        if (yDiff > mTouchSlop) {
+                            mIsBeingDragged = true;
+                            onPullStarted(y);
+                        } else if (yDiff < -mTouchSlop) {
+                            resetTouch();
+                        }
+                    }
+                    // Begin drag from ACTION_MOVE if initial position not yet set
+                    else if (canRefresh(true, params.onRefreshListener)
+                            && params.viewDelegate.isReadyForPull(view, event.getX(), event.getY())) {
+                        mInitialMotionY = (int) event.getY();
                     }
                 }
                 break;
@@ -438,14 +445,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 			return false;
 		}
 
-        // Record whether our handling is started from ACTION_DOWN
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mHandlingTouchEventFromDown = true;
+        // Record whether we are handling the touch event
+        if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE) {
+            mHandlingTouchEvent = true;
         }
 
-        // If we're being called from ACTION_DOWN then we must call through to
-        // onInterceptTouchEvent until it sets mIsBeingDragged
-        if (mHandlingTouchEventFromDown && !mIsBeingDragged) {
+        // If we are handling the event, call through to onInterceptTouchEvent until it sets mIsBeingDragged
+        if (mHandlingTouchEvent && !mIsBeingDragged) {
             onInterceptTouchEvent(view, event);
             return true;
         }
@@ -497,7 +503,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
 	void resetTouch() {
 		mIsBeingDragged = false;
-		mHandlingTouchEventFromDown = false;
+		mHandlingTouchEvent = false;
 		mInitialMotionY = mLastMotionY = mPullBeginY = -1;
 	}
 

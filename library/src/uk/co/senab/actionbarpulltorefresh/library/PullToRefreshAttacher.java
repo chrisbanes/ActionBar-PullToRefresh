@@ -20,15 +20,19 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import java.util.Set;
@@ -132,13 +136,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		final ViewGroup decorView = (ViewGroup) activity.getWindow()
 				.getDecorView();
 
-		// Check to see if there is already a Attacher view installed
-		if (decorView.getChildCount() == 1
-				&& decorView.getChildAt(0) instanceof DecorChildLayout) {
-			throw new IllegalStateException(
-					"You should only create one PullToRefreshAttacher per Activity");
-		}
-
 		// Create Header view and then add to Decor View
 		mHeaderView = LayoutInflater.from(
 				mEnvironmentDelegate.getContextForInflater(activity)).inflate(
@@ -150,15 +147,15 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Make Header View invisible so it still gets a layout pass
 		mHeaderView.setVisibility(View.INVISIBLE);
 
-		// Create DecorChildLayout which will move all of the system's decor
-		// view's children + the
-		// Header View to itself. See DecorChildLayout for more info.
-		DecorChildLayout decorContents = new DecorChildLayout(activity,
-				decorView, mHeaderView);
+        // Now HeaderView to Activity
 
-		// Now add the DecorChildLayout to the decor view
-		decorView.addView(decorContents, ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.MATCH_PARENT);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                addHeaderViewToActivity(mHeaderView, mActivity);
+            }
+        });
+
 
 		// Notify transformer
         mHeaderTransformer.onViewCreated(activity, mHeaderView);
@@ -657,6 +654,26 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
 	}
 
+    private static void addHeaderViewToActivity(View headerView, Activity activity) {
+        // Get the Display Rect of the Decor View
+        final View decorView = activity.getWindow().getDecorView();
+        final Rect visibleRect = new Rect();
+        decorView.getWindowVisibleDisplayFrame(visibleRect);
+
+        // Create LayoutParams for adding the View as a panel
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                PixelFormat.TRANSLUCENT);
+        params.x = 0;
+        params.y = visibleRect.top;
+        params.gravity = Gravity.TOP;
+
+        activity.getWindow().getWindowManager().addView(headerView, params);
+    }
+
 	/**
 	 * Simple Listener to listen for any callbacks to Refresh.
 	 */
@@ -881,52 +898,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
          * until the refresh is finished.
 		 */
 		public boolean refreshMinimize = DEFAULT_REFRESH_MINIMIZE;
-	}
-
-	/**
-	 * This class allows us to insert a layer in between the system decor view
-	 * and the actual decor. (e.g. Action Bar views). This is needed so we can
-	 * receive a call to fitSystemWindows(Rect) so we can adjust the header view
-	 * to fit the system windows too.
-	 */
-	final static class DecorChildLayout extends FrameLayout {
-		private final ViewGroup mHeaderViewWrapper;
-
-		DecorChildLayout(Context context, ViewGroup systemDecorView,
-				View headerView) {
-			super(context);
-
-			// Move all children from decor view to here
-			for (int i = 0, z = systemDecorView.getChildCount(); i < z; i++) {
-				View child = systemDecorView.getChildAt(i);
-				systemDecorView.removeView(child);
-				addView(child);
-			}
-
-			/**
-			 * Wrap the Header View in a FrameLayout and add it to this view. It
-			 * is wrapped so any inset changes do not affect the actual header
-			 * view.
-			 */
-			mHeaderViewWrapper = new FrameLayout(context);
-			mHeaderViewWrapper.addView(headerView);
-			addView(mHeaderViewWrapper, ViewGroup.LayoutParams.MATCH_PARENT,
-					ViewGroup.LayoutParams.WRAP_CONTENT);
-		}
-
-		@Override
-		protected boolean fitSystemWindows(Rect insets) {
-			if (DEBUG) {
-				Log.d(LOG_TAG, "fitSystemWindows: " + insets.toString());
-			}
-
-			// Adjust the Header View's padding to take the insets into account
-			mHeaderViewWrapper.setPadding(insets.left, insets.top,
-					insets.right, insets.bottom);
-
-			// Call return super so that the rest of the
-			return super.fitSystemWindows(insets);
-		}
 	}
 
 	private static final class ViewParams {

@@ -16,13 +16,16 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
@@ -31,7 +34,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -152,7 +154,12 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                addHeaderViewToActivity(mHeaderView, mActivity);
+                View decorView = mActivity.getWindow().getDecorView();
+                if (decorView.getWindowToken() != null) {
+                    addHeaderViewToActivity(mHeaderView, mActivity);
+                } else {
+                    mHandler.post(this);
+                }
             }
         });
 
@@ -662,16 +669,21 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Create LayoutParams for adding the View as a panel
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT);
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
         params.x = 0;
         params.y = visibleRect.top;
         params.gravity = Gravity.TOP;
 
-        activity.getWindow().getWindowManager().addView(headerView, params);
+        FrameLayout wrapper = new FrameLayout(activity);
+        wrapper.addView(headerView);
+
+        activity.getWindowManager().addView(wrapper, params);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            RemoveViewListener.register(activity, wrapper);
+        }
     }
 
 	/**
@@ -831,7 +843,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		/**
 		 * @return Context which should be used for inflating the header layout
 		 */
-		public Context getContextForInflater(Activity activity) {
+        public Context getContextForInflater(Activity activity) {
             Context context = null;
 			if (Build.VERSION.SDK_INT >= 14) {
                 ActionBar ab = activity.getActionBar();
@@ -923,4 +935,55 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		}
 	};
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    static class RemoveViewListener implements Application.ActivityLifecycleCallbacks {
+        private final Activity mActivity;
+        private final View mViewAddedToWindowManager;
+
+        static void register(Activity activity, View viewAddedToWindowManager) {
+            RemoveViewListener listener = new RemoveViewListener(activity, viewAddedToWindowManager);
+            activity.getApplication().registerActivityLifecycleCallbacks(listener);
+        }
+
+        private RemoveViewListener(Activity activity, View viewAddedToWindowManager) {
+            mActivity = activity;
+            mViewAddedToWindowManager = viewAddedToWindowManager;
+        }
+
+        @Override
+        public void onActivityCreated(Activity activity, Bundle bundle) {
+        }
+
+        @Override
+        public void onActivityStarted(Activity activity) {
+        }
+
+        @Override
+        public void onActivityResumed(Activity activity) {
+        }
+
+        @Override
+        public void onActivityPaused(Activity activity) {
+        }
+
+        @Override
+        public void onActivityStopped(Activity activity) {
+        }
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
+        }
+
+        @Override
+        public void onActivityDestroyed(Activity activity) {
+            if (mActivity == activity) {
+                mActivity.getWindowManager().removeViewImmediate(mViewAddedToWindowManager);
+                unregister();
+            }
+        }
+
+        private void unregister() {
+            mActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
+        }
+    }
 }

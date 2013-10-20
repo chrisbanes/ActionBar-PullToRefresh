@@ -59,6 +59,14 @@ public class ListViewActivity extends SherlockFragmentActivity {
                 .replace(R.id.ptr_fragment, new SampleListFragment()).commit();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Need to call destroy() manually on devices pre-ICS
+        mPullToRefreshAttacher.destroy();
+    }
+
     PullToRefreshAttacher getPullToRefreshAttacher() {
         return mPullToRefreshAttacher;
     }

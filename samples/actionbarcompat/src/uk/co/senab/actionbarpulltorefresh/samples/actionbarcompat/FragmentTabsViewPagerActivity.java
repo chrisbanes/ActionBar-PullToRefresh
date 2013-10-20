@@ -71,6 +71,14 @@ public class FragmentTabsViewPagerActivity extends ActionBarActivity {
         mFragmentTabPager.addTab(ab.newTab().setText("Tab 3"), SampleFragment.class, b);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Need to call destroy() manually on devices pre-ICS
+        mPullToRefreshAttacher.destroy();
+    }
+
     PullToRefreshAttacher getPullToRefreshAttacher() {
         return mPullToRefreshAttacher;
     }

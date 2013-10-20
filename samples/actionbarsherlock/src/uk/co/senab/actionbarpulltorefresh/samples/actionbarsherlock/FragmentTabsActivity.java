@@ -89,6 +89,14 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
         return mPullToRefreshAttacher;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Need to call destroy() manually on devices pre-ICS
+        mPullToRefreshAttacher.destroy();
+    }
+
     /**
      * Fragment Class
      */

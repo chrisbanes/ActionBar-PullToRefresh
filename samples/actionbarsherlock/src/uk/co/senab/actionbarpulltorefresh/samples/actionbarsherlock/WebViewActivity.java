@@ -73,6 +73,14 @@ public class WebViewActivity extends SherlockActivity
         mWebView.reload();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Need to call destroy() manually on devices pre-ICS
+        mPullToRefreshAttacher.destroy();
+    }
+
     private class SampleWebViewClient extends WebViewClient {
 
         @Override

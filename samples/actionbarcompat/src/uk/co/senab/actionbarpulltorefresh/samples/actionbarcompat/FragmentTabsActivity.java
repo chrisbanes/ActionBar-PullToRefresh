@@ -87,6 +87,14 @@ public class FragmentTabsActivity extends ActionBarActivity implements ActionBar
         return mPullToRefreshAttacher;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Need to call destroy() manually on devices pre-ICS
+        mPullToRefreshAttacher.destroy();
+    }
+
     /**
      * Fragment Class
      */

@@ -84,6 +84,14 @@ public class GridViewActivity extends SherlockActivity
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Need to call destroy() manually on devices pre-ICS
+        mPullToRefreshAttacher.destroy();
+    }
+
+    @Override
     public void onRefreshStarted(View view) {
         /**
          * Simulate Refresh with 4 seconds sleep

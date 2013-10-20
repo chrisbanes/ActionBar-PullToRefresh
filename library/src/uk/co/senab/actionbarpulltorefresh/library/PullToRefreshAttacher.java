@@ -62,6 +62,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
     private final Activity mActivity;
 	private final View mHeaderView;
+    private final FrameLayout mHeaderViewWrapper;
 	private HeaderViewListener mHeaderViewListener;
 
 	private final int mTouchSlop;
@@ -76,6 +77,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	private final boolean mRefreshOnUp;
 	private final int mRefreshMinimizeDelay;
 	private final boolean mRefreshMinimize;
+    private boolean mIsDestroyed = false;
 
 	private final Handler mHandler = new Handler();
 
@@ -115,6 +117,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		}
 
         mActivity = activity;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            // Register ActivityListener so that we can make sure we're destroyed
+            ActivityListener.register(this);
+        }
+
 		mRefreshableViews = new WeakHashMap<View, ViewParams>();
 
 		// Copy necessary values from options
@@ -149,25 +156,27 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         // Make Header View invisible so it still gets a layout pass
 		mHeaderView.setVisibility(View.INVISIBLE);
 
-        // Now HeaderView to Activity
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                View decorView = mActivity.getWindow().getDecorView();
-                if (decorView.getWindowToken() != null) {
-                    addHeaderViewToActivity(mHeaderView, mActivity);
-                } else {
-                    mHandler.post(this);
-                }
-            }
-        });
-
+        mHeaderViewWrapper = new FrameLayout(mActivity);
+        mHeaderViewWrapper.addView(mHeaderView);
 
 		// Notify transformer
         mHeaderTransformer.onViewCreated(activity, mHeaderView);
         // TODO Remove the follow deprecated method call before v1.0
 		mHeaderTransformer.onViewCreated(mHeaderView);
+
+        // Now HeaderView to Activity
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (decorView.getWindowToken() != null) {
+                    // The Decor View has a Window Token, so we can add the HeaderView!
+                    addHeaderViewToActivity(mHeaderViewWrapper, mActivity);
+                } else {
+                    // The Decor View doesn't have a Window Token yet, post ourselves again...
+                    mHandler.post(this);
+                }
+            }
+        });
 	}
 
 	/**
@@ -335,6 +344,22 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	public final void setRefreshComplete() {
 		setRefreshingInt(null, false, false);
 	}
+
+    /**
+     * This should be called when you now longer need the Pull-to-Refresh functionality. Typically
+     * from your {@link android.app.Activity#onDestroy()}.
+     *
+     * Please note, this is automatically when running on a device with Android v4.0 (Ice Cream Sandwich)
+     * by the hosting Activity's {@link android.app.Activity#onDestroy() onDestroy()}.
+     */
+    public void destroy() {
+        if (mIsDestroyed) return; // We've already been destroyed
+
+        // Remove the Header View from the Activity
+        removeHeaderViewFromActivity(mHeaderViewWrapper, mActivity);
+
+        mIsDestroyed = true;
+    }
 
 	/**
 	 * Set a {@link HeaderViewListener} which is called when the visibility
@@ -560,6 +585,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		}
 	}
 
+    final Activity getAttachedActivity() {
+        return mActivity;
+    }
+
 	protected EnvironmentDelegate createDefaultEnvironmentDelegate() {
 		return new EnvironmentDelegate();
 	}
@@ -661,7 +690,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
 	}
 
-    private static void addHeaderViewToActivity(View headerView, Activity activity) {
+    protected void addHeaderViewToActivity(View headerViewLayout, Activity activity) {
         // Get the Display Rect of the Decor View
         final View decorView = activity.getWindow().getDecorView();
         final Rect visibleRect = new Rect();
@@ -676,14 +705,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         params.y = visibleRect.top;
         params.gravity = Gravity.TOP;
 
-        FrameLayout wrapper = new FrameLayout(activity);
-        wrapper.addView(headerView);
+        activity.getWindowManager().addView(headerViewLayout, params);
+    }
 
-        activity.getWindowManager().addView(wrapper, params);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            RemoveViewListener.register(activity, wrapper);
-        }
+    protected void removeHeaderViewFromActivity(View headerViewLayout, Activity activity) {
+        activity.getWindowManager().removeViewImmediate(headerViewLayout);
     }
 
 	/**
@@ -845,7 +871,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		 */
         public Context getContextForInflater(Activity activity) {
             Context context = null;
-			if (Build.VERSION.SDK_INT >= 14) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 ActionBar ab = activity.getActionBar();
                 if (ab != null) {
                     context = ab.getThemedContext();
@@ -936,18 +962,17 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 	};
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    static class RemoveViewListener implements Application.ActivityLifecycleCallbacks {
-        private final Activity mActivity;
-        private final View mViewAddedToWindowManager;
+    static class ActivityListener implements Application.ActivityLifecycleCallbacks {
+        private final PullToRefreshAttacher mPullToRefreshAttacher;
 
-        static void register(Activity activity, View viewAddedToWindowManager) {
-            RemoveViewListener listener = new RemoveViewListener(activity, viewAddedToWindowManager);
-            activity.getApplication().registerActivityLifecycleCallbacks(listener);
+        static void register(PullToRefreshAttacher pullToRefreshAttacher) {
+            ActivityListener listener = new ActivityListener(pullToRefreshAttacher);
+            pullToRefreshAttacher.getAttachedActivity().getApplication()
+                    .registerActivityLifecycleCallbacks(listener);
         }
 
-        private RemoveViewListener(Activity activity, View viewAddedToWindowManager) {
-            mActivity = activity;
-            mViewAddedToWindowManager = viewAddedToWindowManager;
+        private ActivityListener(PullToRefreshAttacher pullToRefreshAttacher) {
+            mPullToRefreshAttacher = pullToRefreshAttacher;
         }
 
         @Override
@@ -976,14 +1001,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
-            if (mActivity == activity) {
-                mActivity.getWindowManager().removeViewImmediate(mViewAddedToWindowManager);
-                unregister();
+            Activity attacherActivity = mPullToRefreshAttacher.getAttachedActivity();
+            if (attacherActivity == activity) {
+                // Destroy PullToRefreshAttacher
+                mPullToRefreshAttacher.destroy();
+                // Activity has been destroyed so, remove this listener
+                attacherActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
             }
-        }
-
-        private void unregister() {
-            mActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
         }
     }
 }

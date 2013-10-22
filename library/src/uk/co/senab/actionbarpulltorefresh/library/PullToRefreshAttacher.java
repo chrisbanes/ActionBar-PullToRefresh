@@ -69,6 +69,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final float mRefreshScrollDistance;
 
     private int mInitialMotionY, mLastMotionY, mPullBeginY;
+    private int mInitialMotionX, mLastMotionX;
     private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
 
     private final WeakHashMap<View, ViewParams> mRefreshableViews;
@@ -416,10 +417,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 // We're not currently being dragged so check to see if the user has
                 // scrolled enough
                 if (!mIsBeingDragged && mInitialMotionY > 0) {
-                    final int y = (int) event.getY();
+                    final int y = (int) event.getY(), x = (int) event.getX();
                     final int yDiff = y - mInitialMotionY;
+                    final int xDiff = x - mInitialMotionX;
 
-                    if (yDiff > mTouchSlop) {
+                    if (yDiff > xDiff && yDiff > mTouchSlop) {
                         mIsBeingDragged = true;
                         onPullStarted(y);
                     } else if (yDiff < -mTouchSlop) {
@@ -434,6 +436,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 if (canRefresh(true, params.onRefreshListener)
                         && params.viewDelegate.isReadyForPull(view, event.getX(), event.getY())) {
                     mInitialMotionY = (int) event.getY();
+                    mInitialMotionX = (int) event.getY();
                 }
                 break;
             }

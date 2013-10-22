@@ -145,16 +145,15 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 		final ViewGroup decorView = (ViewGroup) activity.getWindow()
 				.getDecorView();
 
-		// Create Header view and then add to Decor View
-		mHeaderView = LayoutInflater.from(
-				mEnvironmentDelegate.getContextForInflater(activity)).inflate(
-				options.headerLayout, decorView, false);
-		if (mHeaderView == null) {
-			throw new IllegalArgumentException(
-					"Must supply valid layout id for header.");
-		}
+        // Create Header view and then add to Decor View
+        mHeaderView = LayoutInflater.from(
+                mEnvironmentDelegate.getContextForInflater(activity)).inflate(
+                options.headerLayout, decorView, false);
+        if (mHeaderView == null) {
+            throw new IllegalArgumentException("Must supply valid layout id for header.");
+        }
         // Make Header View invisible so it still gets a layout pass
-		mHeaderView.setVisibility(View.INVISIBLE);
+        mHeaderView.setVisibility(View.INVISIBLE);
 
         mHeaderViewWrapper = new FrameLayout(mActivity);
         mHeaderViewWrapper.addView(mHeaderView);
@@ -700,7 +699,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT);
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                PixelFormat.TRANSLUCENT);
         params.x = 0;
         params.y = visibleRect.top;
         params.gravity = Gravity.TOP;

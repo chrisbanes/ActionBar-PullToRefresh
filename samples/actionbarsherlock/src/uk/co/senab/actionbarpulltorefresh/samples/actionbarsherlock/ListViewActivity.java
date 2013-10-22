@@ -17,12 +17,15 @@
 package uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
 
@@ -57,6 +60,25 @@ public class ListViewActivity extends SherlockFragmentActivity {
         // Now add ListFragment
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.ptr_fragment, new SampleListFragment()).commit();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getSupportMenuInflater().inflate(R.menu.sample, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_first:
+                Toast.makeText(this, "First Action Item", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_second:
+                Toast.makeText(this, "Second Action Item", Toast.LENGTH_SHORT).show();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

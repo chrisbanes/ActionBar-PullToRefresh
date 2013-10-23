@@ -412,14 +412,15 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. Got ViewParams. " + view.toString());
 
+        final int x = (int) event.getX(), y = (int) event.getY();
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 // We're not currently being dragged so check to see if the user has
                 // scrolled enough
                 if (!mIsBeingDragged && mInitialMotionY > 0) {
-                    final int y = (int) event.getY(), x = (int) event.getX();
-                    final int yDiff = y - mInitialMotionY;
                     final int xDiff = x - mInitialMotionX;
+                    final int yDiff = y - mInitialMotionY;
 
                     if (yDiff > xDiff && yDiff > mTouchSlop) {
                         mIsBeingDragged = true;
@@ -434,9 +435,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
                 if (canRefresh(true, params.onRefreshListener)
-                        && params.viewDelegate.isReadyForPull(view, event.getX(), event.getY())) {
-                    mInitialMotionY = (int) event.getY();
-                    mInitialMotionX = (int) event.getY();
+                        && params.viewDelegate.isReadyForPull(view, x, y)) {
+                    mInitialMotionX = x;
+                    mInitialMotionY = y;
                 }
                 break;
             }

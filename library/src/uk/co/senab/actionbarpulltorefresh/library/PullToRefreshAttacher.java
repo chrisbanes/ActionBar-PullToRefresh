@@ -69,8 +69,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final int mTouchSlop;
     private final float mRefreshScrollDistance;
 
-    private int mInitialMotionY, mLastMotionY, mPullBeginY;
-    private int mInitialMotionX, mLastMotionX;
+    private float mInitialMotionY, mLastMotionY, mPullBeginY;
+    private float mInitialMotionX, mLastMotionX;
     private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
 
     private final WeakHashMap<View, ViewParams> mRefreshableViews;
@@ -417,10 +417,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE: {
                 // We're not currently being dragged so check to see if the user has
                 // scrolled enough
-                if (!mIsBeingDragged && mInitialMotionY > 0) {
-                    final int y = (int) event.getY(), x = (int) event.getX();
-                    final int yDiff = y - mInitialMotionY;
-                    final int xDiff = x - mInitialMotionX;
+                if (!mIsBeingDragged && mInitialMotionY > 0f) {
+                    final float y = event.getY(), x = event.getX();
+                    final float yDiff = y - mInitialMotionY;
+                    final float xDiff = x - mInitialMotionX;
 
                     if (yDiff > xDiff && yDiff > mTouchSlop) {
                         mIsBeingDragged = true;
@@ -493,7 +493,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                 final int y = (int) event.getY();
 
                 if (mIsBeingDragged && y != mLastMotionY) {
-                    final int yDx = y - mLastMotionY;
+                    final float yDx = y - mLastMotionY;
 
                     /**
                      * Check to see if the user is scrolling the right direction
@@ -503,7 +503,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                     if (yDx >= -mTouchSlop) {
                         onPull(view, y);
                         // Only record the y motion if the user has scrolled down.
-                        if (yDx > 0) {
+                        if (yDx > 0f) {
                             mLastMotionY = y;
                         }
                     } else {
@@ -531,10 +531,10 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     void resetTouch() {
         mIsBeingDragged = false;
         mHandlingTouchEventFromDown = false;
-        mInitialMotionY = mLastMotionY = mPullBeginY = -1;
+        mInitialMotionY = mLastMotionY = mPullBeginY = -1f;
     }
 
-    void onPullStarted(int y) {
+    void onPullStarted(float y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPullStarted");
         }
@@ -542,13 +542,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         mPullBeginY = y;
     }
 
-    void onPull(View view, int y) {
+    void onPull(View view, float y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onPull");
         }
 
         final float pxScrollForRefresh = getScrollNeededForRefresh(view);
-        final int scrollLength = y - mPullBeginY;
+        final float scrollLength = y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);

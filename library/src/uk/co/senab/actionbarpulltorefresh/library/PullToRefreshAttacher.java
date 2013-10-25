@@ -622,7 +622,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     private void setRefreshingInt(View view, boolean refreshing, boolean fromTouch) {
-        clearRefreshableViews();
+        checkIfDestroyed();
 
         if (DEBUG) Log.d(LOG_TAG, "setRefreshingInt: " + refreshing);
         // Check to see if we need to do anything

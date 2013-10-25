@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import java.lang.ref.WeakReference;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -433,8 +434,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (canRefresh(true, params.onRefreshListener)
-                        && params.viewDelegate.isReadyForPull(view, event.getX(), event.getY())) {
+                if (canRefresh(true, params.getOnRefreshListener())
+                        && params.mViewDelegate.isReadyForPull(view, event.getX(), event.getY())) {
                     mInitialMotionY = (int) event.getY();
                     mInitialMotionX = (int) event.getY();
                 }
@@ -631,7 +632,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         if (view != null) {
             ViewParams params = mRefreshableViews.get(view);
             if (params != null) {
-                return params.onRefreshListener;
+                return params.getOnRefreshListener();
             }
         }
         return null;
@@ -942,13 +943,20 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     private static final class ViewParams {
-        final OnRefreshListener onRefreshListener;
-        final ViewDelegate viewDelegate;
+        private final WeakReference<OnRefreshListener> mOnRefreshListener;
+        private final ViewDelegate mViewDelegate;
 
-        ViewParams(ViewDelegate _viewDelegate,
-                OnRefreshListener _onRefreshListener) {
-            onRefreshListener = _onRefreshListener;
-            viewDelegate = _viewDelegate;
+        ViewParams(ViewDelegate viewDelegate, OnRefreshListener onRefreshListener) {
+            mOnRefreshListener = new WeakReference<OnRefreshListener>(onRefreshListener);
+            mViewDelegate = viewDelegate;
+        }
+
+        OnRefreshListener getOnRefreshListener() {
+            return mOnRefreshListener.get();
+        }
+
+        ViewDelegate getViewDelegate() {
+            return mViewDelegate;
         }
     }
 

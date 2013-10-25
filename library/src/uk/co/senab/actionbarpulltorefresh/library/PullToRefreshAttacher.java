@@ -435,9 +435,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
                 if (canRefresh(true, params.getOnRefreshListener())
-                        && params.mViewDelegate.isReadyForPull(view, event.getX(), event.getY())) {
+                        && params.getViewDelegate().isReadyForPull(view, event.getX(), event.getY())) {
                     mInitialMotionY = (int) event.getY();
-                    mInitialMotionX = (int) event.getY();
+                    mInitialMotionX = (int) event.getX();
                 }
                 break;
             }

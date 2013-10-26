@@ -70,7 +70,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final float mRefreshScrollDistance;
 
     private float mInitialMotionY, mLastMotionY, mPullBeginY;
-    private float mInitialMotionX, mLastMotionX;
+    private float mInitialMotionX;
     private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
 
     private final WeakHashMap<View, ViewParams> mRefreshableViews;
@@ -424,14 +424,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. Got ViewParams. " + view.toString());
 
-        final int x = (int) event.getX(), y = (int) event.getY();
+        final float x = event.getX(), y = event.getY();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 // We're not currently being dragged so check to see if the user has
                 // scrolled enough
                 if (!mIsBeingDragged && mInitialMotionY > 0f) {
-                    final float y = event.getY(), x = event.getX();
                     final float yDiff = y - mInitialMotionY;
                     final float xDiff = x - mInitialMotionX;
 
@@ -448,9 +447,9 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
                 if (canRefresh(true, params.getOnRefreshListener())
-                        && params.getViewDelegate().isReadyForPull(view, event.getX(), event.getY())) {
-                    mInitialMotionY = (int) event.getY();
-                    mInitialMotionX = (int) event.getX();
+                        && params.getViewDelegate().isReadyForPull(view, x, y)) {
+                    mInitialMotionX = x;
+                    mInitialMotionY = y;
                 }
                 break;
             }
@@ -503,7 +502,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
                     return false;
                 }
 
-                final int y = (int) event.getY();
+                final float y = event.getY();
 
                 if (mIsBeingDragged && y != mLastMotionY) {
                     final float yDx = y - mLastMotionY;

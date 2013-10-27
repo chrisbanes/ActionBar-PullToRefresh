@@ -109,12 +109,22 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    protected void onDetachedFromWindow() {
+        // Detach all refreshable views
+        if (mPullToRefreshAttacher != null) {
+            for (int i = 0, z = getChildCount(); i < z; i++) {
+                mPullToRefreshAttacher.removeRefreshableView(getChildAt(i));
+            }
+        }
+        super.onDetachedFromWindow();
+    }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
         if (mPullToRefreshAttacher != null) {
             mPullToRefreshAttacher.onConfigurationChanged(newConfig);
         }
+        super.onConfigurationChanged(newConfig);
     }
 
     private View getChildForTouchEvent(MotionEvent event) {

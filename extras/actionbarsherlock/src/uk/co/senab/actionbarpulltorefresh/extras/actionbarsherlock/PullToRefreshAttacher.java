@@ -29,19 +29,12 @@ import android.content.Context;
 public class PullToRefreshAttacher extends
         uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher {
 
-    static final Creator<PullToRefreshAttacher> CREATOR = new Creator<PullToRefreshAttacher>() {
-        @Override
-        public PullToRefreshAttacher create(Activity activity, Options options) {
-            return new PullToRefreshAttacher(activity, options);
-        }
-    };
-
     public static PullToRefreshAttacher get(Activity activity) {
         return get(activity, new Options());
     }
 
     public static PullToRefreshAttacher get(Activity activity, Options options) {
-        return get(activity, options, CREATOR);
+        return new PullToRefreshAttacher(activity, options);
     }
 
     protected PullToRefreshAttacher(Activity activity, Options options) {

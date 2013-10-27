@@ -37,7 +37,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import java.lang.ref.WeakReference;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -228,7 +227,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     void addRefreshableView(View view, ViewDelegate viewDelegate,
             OnRefreshListener refreshListener, final boolean setTouchListener) {
-        checkIfDestroyed();
+        if (isDestroyed()) return;
+
         // Check to see if view is null
         if (view == null) {
             Log.i(LOG_TAG, "Refreshable View is null.");
@@ -263,7 +263,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      *            - View which will be used to initiate refresh requests.
      */
     public void removeRefreshableView(View view) {
-        checkIfDestroyed();
         if (mRefreshableViews.containsKey(view)) {
             mRefreshableViews.remove(view);
             view.setOnTouchListener(null);
@@ -274,7 +273,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Clear all views which were previously used to initiate refresh requests.
      */
     public void clearRefreshableViews() {
-        checkIfDestroyed();
         Set<View> views = mRefreshableViews.keySet();
         for (View view : views) {
             view.setOnTouchListener(null);
@@ -364,6 +362,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // Lets clear out all of our internal state
         clearRefreshableViews();
+
         mActivity = null;
         mHeaderView = mHeaderViewWrapper = null;
         mHeaderViewListener = null;
@@ -540,6 +539,16 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         return true;
     }
 
+    void minimizeHeader() {
+        if (isDestroyed()) return;
+
+        mHeaderTransformer.onRefreshMinimized();
+
+        if (mHeaderViewListener != null) {
+            mHeaderViewListener.onStateChanged(mHeaderView, HeaderViewListener.STATE_MINIMIZED);
+        }
+    }
+
     void resetTouch() {
         mIsBeingDragged = false;
         mHandlingTouchEventFromDown = false;
@@ -623,7 +632,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     private void setRefreshingInt(View view, boolean refreshing, boolean fromTouch) {
-        checkIfDestroyed();
+        if (isDestroyed()) return;
 
         if (DEBUG) Log.d(LOG_TAG, "setRefreshingInt: " + refreshing);
         // Check to see if we need to do anything
@@ -705,10 +714,11 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         }
     }
 
-    private void checkIfDestroyed() {
+    private boolean isDestroyed() {
         if (mIsDestroyed) {
-            throw new IllegalStateException("PullToRefreshAttacher is destroyed.");
+            Log.i(LOG_TAG, "PullToRefreshAttacher is destroyed.");
         }
+        return mIsDestroyed;
     }
 
     protected void addHeaderViewToActivity(View headerViewLayout, Activity activity) {
@@ -974,12 +984,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private final Runnable mRefreshMinimizeRunnable = new Runnable() {
         @Override
         public void run() {
-            mHeaderTransformer.onRefreshMinimized();
-
-            if (mHeaderViewListener != null) {
-                mHeaderViewListener.onStateChanged(mHeaderView,
-                        HeaderViewListener.STATE_MINIMIZED);
-            }
+            minimizeHeader();
         }
     };
 

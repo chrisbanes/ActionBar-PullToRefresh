@@ -446,8 +446,8 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (canRefresh(true, params.getOnRefreshListener())
-                        && params.getViewDelegate().isReadyForPull(view, x, y)) {
+                if (canRefresh(true, params.onRefreshListener) && params.viewDelegate
+                        .isReadyForPull(view, x, y)) {
                     mInitialMotionX = x;
                     mInitialMotionY = y;
                 }
@@ -644,7 +644,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
         if (view != null) {
             ViewParams params = mRefreshableViews.get(view);
             if (params != null) {
-                return params.getOnRefreshListener();
+                return params.onRefreshListener;
             }
         }
         return null;
@@ -961,20 +961,13 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     private static final class ViewParams {
-        private final WeakReference<OnRefreshListener> mOnRefreshListener;
-        private final ViewDelegate mViewDelegate;
+        final OnRefreshListener onRefreshListener;
+        final ViewDelegate viewDelegate;
 
-        ViewParams(ViewDelegate viewDelegate, OnRefreshListener onRefreshListener) {
-            mOnRefreshListener = new WeakReference<OnRefreshListener>(onRefreshListener);
-            mViewDelegate = viewDelegate;
-        }
-
-        OnRefreshListener getOnRefreshListener() {
-            return mOnRefreshListener.get();
-        }
-
-        ViewDelegate getViewDelegate() {
-            return mViewDelegate;
+        ViewParams(ViewDelegate _viewDelegate,
+                OnRefreshListener _onRefreshListener) {
+            onRefreshListener = _onRefreshListener;
+            viewDelegate = _viewDelegate;
         }
     }
 

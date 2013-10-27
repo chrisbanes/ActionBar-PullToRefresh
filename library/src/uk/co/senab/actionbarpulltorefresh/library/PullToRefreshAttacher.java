@@ -55,6 +55,65 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
+    private static final WeakHashMap<Activity, PullToRefreshAttacher> ATTACHERS
+            = new WeakHashMap<Activity, PullToRefreshAttacher>();
+
+    protected interface Creator<T extends PullToRefreshAttacher> {
+        T create(Activity activity, Options options);
+    }
+
+    static final Creator<PullToRefreshAttacher> CREATOR = new Creator<PullToRefreshAttacher>() {
+        @Override
+        public PullToRefreshAttacher create(Activity activity, Options options) {
+            return new PullToRefreshAttacher(activity, options);
+        }
+    };
+
+    /**
+     * Get a PullToRefreshAttacher for this Activity. If there is already a
+     * PullToRefreshAttacher attached to the Activity, the existing one is
+     * returned, otherwise a new instance is created. This version of the method
+     * will use default configuration options for everything.
+     *
+     * @param activity Activity to attach to.
+     * @return PullToRefresh attached to the Activity.
+     */
+    public static PullToRefreshAttacher get(Activity activity) {
+        return get(activity, new Options());
+    }
+
+    /**
+     * Get a PullToRefreshAttacher for this Activity. If there is already a
+     * PullToRefreshAttacher attached to the Activity, the existing one is
+     * returned, otherwise a new instance is created.
+     *
+     * @param activity Activity to attach to.
+     * @param options Options used when creating the PullToRefreshAttacher.
+     * @return PullToRefresh attached to the Activity.
+     */
+    public static PullToRefreshAttacher get(final Activity activity, final Options options) {
+        return get(activity, options, CREATOR);
+    }
+
+    /**
+     * Internal version of {@link #get(Activity, Options)}
+     */
+    protected static <T extends PullToRefreshAttacher> T get(Activity activity, Options options,
+            Creator<T> creator) {
+        T attacher = (T) ATTACHERS.get(activity);
+
+        // We don't have a attacher, so create one
+        if (attacher == null) {
+            if (DEBUG) Log.d(LOG_TAG, "Creating new Attacher for Activity: " + activity);
+            attacher = creator.create(activity, options);
+            ATTACHERS.put(activity, attacher);
+        } else {
+            if (DEBUG) Log.d(LOG_TAG, "Re-using existing Attacher for Activity: " + activity);
+        }
+
+        return attacher;
+    }
+
 	/* Member Variables */
 
     private EnvironmentDelegate mEnvironmentDelegate;
@@ -81,35 +140,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     private boolean mIsDestroyed = false;
 
     private final Handler mHandler = new Handler();
-
-    /**
-     * Get a PullToRefreshAttacher for this Activity. If there is already a
-     * PullToRefreshAttacher attached to the Activity, the existing one is
-     * returned, otherwise a new instance is created. This version of the method
-     * will use default configuration options for everything.
-     *
-     * @param activity
-     *            Activity to attach to.
-     * @return PullToRefresh attached to the Activity.
-     */
-    public static PullToRefreshAttacher get(Activity activity) {
-        return get(activity, new Options());
-    }
-
-    /**
-     * Get a PullToRefreshAttacher for this Activity. If there is already a
-     * PullToRefreshAttacher attached to the Activity, the existing one is
-     * returned, otherwise a new instance is created.
-     *
-     * @param activity
-     *            Activity to attach to.
-     * @param options
-     *            Options used when creating the PullToRefreshAttacher.
-     * @return PullToRefresh attached to the Activity.
-     */
-    public static PullToRefreshAttacher get(Activity activity, Options options) {
-        return new PullToRefreshAttacher(activity, options);
-    }
 
     protected PullToRefreshAttacher(Activity activity, Options options) {
         if (options == null) {

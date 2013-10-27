@@ -41,7 +41,6 @@ public class FragmentTabsViewPagerActivity extends ActionBarActivity {
     private static String EXTRA_TITLE = "extra_title";
 
     private FragmentTabPager mFragmentTabPager;
-    private PullToRefreshAttacher mPullToRefreshAttacher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +49,6 @@ public class FragmentTabsViewPagerActivity extends ActionBarActivity {
         setContentView(R.layout.activity_fragment_tabs_vp);
         ViewPager vp = (ViewPager) findViewById(R.id.ptr_viewpager);
         mFragmentTabPager = new FragmentTabPager(this, vp);
-
-        // The attacher should always be created in the Activity's onCreate
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         // Add 3 tabs which will switch fragments
         ActionBar ab = getSupportActionBar();
@@ -69,18 +65,6 @@ public class FragmentTabsViewPagerActivity extends ActionBarActivity {
         b = new Bundle();
         b.putString(EXTRA_TITLE, "Tab 3");
         mFragmentTabPager.addTab(ab.newTab().setText("Tab 3"), SampleFragment.class, b);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // Need to call destroy() manually on devices pre-ICS
-        mPullToRefreshAttacher.destroy();
-    }
-
-    PullToRefreshAttacher getPullToRefreshAttacher() {
-        return mPullToRefreshAttacher;
     }
 
     /**
@@ -101,10 +85,8 @@ public class FragmentTabsViewPagerActivity extends ActionBarActivity {
             // The ScrollView is what we'll be listening to for refresh starts
             mScrollView = (ScrollView) view.findViewById(R.id.ptr_scrollview);
 
-            // Now get the PullToRefresh attacher from the Activity. An exercise to the reader
-            // is to create an implicit interface instead of casting to the concrete Activity
-            mPullToRefreshAttacher = ((FragmentTabsViewPagerActivity) getActivity())
-                    .getPullToRefreshAttacher();
+            // Now create the PullToRefreshAttacher
+            mPullToRefreshAttacher = PullToRefreshAttacher.get(getActivity());
 
             // Now set the ScrollView as the refreshable view, and the refresh listener (this)
             mPullToRefreshAttacher.addRefreshableView(mScrollView, this);
@@ -117,6 +99,14 @@ public class FragmentTabsViewPagerActivity extends ActionBarActivity {
             }
 
             return view;
+        }
+
+        @Override
+        public void onDestroy() {
+            // We now need to destroy the PullToRefreshAttacher
+            mPullToRefreshAttacher.destroy();
+
+            super.onDestroy();
         }
 
         @Override

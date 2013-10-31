@@ -16,6 +16,6 @@
 
 <resources>
     <string name="pull_to_refresh_pull_label">Potiahnite pre načítanie...</string>
-    <string name="pull_to_refresh_release_label">Uvolnite pre načítanie...</string>
+    <string name="pull_to_refresh_release_label">Uvoľnite pre načítanie...</string>
     <string name="pull_to_refresh_refreshing_label">Načítavanie...</string>
 </resources>

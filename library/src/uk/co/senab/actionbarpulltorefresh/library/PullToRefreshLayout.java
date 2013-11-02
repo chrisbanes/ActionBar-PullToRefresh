@@ -63,7 +63,7 @@ public class PullToRefreshLayout extends FrameLayout {
 
             if (attacher != null) {
                 if (DEBUG) Log.d(LOG_TAG, "Adding View to Attacher: " + view);
-                attacher.addRefreshableView(view, null, refreshListener, false);
+                attacher.addRefreshableView(view, null, refreshListener);
             }
         }
 

@@ -20,9 +20,12 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import java.util.HashSet;
 
 /**
  * FIXME
@@ -34,6 +37,8 @@ public class PullToRefreshLayout extends FrameLayout {
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
     private View mCurrentTouchTarget;
+
+    private HashSet<Integer> mViewIdsToAdd;
 
     public PullToRefreshLayout(Context context) {
         this(context, null);
@@ -48,11 +53,33 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     /**
-     * Set the {@link PullToRefreshAttacher} to be used with this layout. The view which is added
-     * to this layout will automatically be added as a refreshable-view in the attacher.
+     * @deprecated Use {@link #setPullToRefreshAttacher(PullToRefreshAttacher)} instead.
      */
     public void setPullToRefreshAttacher(PullToRefreshAttacher attacher,
             PullToRefreshAttacher.OnRefreshListener refreshListener) {
+        setPullToRefreshAttacher(attacher);
+
+        // Model the deprecated behaviour by setting the refresh listener
+        if (attacher != null) {
+            attacher.setOnRefreshListener(refreshListener);
+        }
+    }
+
+    /**
+     * Set the {@link PullToRefreshAttacher} to be used with this layout. All views which are added to
+     * this layout will automatically be added as a refreshable-view in the attacher.
+     */
+    public void setPullToRefreshAttacher(PullToRefreshAttacher attacher) {
+        setPullToRefreshAttacher(attacher, true);
+    }
+
+    /**
+     * Set the {@link PullToRefreshAttacher} to be used with this layout.
+     *
+     * @param addAllViews Whether to add all views which are added to this layout will automatically
+     *                    be added as a refreshable-view in the attacher.
+     */
+    public void setPullToRefreshAttacher(PullToRefreshAttacher attacher, boolean addAllViews) {
         View view;
         for (int i = 0, z = getChildCount(); i < z; i++) {
             view = getChildAt(i);
@@ -62,17 +89,42 @@ public class PullToRefreshLayout extends FrameLayout {
             }
 
             if (attacher != null) {
-                if (DEBUG) Log.d(LOG_TAG, "Adding View to Attacher: " + view);
-                attacher.addRefreshableView(view, null, refreshListener);
+                if (addAllViews) {
+                    if (DEBUG) {
+                        Log.d(LOG_TAG, "Adding View to Attacher: " + view);
+                    }
+                    attacher.addRefreshableView(view, null);
+                } else if (mViewIdsToAdd != null) {
+                    for (Integer viewId : mViewIdsToAdd) {
+                        addRefreshableView(viewId);
+                    }
+                    mViewIdsToAdd = null;
+                }
             }
         }
 
         mPullToRefreshAttacher = attacher;
     }
 
+    public void addRefreshableView(int viewId) {
+        View view = findViewById(viewId);
+        if (view != null) {
+            if (mPullToRefreshAttacher != null) {
+                mPullToRefreshAttacher.addRefreshableView(view, null);
+            } else {
+                if (mViewIdsToAdd == null) {
+                    mViewIdsToAdd = new HashSet<Integer>();
+                }
+                mViewIdsToAdd.add(viewId);
+            }
+        }
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. " + event.toString());
+        if (DEBUG) {
+            Log.d(LOG_TAG, "onInterceptTouchEvent. " + event.toString());
+        }
 
         if (mPullToRefreshAttacher != null && getChildCount() > 0) {
             View target = getChildForTouchEvent(event);
@@ -88,7 +140,9 @@ public class PullToRefreshLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (DEBUG) Log.d(LOG_TAG, "onTouchEvent. " + event.toString());
+        if (DEBUG) {
+            Log.d(LOG_TAG, "onTouchEvent. " + event.toString());
+        }
 
         if (mPullToRefreshAttacher != null) {
             // This is an edge-case. If the ViewGroup does not contain a valid touch target then
@@ -130,11 +184,13 @@ public class PullToRefreshLayout extends FrameLayout {
     private View getChildForTouchEvent(MotionEvent event) {
         final float x = event.getX(), y = event.getY();
         View child;
-        for (int z = getChildCount() - 1;  z >= 0 ; z--) {
+        for (int z = getChildCount() - 1; z >= 0; z--) {
             child = getChildAt(z);
             if (child.isShown() && x >= child.getLeft() && x <= child.getRight()
                     && y >= child.getTop() && y <= child.getBottom()) {
-                if (DEBUG) Log.d(LOG_TAG, "Got Child for Touch Event: " + child);
+                if (DEBUG) {
+                    Log.d(LOG_TAG, "Got Child for Touch Event: " + child);
+                }
                 return child;
             }
         }

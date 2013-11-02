@@ -60,6 +60,8 @@ public class PullToRefreshAttacher {
     private EnvironmentDelegate mEnvironmentDelegate;
     private HeaderTransformer mHeaderTransformer;
 
+    private OnRefreshListener mOnRefreshListener;
+
     private Activity mActivity;
     private View mHeaderView;
     private FrameLayout mHeaderViewWrapper;
@@ -72,7 +74,7 @@ public class PullToRefreshAttacher {
     private float mInitialMotionX;
     private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
 
-    private final WeakHashMap<View, ViewParams> mRefreshableViews;
+    private final WeakHashMap<View, ViewDelegate> mRefreshableViews;
 
     private boolean mEnabled = true;
     private final boolean mRefreshOnUp;
@@ -123,7 +125,7 @@ public class PullToRefreshAttacher {
             ActivityListener.register(this);
         }
 
-        mRefreshableViews = new WeakHashMap<View, ViewParams>();
+        mRefreshableViews = new WeakHashMap<View, ViewDelegate>();
 
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
@@ -188,21 +190,14 @@ public class PullToRefreshAttacher {
      *            View which will be used to initiate refresh requests.
      * @param viewDelegate
      *            delegate which knows how to handle <code>view</code>.
-     * @param refreshListener
-     *            Listener to be invoked when a refresh is started.
      */
-    void addRefreshableView(View view, ViewDelegate viewDelegate, OnRefreshListener refreshListener) {
+    void addRefreshableView(View view, ViewDelegate viewDelegate) {
         if (isDestroyed()) return;
 
         // Check to see if view is null
         if (view == null) {
             Log.i(LOG_TAG, "Refreshable View is null.");
             return;
-        }
-
-        if (refreshListener == null) {
-            throw new IllegalArgumentException(
-                    "OnRefreshListener not given. Please provide one.");
         }
 
         // ViewDelegate
@@ -215,7 +210,7 @@ public class PullToRefreshAttacher {
         }
 
         // View to detect refreshes for
-        mRefreshableViews.put(view, new ViewParams(viewDelegate, refreshListener));
+        mRefreshableViews.put(view, viewDelegate);
     }
 
     /**
@@ -305,6 +300,13 @@ public class PullToRefreshAttacher {
     }
 
     /**
+     * Set the Listener to be called when a refresh is initiated.
+     */
+    public void setOnRefreshListener(OnRefreshListener listener) {
+        mOnRefreshListener = listener;
+    }
+
+    /**
      * This should be called when you now longer need the Pull-to-Refresh functionality. Typically
      * from your {@link android.app.Activity#onDestroy()}.
      *
@@ -365,8 +367,8 @@ public class PullToRefreshAttacher {
             return false;
         }
 
-        final ViewParams params = mRefreshableViews.get(view);
-        if (params == null) {
+        final ViewDelegate viewDelegate = mRefreshableViews.get(view);
+        if (viewDelegate == null) {
             return false;
         }
 
@@ -394,8 +396,7 @@ public class PullToRefreshAttacher {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (canRefresh(true, params.onRefreshListener) && params.viewDelegate
-                        .isReadyForPull(view, x, y)) {
+                if (canRefresh(true) && viewDelegate.isReadyForPull(view, x, y)) {
                     mInitialMotionX = x;
                     mInitialMotionY = y;
                 }
@@ -425,11 +426,7 @@ public class PullToRefreshAttacher {
             return false;
         }
 
-        final ViewParams params = mRefreshableViews.get(view);
-        if (params == null) {
-            Log.i(LOG_TAG, "View does not have ViewParams");
-            return false;
-        }
+        final ViewDelegate delegate = mRefreshableViews.get(view);
 
         // Record whether our handling is started from ACTION_DOWN
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -591,31 +588,20 @@ public class PullToRefreshAttacher {
 
         resetTouch();
 
-        if (refreshing && canRefresh(fromTouch, getRefreshListenerForView(view))) {
+        if (refreshing && canRefresh(fromTouch)) {
             startRefresh(view, fromTouch);
         } else {
             reset(fromTouch);
         }
     }
 
-    private OnRefreshListener getRefreshListenerForView(View view) {
-        if (view != null) {
-            ViewParams params = mRefreshableViews.get(view);
-            if (params != null) {
-                return params.onRefreshListener;
-            }
-        }
-        return null;
-    }
-
     /**
-     * @param fromTouch
-     *            - Whether this is being invoked from a touch event
+     * @param fromTouch Whether this is being invoked from a touch event
      * @return true if we're currently in a state where a refresh can be
      *         started.
      */
-    private boolean canRefresh(boolean fromTouch, OnRefreshListener listener) {
-        return !mIsRefreshing && (!fromTouch || listener != null);
+    private boolean canRefresh(boolean fromTouch) {
+        return !mIsRefreshing && (!fromTouch || mOnRefreshListener != null);
     }
 
     private float getScrollNeededForRefresh(View view) {
@@ -641,9 +627,8 @@ public class PullToRefreshAttacher {
 
         // Call OnRefreshListener if this call has originated from a touch event
         if (fromTouch) {
-            OnRefreshListener listener = getRefreshListenerForView(view);
-            if (listener != null) {
-                listener.onRefreshStarted(view);
+            if (mOnRefreshListener != null) {
+                mOnRefreshListener.onRefreshStarted(view);
             }
         }
 
@@ -917,17 +902,6 @@ public class PullToRefreshAttacher {
          * until the refresh is finished.
          */
         public boolean refreshMinimize = DEFAULT_REFRESH_MINIMIZE;
-    }
-
-    private static final class ViewParams {
-        final OnRefreshListener onRefreshListener;
-        final ViewDelegate viewDelegate;
-
-        ViewParams(ViewDelegate _viewDelegate,
-                OnRefreshListener _onRefreshListener) {
-            onRefreshListener = _onRefreshListener;
-            viewDelegate = _viewDelegate;
-        }
     }
 
     private final Runnable mRefreshMinimizeRunnable = new Runnable() {

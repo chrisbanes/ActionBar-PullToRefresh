@@ -29,11 +29,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
  * A sample which show you how to use PullToRefreshAttacher with Fragments.
  */
-public class FragmentTabsActivity extends Activity implements ActionBar.TabListener {
+public class FragmentTabsActivity extends BaseSampleActivity implements ActionBar.TabListener {
     private static String EXTRA_TITLE = "extra_title";
 
     @Override
@@ -92,9 +93,12 @@ public class FragmentTabsActivity extends Activity implements ActionBar.TabListe
 
             // Now create the PullToRefreshAttacher
             mPullToRefreshAttacher = PullToRefreshAttacher.get(getActivity());
+            mPullToRefreshAttacher.setOnRefreshListener(this);
 
-            // Now set the ScrollView as the refreshable view, and the refresh listener (this)
-            mPullToRefreshAttacher.addRefreshableView(scrollView, this);
+            // Now give the created Attacher to the PullToRefreshLayout and the refresh listener to
+            // be this.
+            PullToRefreshLayout ptrLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
+            ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);

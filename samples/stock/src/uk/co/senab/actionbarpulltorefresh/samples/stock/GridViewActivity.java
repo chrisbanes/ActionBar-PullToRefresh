@@ -26,13 +26,14 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.AbsListViewDelegate;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.GridView
  * GridView}, and manually creating (and attaching) a {@link PullToRefreshAttacher} to the view.
  */
-public class GridViewActivity extends Activity
+public class GridViewActivity extends BaseSampleActivity
         implements PullToRefreshAttacher.OnRefreshListener {
 
     private static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
@@ -70,15 +71,12 @@ public class GridViewActivity extends Activity
 
         // Here we create a PullToRefreshAttacher manually with the Options instance created above.
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this, ptrOptions);
+        mPullToRefreshAttacher.setOnRefreshListener(this);
 
-        /**
-         * As GridView is an AbsListView derived class, we create a new
-         * AbsListViewDelegate instance. You do NOT need to do this if you're using
-         * a supported scrollable Views. It is merely in this sample to show you how to set a
-         * custom view delegate.
-         */
-        PullToRefreshAttacher.ViewDelegate handler = new AbsListViewDelegate();
-        mPullToRefreshAttacher.addRefreshableView(gridView, handler, this);
+        // Now give the created Attacher to the PullToRefreshLayout and the refresh listener to
+        // be this.
+        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
+        ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher);
     }
 
     @Override

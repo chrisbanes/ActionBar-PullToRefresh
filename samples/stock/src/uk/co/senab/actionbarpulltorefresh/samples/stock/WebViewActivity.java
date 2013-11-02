@@ -30,7 +30,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
  * {@link android.webkit.WebView WebView}, and manually creating (and attaching) a
  * {@link uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher} to the view.
  */
-public class WebViewActivity extends Activity implements PullToRefreshAttacher.OnRefreshListener {
+public class WebViewActivity extends BaseSampleActivity implements PullToRefreshAttacher.OnRefreshListener {
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
 
@@ -53,9 +53,10 @@ public class WebViewActivity extends Activity implements PullToRefreshAttacher.O
          * PullToRefreshAttacher will manually create one using default values.
          */
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
+        mPullToRefreshAttacher.setOnRefreshListener(this);
 
         // Retrieve the PullToRefreshLayout from the content view
-        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_webview);
+        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
 
         // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
         // listener (this).

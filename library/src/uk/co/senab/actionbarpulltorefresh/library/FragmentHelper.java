@@ -40,9 +40,8 @@ public class FragmentHelper {
      * @return The created {@link PullToRefreshLayout}
      */
     public static PullToRefreshLayout wrapListFragmentView(View view) {
-        PullToRefreshLayout ptrLayout = new PullToRefreshLayout(view.getContext());
-
         if (view instanceof ViewGroup) {
+            PullToRefreshLayout ptrLayout = new PullToRefreshLayout(view.getContext());
             ViewGroup viewGroup = (ViewGroup) view;
 
             // Move all children to PullToRefreshLayout. This code looks a bit silly but the child
@@ -59,9 +58,11 @@ public class FragmentHelper {
 
             ptrLayout.addRefreshableView(android.R.id.list);
             ptrLayout.addRefreshableView(android.R.id.empty);
-        }
 
-        return ptrLayout;
+            return ptrLayout;
+        } else {
+            return null;
+        }
     }
 
 }

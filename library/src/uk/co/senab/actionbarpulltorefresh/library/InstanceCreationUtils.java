@@ -58,10 +58,7 @@ class InstanceCreationUtils {
                         entry.getValue(), VIEW_DELEGATE_CONSTRUCTOR_SIGNATURE, null);
             }
         }
-
-        // Default is the ScrollYDelegate
-        return InstanceCreationUtils.newInstance(view.getContext(),
-                ScrollYDelegate.class, VIEW_DELEGATE_CONSTRUCTOR_SIGNATURE, null);
+        return null;
     }
 
     static <T> T instantiateViewDelegate(Context context, String className, Object[] arguments) {

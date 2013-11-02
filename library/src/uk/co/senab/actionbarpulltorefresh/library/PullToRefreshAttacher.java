@@ -43,7 +43,7 @@ import java.util.WeakHashMap;
 /**
  * FIXME
  */
-public class PullToRefreshAttacher implements View.OnTouchListener {
+public class PullToRefreshAttacher {
 
     /* Default configuration values */
     private static final int DEFAULT_HEADER_LAYOUT = R.layout.default_header;
@@ -180,20 +180,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     }
 
     /**
-     * Add a view which will be used to initiate refresh requests and a listener
-     * to be invoked when a refresh is started. This version of the method will
-     * try to find a handler for the view from the built-in view delegates.
-     *
-     * @param view
-     *            View which will be used to initiate refresh requests.
-     * @param refreshListener
-     *            Listener to be invoked when a refresh is started.
-     */
-    public void addRefreshableView(View view, OnRefreshListener refreshListener) {
-        addRefreshableView(view, null, refreshListener);
-    }
-
-    /**
      * Add a view which will be used to initiate refresh requests, along with a
      * delegate which knows how to handle the given view, and a listener to be
      * invoked when a refresh is started.
@@ -205,28 +191,7 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * @param refreshListener
      *            Listener to be invoked when a refresh is started.
      */
-    public void addRefreshableView(View view, ViewDelegate viewDelegate,
-            OnRefreshListener refreshListener) {
-        addRefreshableView(view, viewDelegate, refreshListener, true);
-    }
-
-    /**
-     * Add a view which will be used to initiate refresh requests, along with a
-     * delegate which knows how to handle the given view, and a listener to be
-     * invoked when a refresh is started.
-     *
-     * @param view
-     *            View which will be used to initiate refresh requests.
-     * @param viewDelegate
-     *            delegate which knows how to handle <code>view</code>.
-     * @param refreshListener
-     *            Listener to be invoked when a refresh is started.
-     * @param setTouchListener
-     *            Whether to set this as the
-     *            {@link android.view.View.OnTouchListener}.
-     */
-    void addRefreshableView(View view, ViewDelegate viewDelegate,
-            OnRefreshListener refreshListener, final boolean setTouchListener) {
+    void addRefreshableView(View view, ViewDelegate viewDelegate, OnRefreshListener refreshListener) {
         if (isDestroyed()) return;
 
         // Check to see if view is null
@@ -251,9 +216,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
 
         // View to detect refreshes for
         mRefreshableViews.put(view, new ViewParams(viewDelegate, refreshListener));
-        if (setTouchListener) {
-            view.setOnTouchListener(this);
-        }
     }
 
     /**
@@ -265,7 +227,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
     public void removeRefreshableView(View view) {
         if (mRefreshableViews.containsKey(view)) {
             mRefreshableViews.remove(view);
-            view.setOnTouchListener(null);
         }
     }
 
@@ -273,10 +234,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      * Clear all views which were previously used to initiate refresh requests.
      */
     public void clearRefreshableViews() {
-        Set<View> views = mRefreshableViews.keySet();
-        for (View view : views) {
-            view.setOnTouchListener(null);
-        }
         mRefreshableViews.clear();
     }
 
@@ -395,14 +352,6 @@ public class PullToRefreshAttacher implements View.OnTouchListener {
      */
     public HeaderTransformer getHeaderTransformer() {
         return mHeaderTransformer;
-    }
-
-    @Override
-    public final boolean onTouch(final View view, final MotionEvent event) {
-        // Just call onTouchEvent. It now handles the proper calling of onInterceptTouchEvent
-        onTouchEvent(view, event);
-        // Always return false as we only want to observe events
-        return false;
     }
 
     final boolean onInterceptTouchEvent(View view, MotionEvent event) {

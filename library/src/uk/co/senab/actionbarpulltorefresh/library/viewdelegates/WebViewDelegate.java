@@ -26,7 +26,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
  */
 public class WebViewDelegate extends PullToRefreshAttacher.ViewDelegate {
 
-    public static final Class SUPPORTED_VIEW_CLASS = WebView.class;
+    public static final Class[] SUPPORTED_VIEW_CLASSES =  { WebView.class };
 
     @Override
     public boolean isReadyForPull(View view, float x, float y) {

@@ -17,6 +17,7 @@
 package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
 
 import android.view.View;
+import android.widget.ScrollView;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
@@ -24,6 +25,8 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
  * FIXME
  */
 public class ScrollYDelegate extends PullToRefreshAttacher.ViewDelegate {
+
+    public static final Class[] SUPPORTED_VIEW_CLASSES =  { ScrollView.class };
 
     @Override
     public boolean isReadyForPull(View view, float x, float y) {

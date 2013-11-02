@@ -29,7 +29,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 public class AbsListViewDelegate
         extends PullToRefreshAttacher.ViewDelegate {
 
-    public static final Class SUPPORTED_VIEW_CLASS = AbsListView.class;
+    public static final Class[] SUPPORTED_VIEW_CLASSES =  { AbsListView.class };
 
     @Override
     public boolean isReadyForPull(View view, final float x, final float y) {

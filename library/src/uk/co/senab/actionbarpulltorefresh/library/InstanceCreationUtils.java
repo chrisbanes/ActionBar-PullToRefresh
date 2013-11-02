@@ -39,8 +39,15 @@ class InstanceCreationUtils {
     private static final HashMap<Class, Class> BUILT_IN_DELEGATES;
     static {
         BUILT_IN_DELEGATES = new HashMap<Class, Class>();
-        BUILT_IN_DELEGATES.put(AbsListViewDelegate.SUPPORTED_VIEW_CLASS, AbsListViewDelegate.class);
-        BUILT_IN_DELEGATES.put(WebViewDelegate.SUPPORTED_VIEW_CLASS, WebViewDelegate.class);
+        addBuiltinDelegates(AbsListViewDelegate.SUPPORTED_VIEW_CLASSES, AbsListViewDelegate.class);
+        addBuiltinDelegates(ScrollYDelegate.SUPPORTED_VIEW_CLASSES, ScrollYDelegate.class);
+        addBuiltinDelegates(WebViewDelegate.SUPPORTED_VIEW_CLASSES, WebViewDelegate.class);
+    }
+
+    private static void addBuiltinDelegates(Class[] supportedViews, Class<?> delegateClass) {
+        for (int i = 0, z = supportedViews.length; i< z ; i++) {
+            BUILT_IN_DELEGATES.put(supportedViews[i], delegateClass);
+        }
     }
 
     static PullToRefreshAttacher.ViewDelegate getBuiltInViewDelegate(final View view) {

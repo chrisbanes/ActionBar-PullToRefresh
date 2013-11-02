@@ -121,7 +121,7 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
+    public final boolean onInterceptTouchEvent(MotionEvent event) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onInterceptTouchEvent. " + event.toString());
         }
@@ -139,7 +139,7 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public final boolean onTouchEvent(MotionEvent event) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onTouchEvent. " + event.toString());
         }

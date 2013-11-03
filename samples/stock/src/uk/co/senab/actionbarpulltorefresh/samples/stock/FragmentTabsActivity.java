@@ -17,7 +17,6 @@
 package uk.co.senab.actionbarpulltorefresh.samples.stock;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.AsyncTask;
@@ -28,7 +27,7 @@ import android.view.ViewGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
@@ -79,8 +78,8 @@ public class FragmentTabsActivity extends BaseSampleActivity implements ActionBa
      * Fragment Class
      */
     public static class SampleFragment extends Fragment implements
-            PullToRefreshAttacher.OnRefreshListener {
-        private PullToRefreshAttacher mPullToRefreshAttacher;
+            OnRefreshListener {
+        private PullToRefreshLayout mPullToRefreshLayout;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -91,14 +90,9 @@ public class FragmentTabsActivity extends BaseSampleActivity implements ActionBa
             // The ScrollView is what we'll be listening to for refresh starts
             ScrollView scrollView = (ScrollView) view.findViewById(R.id.ptr_scrollview);
 
-            // Now create the PullToRefreshAttacher
-            mPullToRefreshAttacher = PullToRefreshAttacher.get(getActivity());
-            mPullToRefreshAttacher.setOnRefreshListener(this);
-
-            // Now give the created Attacher to the PullToRefreshLayout and the refresh listener to
-            // be this.
-            PullToRefreshLayout ptrLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
-            ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher);
+            // Now give the find the PullToRefreshLayout and set it up
+            mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
+            mPullToRefreshLayout.setup(getActivity()).defaultOptions().allViewsAreRefreshable().withListener(this);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);
@@ -108,14 +102,6 @@ public class FragmentTabsActivity extends BaseSampleActivity implements ActionBa
             }
 
             return view;
-        }
-
-        @Override
-        public void onDestroy() {
-            // We now need to destroy the PullToRefreshAttacher
-            mPullToRefreshAttacher.destroy();
-
-            super.onDestroy();
         }
 
         @Override
@@ -139,8 +125,8 @@ public class FragmentTabsActivity extends BaseSampleActivity implements ActionBa
                 protected void onPostExecute(Void result) {
                     super.onPostExecute(result);
 
-                    // Notify PullToRefreshAttacher that the refresh has finished
-                    mPullToRefreshAttacher.setRefreshComplete();
+                    // Notify PullToRefreshLayout that the refresh has finished
+                    mPullToRefreshLayout.setRefreshComplete();
                 }
             }.execute();
         }

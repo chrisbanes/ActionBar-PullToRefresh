@@ -25,16 +25,17 @@ import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.HeaderTransformer;
+import uk.co.senab.actionbarpulltorefresh.library.Options;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
-import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.AbsListViewDelegate;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.GridView
- * GridView}, and manually creating (and attaching) a {@link PullToRefreshAttacher} to the view.
+ * GridView}, and manually creating (and attaching) a {@link Pull} to the view.
  */
 public class GridViewActivity extends BaseSampleActivity
-        implements PullToRefreshAttacher.OnRefreshListener {
+        implements OnRefreshListener {
 
     private static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
             "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
@@ -43,7 +44,7 @@ public class GridViewActivity extends BaseSampleActivity
             "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
             "Allgauer Emmentaler"};
 
-    private PullToRefreshAttacher mPullToRefreshAttacher;
+    private PullToRefreshLayout mPullToRefreshLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +58,7 @@ public class GridViewActivity extends BaseSampleActivity
 
         // As we're modifying some of the options, create an instance of
         // PullToRefreshAttacher.Options
-        PullToRefreshAttacher.Options ptrOptions = new PullToRefreshAttacher.Options();
+        Options ptrOptions = new Options();
 
         // Here we make the refresh scroll distance to 75% of the GridView height
         ptrOptions.refreshScrollDistance = 0.75f;
@@ -69,14 +70,10 @@ public class GridViewActivity extends BaseSampleActivity
         // current pull-to-refresh state
         ptrOptions.headerTransformer = new CustomisedHeaderTransformer();
 
-        // Here we create a PullToRefreshAttacher manually with the Options instance created above.
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this, ptrOptions);
-        mPullToRefreshAttacher.setOnRefreshListener(this);
-
-        // Now give the created Attacher to the PullToRefreshLayout and the refresh listener to
-        // be this.
-        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
-        ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher);
+        // Now find the PullToRefreshLayout and set it up
+        mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
+        mPullToRefreshLayout.setup(this).options(ptrOptions).allViewsAreRefreshable().withListener(
+                this);
     }
 
     @Override
@@ -101,7 +98,7 @@ public class GridViewActivity extends BaseSampleActivity
                 super.onPostExecute(result);
 
                 // Notify PullToRefreshAttacher that the refresh has finished
-                mPullToRefreshAttacher.setRefreshComplete();
+                mPullToRefreshLayout.setRefreshComplete();
             }
         }.execute();
     }
@@ -109,7 +106,7 @@ public class GridViewActivity extends BaseSampleActivity
     /**
      * Here's a customised header transformer which displays the scroll progress as text.
      */
-    static class CustomisedHeaderTransformer extends PullToRefreshAttacher.HeaderTransformer {
+    static class CustomisedHeaderTransformer extends HeaderTransformer {
 
         private View mHeaderView;
         private TextView mMainTextView;

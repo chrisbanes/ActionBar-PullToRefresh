@@ -16,32 +16,23 @@
 
 package uk.co.senab.actionbarpulltorefresh.samples.stock;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.app.ListActivity;
 import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import uk.co.senab.actionbarpulltorefresh.library.FragmentHelper;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
  * {@link android.widget.ListView ListView}, and manually creating (and attaching) a
- * {@link PullToRefreshAttacher} to the view.
+ * {@link PullToRefreshLayout} to the view.
  */
 public class ListViewActivity extends BaseSampleActivity {
 
@@ -54,7 +45,7 @@ public class ListViewActivity extends BaseSampleActivity {
      * Fragment Class
      */
     public static class SampleListFragment extends ListFragment implements
-            PullToRefreshAttacher.OnRefreshListener {
+            OnRefreshListener {
 
         private static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
                 "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
@@ -64,28 +55,24 @@ public class ListViewActivity extends BaseSampleActivity {
                 "Allgauer Emmentaler"};
 
         private PullToRefreshLayout mPullToRefreshLayout;
-        private PullToRefreshAttacher mPullToRefreshAttacher;
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
+            super.onViewCreated(view,savedInstanceState);
 
-            // As we're using a ListFragment we need to inject a PullToRefreshLayout into the View.
+            // As we're using a ListFragment we need to 'inject' a PullToRefreshLayout into it.
             // This is easily done with FragmentHelper
             mPullToRefreshLayout = FragmentHelper.wrapListFragmentView(view);
+
+            // Now setup the PullToRefreshLayout as normal
+            mPullToRefreshLayout.setup(getActivity()).defaultOptions()
+                    .theseViewsAreRefreshable(android.R.id.list, android.R.id.empty)
+                    .withListener(this);
         }
 
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
-
-            // Here we create a PullToRefreshAttacher manually without an Options instance.
-            // PullToRefreshAttacher will manually create one using default values.
-            mPullToRefreshAttacher = PullToRefreshAttacher.get(getActivity());
-            mPullToRefreshAttacher.setOnRefreshListener(this);
-
-            // Set the Refreshable View to be the ListView and the refresh listener to be this.
-            mPullToRefreshLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, false);
 
             /**
              * Get ListView and give it an adapter to display the sample items
@@ -96,14 +83,6 @@ public class ListViewActivity extends BaseSampleActivity {
                     ITEMS);
             listView.setAdapter(adapter);
             setListShownNoAnimation(true);
-        }
-
-        @Override
-        public void onDestroy() {
-            // We now need to destroy the PullToRefreshAttacher
-            mPullToRefreshAttacher.destroy();
-
-            super.onDestroy();
         }
 
         @Override
@@ -130,8 +109,8 @@ public class ListViewActivity extends BaseSampleActivity {
                 protected void onPostExecute(Void result) {
                     super.onPostExecute(result);
 
-                    // Notify PullToRefreshAttacher that the refresh has finished
-                    mPullToRefreshAttacher.setRefreshComplete();
+                    // Notify PullToRefreshLayout that the refresh has finished
+                    mPullToRefreshLayout.setRefreshComplete();
                     // Show the list again
                     setListShown(true);
                 }

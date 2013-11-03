@@ -16,12 +16,11 @@
 
 package uk.co.senab.actionbarpulltorefresh.samples.stock;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
@@ -29,25 +28,19 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
  * {@link android.widget.ScrollView ScrollView}.
  */
 public class ScrollViewActivity extends BaseSampleActivity
-        implements PullToRefreshAttacher.OnRefreshListener {
+        implements OnRefreshListener {
 
-    private PullToRefreshAttacher mPullToRefreshAttacher;
+    private PullToRefreshLayout mPullToRefreshLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrollview);
 
-        // Create new PullToRefreshAttacher
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
-        mPullToRefreshAttacher.setOnRefreshListener(this);
-
-        // Retrieve the PullToRefreshLayout from the content view
-        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
-
-        // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
-        // listener (this).
-        ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher);
+        // Now find the PullToRefreshLayout and set it up
+        mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
+        mPullToRefreshLayout.setup(this).defaultOptions().allViewsAreRefreshable().withListener(
+                this);
     }
 
     @Override
@@ -72,7 +65,7 @@ public class ScrollViewActivity extends BaseSampleActivity
                 super.onPostExecute(result);
 
                 // Notify PullToRefreshAttacher that the refresh has finished
-                mPullToRefreshAttacher.setRefreshComplete();
+                mPullToRefreshLayout.setRefreshComplete();
             }
         }.execute();
     }

@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -90,8 +89,8 @@ public class FragmentTabsActivity extends BaseSampleActivity implements ActionBa
             // Now give the find the PullToRefreshLayout and set it up
             mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
             mPullToRefreshLayout.setup(getActivity())
-                    .allViewsAreRefreshable()
-                    .withListener(this)
+                    .allChildrenArePullable()
+                    .listener(this)
                     .done();
 
             // Set title in Fragment for display purposes.

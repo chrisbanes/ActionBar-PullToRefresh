@@ -76,8 +76,8 @@ public class GridViewActivity extends SherlockActivity
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
         mPullToRefreshLayout.setup(this)
                 .options(ptrOptions)
-                .allViewsAreRefreshable()
-                .withListener(this)
+                .allChildrenArePullable()
+                .listener(this)
                 .done();
     }
 

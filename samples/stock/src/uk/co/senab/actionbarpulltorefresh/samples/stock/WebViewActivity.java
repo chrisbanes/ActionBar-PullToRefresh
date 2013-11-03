@@ -48,8 +48,8 @@ public class WebViewActivity extends BaseSampleActivity implements OnRefreshList
         // Now find the PullToRefreshLayout and set it up
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
         mPullToRefreshLayout.setup(this)
-                .allViewsAreRefreshable()
-                .withListener(this)
+                .allChildrenArePullable()
+                .listener(this)
                 .done();
 
         // Finally make the WebView load something...

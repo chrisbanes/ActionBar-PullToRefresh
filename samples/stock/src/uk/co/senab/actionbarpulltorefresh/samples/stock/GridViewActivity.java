@@ -74,8 +74,8 @@ public class GridViewActivity extends BaseSampleActivity
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
         mPullToRefreshLayout.setup(this)
                 .options(ptrOptions)
-                .allViewsAreRefreshable()
-                .withListener(this)
+                .allChildrenArePullable()
+                .listener(this)
                 .done();
     }
 

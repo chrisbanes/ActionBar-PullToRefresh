@@ -92,8 +92,8 @@ public class FragmentTabsActivity extends SherlockFragmentActivity
             // Now give the find the PullToRefreshLayout and set it up
             mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
             mPullToRefreshLayout.setup(getActivity())
-                    .allViewsAreRefreshable()
-                    .withListener(this)
+                    .allChildrenArePullable()
+                    .listener(this)
                     .done();
 
             // Set title in Fragment for display purposes.

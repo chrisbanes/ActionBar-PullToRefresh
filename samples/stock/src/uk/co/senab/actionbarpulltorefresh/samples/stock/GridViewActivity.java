@@ -32,7 +32,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.GridView
- * GridView}, and manually creating (and attaching) a {@link Pull} to the view.
+ * GridView}, and manually creating (and attaching) a {@link PullToRefreshLayout} to the view.
  */
 public class GridViewActivity extends BaseSampleActivity
         implements OnRefreshListener {
@@ -72,8 +72,9 @@ public class GridViewActivity extends BaseSampleActivity
 
         // Now find the PullToRefreshLayout and set it up
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
-        mPullToRefreshLayout.setup(this).options(ptrOptions).allViewsAreRefreshable().withListener(
-                this);
+        mPullToRefreshLayout.setup(this).options(ptrOptions)
+                .allViewsAreRefreshable()
+                .withListener(this);
     }
 
     @Override
@@ -97,7 +98,7 @@ public class GridViewActivity extends BaseSampleActivity
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
 
-                // Notify PullToRefreshAttacher that the refresh has finished
+                // Notify PullToRefreshLayout that the refresh has finished
                 mPullToRefreshLayout.setRefreshComplete();
             }
         }.execute();
@@ -161,7 +162,7 @@ public class GridViewActivity extends BaseSampleActivity
 
         @Override
         public boolean hideHeaderView() {
-            final boolean changeVis = mHeaderView.getVisibility() != View.GONE;
+            final boolean changeVis = mHeaderView.getVisibility() == View.VISIBLE;
             if (changeVis) {
                 mHeaderView.setVisibility(View.GONE);
             }

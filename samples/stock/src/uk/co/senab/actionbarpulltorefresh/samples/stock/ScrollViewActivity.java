@@ -39,8 +39,10 @@ public class ScrollViewActivity extends BaseSampleActivity
 
         // Now find the PullToRefreshLayout and set it up
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
-        mPullToRefreshLayout.setup(this).defaultOptions().allViewsAreRefreshable().withListener(
-                this);
+        mPullToRefreshLayout.setup(this)
+                .defaultOptions()
+                .allViewsAreRefreshable()
+                .withListener(this);
     }
 
     @Override
@@ -64,7 +66,7 @@ public class ScrollViewActivity extends BaseSampleActivity
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
 
-                // Notify PullToRefreshAttacher that the refresh has finished
+                // Notify PullToRefreshLayout that the refresh has finished
                 mPullToRefreshLayout.setRefreshComplete();
             }
         }.execute();

@@ -62,10 +62,12 @@ public class ListViewActivity extends BaseSampleActivity {
 
             // As we're using a ListFragment we need to 'inject' a PullToRefreshLayout into it.
             // This is easily done with FragmentHelper
-            mPullToRefreshLayout = FragmentHelper.wrapListFragmentView(view);
+            mPullToRefreshLayout = new PullToRefreshLayout(getActivity());
+            FragmentHelper.insertIntoFragmentView(view, mPullToRefreshLayout);
 
             // Now setup the PullToRefreshLayout as normal
-            mPullToRefreshLayout.setup(getActivity()).defaultOptions()
+            mPullToRefreshLayout.setup(getActivity())
+                    .defaultOptions()
                     .theseViewsAreRefreshable(android.R.id.list, android.R.id.empty)
                     .withListener(this);
         }
@@ -74,14 +76,9 @@ public class ListViewActivity extends BaseSampleActivity {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
-            /**
-             * Get ListView and give it an adapter to display the sample items
-             */
-            ListView listView = getListView();
-            ListAdapter adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1,
-                    ITEMS);
-            listView.setAdapter(adapter);
+            // Set the List Adapter to display the sample items
+            setListAdapter(new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_list_item_1, ITEMS));
             setListShownNoAnimation(true);
         }
 

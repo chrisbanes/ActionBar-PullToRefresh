@@ -31,7 +31,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 
 /**
- * A sample which show you how to use PullToRefreshAttacher with Fragments.
+ * A sample which show you how to use {@link PullToRefreshLayout} with Fragments.
  */
 public class FragmentTabsActivity extends BaseSampleActivity implements ActionBar.TabListener {
     private static String EXTRA_TITLE = "extra_title";
@@ -87,12 +87,12 @@ public class FragmentTabsActivity extends BaseSampleActivity implements ActionBa
             // Inflate the layout
             View view = inflater.inflate(R.layout.layout_fragment, container, false);
 
-            // The ScrollView is what we'll be listening to for refresh starts
-            ScrollView scrollView = (ScrollView) view.findViewById(R.id.ptr_scrollview);
-
             // Now give the find the PullToRefreshLayout and set it up
             mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
-            mPullToRefreshLayout.setup(getActivity()).defaultOptions().allViewsAreRefreshable().withListener(this);
+            mPullToRefreshLayout.setup(getActivity())
+                    .defaultOptions()
+                    .allViewsAreRefreshable()
+                    .withListener(this);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);

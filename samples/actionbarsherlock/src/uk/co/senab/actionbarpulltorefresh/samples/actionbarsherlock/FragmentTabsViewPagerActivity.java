@@ -20,24 +20,19 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
- * A sample which show you how to use PullToRefreshAttacher with Fragments in a ViewPager.
- * <p/>
- * The TL;DR version is that the
- * {@link PullToRefreshAttacher} should always be created in your in
- * {@link #onCreate(android.os.Bundle)} and then pulled in from your Fragments as necessary.
+ * A sample which show you how to use PullToRefreshLayout with Fragments in a ViewPager.
  */
 public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
     private static String EXTRA_TITLE = "extra_title";
@@ -73,10 +68,9 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
      * Fragment Class
      */
     public static class SampleFragment extends SherlockFragment implements
-            PullToRefreshAttacher.OnRefreshListener {
+            OnRefreshListener {
 
-        private PullToRefreshAttacher mPullToRefreshAttacher;
-        private ScrollView mScrollView;
+        private PullToRefreshLayout mPullToRefreshLayout;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,14 +78,12 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
             // Inflate the layout
             View view = inflater.inflate(R.layout.layout_fragment, container, false);
 
-            // The ScrollView is what we'll be listening to for refresh starts
-            mScrollView = (ScrollView) view.findViewById(R.id.ptr_scrollview);
-
-            // Now create the PullToRefreshAttacher
-            mPullToRefreshAttacher = PullToRefreshAttacher.get(getActivity());
-
-            // Now set the ScrollView as the refreshable view, and the refresh listener (this)
-            mPullToRefreshAttacher.addRefreshableView(mScrollView, this);
+            // Now give the find the PullToRefreshLayout and set it up
+            mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
+            mPullToRefreshLayout.setup(getActivity())
+                    .defaultOptions()
+                    .allViewsAreRefreshable()
+                    .withListener(this);
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);
@@ -101,14 +93,6 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
             }
 
             return view;
-        }
-
-        @Override
-        public void onDestroy() {
-            // We now need to destroy the PullToRefreshAttacher
-            mPullToRefreshAttacher.destroy();
-
-            super.onDestroy();
         }
 
         @Override
@@ -132,8 +116,8 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
                 protected void onPostExecute(Void result) {
                     super.onPostExecute(result);
 
-                    // Notify PullToRefreshAttacher that the refresh has finished
-                    mPullToRefreshAttacher.setRefreshComplete();
+                    // Notify PullToRefreshLayout that the refresh has finished
+                    mPullToRefreshLayout.setRefreshComplete();
                 }
             }.execute();
         }

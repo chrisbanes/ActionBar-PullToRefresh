@@ -27,15 +27,17 @@ import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.AbsListViewDelegate;
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.HeaderTransformer;
+import uk.co.senab.actionbarpulltorefresh.library.Options;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.GridView
- * GridView}, and manually creating (and attaching) a {@link PullToRefreshAttacher} to the view.
+ * GridView}, and manually creating (and attaching) a {@link PullToRefreshLayout} to the view.
  */
 public class GridViewActivity extends SherlockActivity
-        implements PullToRefreshAttacher.OnRefreshListener {
+        implements OnRefreshListener {
 
     private static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
             "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
@@ -44,7 +46,7 @@ public class GridViewActivity extends SherlockActivity
             "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
             "Allgauer Emmentaler"};
 
-    private PullToRefreshAttacher mPullToRefreshAttacher;
+    private PullToRefreshLayout mPullToRefreshLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,8 +59,8 @@ public class GridViewActivity extends SherlockActivity
         gridView.setAdapter(adapter);
 
         // As we're modifying some of the options, create an instance of
-        // PullToRefreshAttacher.Options
-        PullToRefreshAttacher.Options ptrOptions = new PullToRefreshAttacher.Options();
+        // AbsPullToRefreshAttacher.Options
+        Options ptrOptions = new Options();
 
         // Here we make the refresh scroll distance to 75% of the GridView height
         ptrOptions.refreshScrollDistance = 0.75f;
@@ -70,25 +72,11 @@ public class GridViewActivity extends SherlockActivity
         // current pull-to-refresh state
         ptrOptions.headerTransformer = new CustomisedHeaderTransformer();
 
-        // Here we create a PullToRefreshAttacher manually with the Options instance created above.
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this, ptrOptions);
-
-        /**
-         * As GridView is an AbsListView derived class, we create a new
-         * AbsListViewDelegate instance. You do NOT need to do this if you're using
-         * a supported scrollable Views. It is merely in this sample to show you how to set a
-         * custom view delegate.
-         */
-        PullToRefreshAttacher.ViewDelegate handler = new AbsListViewDelegate();
-        mPullToRefreshAttacher.addRefreshableView(gridView, handler, this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // Need to call destroy() manually on devices pre-ICS
-        mPullToRefreshAttacher.destroy();
+        // Now find the PullToRefreshLayout and set it up
+        mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
+        mPullToRefreshLayout.setup(this).options(ptrOptions)
+                .allViewsAreRefreshable()
+                .withListener(this);
     }
 
     @Override
@@ -112,8 +100,8 @@ public class GridViewActivity extends SherlockActivity
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
 
-                // Notify PullToRefreshAttacher that the refresh has finished
-                mPullToRefreshAttacher.setRefreshComplete();
+                // Notify PullToRefreshLayout that the refresh has finished
+                mPullToRefreshLayout.setRefreshComplete();
             }
         }.execute();
     }
@@ -121,7 +109,7 @@ public class GridViewActivity extends SherlockActivity
     /**
      * Here's a customised header transformer which displays the scroll progress as text.
      */
-    static class CustomisedHeaderTransformer extends PullToRefreshAttacher.HeaderTransformer {
+    static class CustomisedHeaderTransformer extends HeaderTransformer {
 
         private View mHeaderView;
         private TextView mMainTextView;
@@ -176,7 +164,7 @@ public class GridViewActivity extends SherlockActivity
 
         @Override
         public boolean hideHeaderView() {
-            final boolean changeVis = mHeaderView.getVisibility() != View.GONE;
+            final boolean changeVis = mHeaderView.getVisibility() == View.VISIBLE;
             if (changeVis) {
                 mHeaderView.setVisibility(View.GONE);
             }

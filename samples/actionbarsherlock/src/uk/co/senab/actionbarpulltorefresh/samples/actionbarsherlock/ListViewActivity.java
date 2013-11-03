@@ -16,106 +16,75 @@
 
 package uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.FragmentHelper;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
  * {@link android.widget.ListView ListView}, and manually creating (and attaching) a
- * {@link PullToRefreshAttacher} to the view.
+ * {@link PullToRefreshLayout} to the view.
  */
-public class ListViewActivity extends SherlockFragmentActivity {
-
-    static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
-            "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
-            "Airag", "Airedale", "Aisy Cendre", "Allgauer Emmentaler", "Abbaye de Belloc",
-            "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi", "Acorn", "Adelost",
-            "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
-            "Allgauer Emmentaler"};
-
-    private PullToRefreshAttacher mPullToRefreshAttacher;
+public class ListViewActivity extends BaseSampleActivity {
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_fragment);
-
-        /**
-         * Here we create a PullToRefreshAttacher manually without an Options instance.
-         * PullToRefreshAttacher will manually create one using default values.
-         */
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
-
-        // Now add ListFragment
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.ptr_fragment, new SampleListFragment()).commit();
+    protected Fragment getSampleFragment() {
+        return new SampleListFragment();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.sample, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
+    /**
+     * Fragment Class
+     */
+    public static class SampleListFragment extends ListFragment implements
+            OnRefreshListener {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_first:
-                Toast.makeText(this, "First Action Item", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.action_second:
-                Toast.makeText(this, "Second Action Item", Toast.LENGTH_SHORT).show();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+        private static String[] ITEMS = {"Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
+                "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis", "Afuega'l Pitu",
+                "Airag", "Airedale", "Aisy Cendre", "Allgauer Emmentaler", "Abbaye de Belloc",
+                "Abbaye du Mont des Cats", "Abertam", "Abondance", "Ackawi", "Acorn", "Adelost",
+                "Affidelice au Chablis", "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
+                "Allgauer Emmentaler"};
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // Need to call destroy() manually on devices pre-ICS
-        mPullToRefreshAttacher.destroy();
-    }
-
-    PullToRefreshAttacher getPullToRefreshAttacher() {
-        return mPullToRefreshAttacher;
-    }
-
-    public static class SampleListFragment extends ListFragment
-            implements PullToRefreshAttacher.OnRefreshListener {
-
-        private PullToRefreshAttacher mPullToRefreshAttacher;
+        private PullToRefreshLayout mPullToRefreshLayout;
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
+            super.onViewCreated(view,savedInstanceState);
 
-            /**
-             * Set the List Adapter to display the sample items
-             */
+            // As we're using a ListFragment we need to 'inject' a PullToRefreshLayout into it.
+            // This is easily done with FragmentHelper
+            mPullToRefreshLayout = new PullToRefreshLayout(getActivity());
+            FragmentHelper.insertIntoFragmentView(view, mPullToRefreshLayout);
+
+            // Now setup the PullToRefreshLayout as normal
+            mPullToRefreshLayout.setup(getActivity())
+                    .defaultOptions()
+                    .theseViewsAreRefreshable(android.R.id.list, android.R.id.empty)
+                    .withListener(this);
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+
+            // Set the List Adapter to display the sample items
             setListAdapter(new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_list_item_1, ITEMS));
-
-            mPullToRefreshAttacher = ((ListViewActivity) getActivity()).getPullToRefreshAttacher();
-
-            // Set the Refreshable View to be the ListView and the refresh listener to be this.
-            mPullToRefreshAttacher.addRefreshableView(getListView(), this);
+            setListShownNoAnimation(true);
         }
 
         @Override
         public void onRefreshStarted(View view) {
+            // Hide the list
+            setListShown(false);
+
             /**
              * Simulate Refresh with 4 seconds sleep
              */
@@ -135,8 +104,10 @@ public class ListViewActivity extends SherlockFragmentActivity {
                 protected void onPostExecute(Void result) {
                     super.onPostExecute(result);
 
-                    // Notify PullToRefreshAttacher that the refresh has finished
-                    mPullToRefreshAttacher.setRefreshComplete();
+                    // Notify PullToRefreshLayout that the refresh has finished
+                    mPullToRefreshLayout.setRefreshComplete();
+                    // Show the list again
+                    setListShown(true);
                 }
             }.execute();
         }

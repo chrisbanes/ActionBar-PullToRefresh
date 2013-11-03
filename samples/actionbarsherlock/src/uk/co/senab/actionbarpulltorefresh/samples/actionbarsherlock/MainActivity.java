@@ -18,7 +18,6 @@ package uk.co.senab.actionbarpulltorefresh.samples.actionbarsherlock;
 
 import com.actionbarsherlock.app.SherlockListActivity;
 
-import android.app.ListActivity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
+package uk.co.senab.actionbarpulltorefresh.library.listeners;
 
 import android.view.View;
-import android.widget.ScrollView;
 
 /**
- * FIXME
+ * Simple Listener to listen for any callbacks to Refresh.
  */
-public class ScrollYDelegate implements ViewDelegate {
-
-    public static final Class[] SUPPORTED_VIEW_CLASSES =  { ScrollView.class };
-
-    @Override
-    public boolean isReadyForPull(View view, float x, float y) {
-        return view.getScrollY() <= 0;
-    }
+public interface OnRefreshListener {
+    /**
+     * Called when the user has initiated a refresh by pulling.
+     *
+     * @param view
+     *            - View which the user has started the refresh from.
+     */
+    public void onRefreshStarted(View view);
 }

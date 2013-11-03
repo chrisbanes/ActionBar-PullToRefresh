@@ -26,6 +26,10 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import android.app.Activity;
 import android.content.Context;
 
+import uk.co.senab.actionbarpulltorefresh.library.EnvironmentDelegate;
+import uk.co.senab.actionbarpulltorefresh.library.HeaderTransformer;
+import uk.co.senab.actionbarpulltorefresh.library.Options;
+
 public class PullToRefreshAttacher extends
         uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher {
 

@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
+package uk.co.senab.actionbarpulltorefresh.library;
 
-import android.view.View;
-import android.widget.ScrollView;
 
-/**
- * FIXME
- */
-public class ScrollYDelegate implements ViewDelegate {
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-    public static final Class[] SUPPORTED_VIEW_CLASSES =  { ScrollView.class };
+class API {
 
-    @Override
-    public boolean isReadyForPull(View view, float x, float y) {
-        return view.getScrollY() <= 0;
+    public interface OptionsSelector {
+        public ViewAdder defaultOptions();
+        public ViewAdder options(Options options);
     }
+
+    public interface ViewAdder {
+        public ListenerSetter allViewsAreRefreshable();
+        public ListenerSetter theseViewsAreRefreshable(int... viewIds);
+    }
+
+    public interface ListenerSetter {
+        public void withListener(OnRefreshListener listener);
+    }
+
 }

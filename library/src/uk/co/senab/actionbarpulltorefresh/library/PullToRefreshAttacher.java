@@ -37,20 +37,16 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import java.util.Set;
 import java.util.WeakHashMap;
+
+import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
 /**
  * FIXME
  */
 public class PullToRefreshAttacher {
-
-    /* Default configuration values */
-    private static final int DEFAULT_HEADER_LAYOUT = R.layout.default_header;
-    private static final float DEFAULT_REFRESH_SCROLL_DISTANCE = 0.5f;
-    private static final boolean DEFAULT_REFRESH_ON_UP = false;
-    private static final int DEFAULT_REFRESH_MINIMIZED_DELAY = 1 * 1000;
-    private static final boolean DEFAULT_REFRESH_MINIMIZE = true;
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
@@ -76,42 +72,12 @@ public class PullToRefreshAttacher {
 
     private final WeakHashMap<View, ViewDelegate> mRefreshableViews;
 
-    private boolean mEnabled = true;
     private final boolean mRefreshOnUp;
     private final int mRefreshMinimizeDelay;
     private final boolean mRefreshMinimize;
     private boolean mIsDestroyed = false;
 
     private final Handler mHandler = new Handler();
-
-    /**
-     * Get a PullToRefreshAttacher for this Activity. If there is already a
-     * PullToRefreshAttacher attached to the Activity, the existing one is
-     * returned, otherwise a new instance is created. This version of the method
-     * will use default configuration options for everything.
-     *
-     * @param activity
-     *            Activity to attach to.
-     * @return PullToRefresh attached to the Activity.
-     */
-    public static PullToRefreshAttacher get(Activity activity) {
-        return get(activity, new Options());
-    }
-
-    /**
-     * Get a PullToRefreshAttacher for this Activity. If there is already a
-     * PullToRefreshAttacher attached to the Activity, the existing one is
-     * returned, otherwise a new instance is created.
-     *
-     * @param activity
-     *            Activity to attach to.
-     * @param options
-     *            Options used when creating the PullToRefreshAttacher.
-     * @return PullToRefresh attached to the Activity.
-     */
-    public static PullToRefreshAttacher get(Activity activity, Options options) {
-        return new PullToRefreshAttacher(activity, options);
-    }
 
     protected PullToRefreshAttacher(Activity activity, Options options) {
         if (options == null) {
@@ -214,21 +180,9 @@ public class PullToRefreshAttacher {
     }
 
     /**
-     * Remove a view which was previously used to initiate refresh requests.
-     *
-     * @param view
-     *            - View which will be used to initiate refresh requests.
-     */
-    public void removeRefreshableView(View view) {
-        if (mRefreshableViews.containsKey(view)) {
-            mRefreshableViews.remove(view);
-        }
-    }
-
-    /**
      * Clear all views which were previously used to initiate refresh requests.
      */
-    public void clearRefreshableViews() {
+    void clearRefreshableViews() {
         mRefreshableViews.clear();
     }
 
@@ -249,44 +203,15 @@ public class PullToRefreshAttacher {
      * @param refreshing
      *            - Whether the attacher should be in a refreshing state,
      */
-    public final void setRefreshing(boolean refreshing) {
+    final void setRefreshing(boolean refreshing) {
         setRefreshingInt(null, refreshing, false);
     }
 
     /**
      * @return true if this Attacher is currently in a refreshing state.
      */
-    public final boolean isRefreshing() {
+    final boolean isRefreshing() {
         return mIsRefreshing;
-    }
-
-    /**
-     * @return true if this PullToRefresh is currently enabled (defaults to
-     *         <code>true</code>)
-     */
-    public boolean isEnabled() {
-        return mEnabled;
-    }
-
-    /**
-     * Allows the enable/disable of this PullToRefreshAttacher. If disabled when
-     * refreshing then the UI is automatically reset.
-     *
-     * @param enabled
-     *            - Whether this PullToRefreshAttacher is enabled.
-     */
-    public void setEnabled(boolean enabled) {
-        mEnabled = enabled;
-
-        if (!enabled) {
-            // If we're not enabled, reset any touch handling
-            resetTouch();
-
-            // If we're currently refreshing, reset the ptr UI
-            if (mIsRefreshing) {
-                reset(false);
-            }
-        }
     }
 
     /**
@@ -295,14 +220,14 @@ public class PullToRefreshAttacher {
      *
      * This is the equivalent of calling <code>setRefreshing(false)</code>.
      */
-    public final void setRefreshComplete() {
+    final void setRefreshComplete() {
         setRefreshingInt(null, false, false);
     }
 
     /**
      * Set the Listener to be called when a refresh is initiated.
      */
-    public void setOnRefreshListener(OnRefreshListener listener) {
+    void setOnRefreshListener(OnRefreshListener listener) {
         mOnRefreshListener = listener;
     }
 
@@ -313,7 +238,7 @@ public class PullToRefreshAttacher {
      * Please note, this is automatically when running on a device with Android v4.0 (Ice Cream Sandwich)
      * by the hosting Activity's {@link android.app.Activity#onDestroy() onDestroy()}.
      */
-    public void destroy() {
+    void destroy() {
         if (mIsDestroyed) return; // We've already been destroyed
 
         // Remove the Header View from the Activity
@@ -337,7 +262,7 @@ public class PullToRefreshAttacher {
      *
      * @param listener
      */
-    public final void setHeaderViewListener(HeaderViewListener listener) {
+    final void setHeaderViewListener(HeaderViewListener listener) {
         mHeaderViewListener = listener;
     }
 
@@ -345,34 +270,29 @@ public class PullToRefreshAttacher {
      * @return The Header View which is displayed when the user is pulling, or
      *         we are refreshing.
      */
-    public final View getHeaderView() {
+    final View getHeaderView() {
         return mHeaderView;
     }
 
     /**
      * @return The HeaderTransformer currently used by this Attacher.
      */
-    public HeaderTransformer getHeaderTransformer() {
+    HeaderTransformer getHeaderTransformer() {
         return mHeaderTransformer;
     }
 
-    final boolean onInterceptTouchEvent(View view, MotionEvent event) {
+    private View mViewBeingDragged;
+
+    final boolean onInterceptTouchEvent(MotionEvent event) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onInterceptTouchEvent: " + event.toString());
         }
 
         // If we're not enabled or currently refreshing don't handle any touch
         // events
-        if (!isEnabled() || isRefreshing()) {
+        if (isRefreshing()) {
             return false;
         }
-
-        final ViewDelegate viewDelegate = mRefreshableViews.get(view);
-        if (viewDelegate == null) {
-            return false;
-        }
-
-        if (DEBUG) Log.d(LOG_TAG, "onInterceptTouchEvent. Got ViewParams. " + view.toString());
 
         final float x = event.getX(), y = event.getY();
 
@@ -396,9 +316,14 @@ public class PullToRefreshAttacher {
 
             case MotionEvent.ACTION_DOWN: {
                 // If we're already refreshing, ignore
-                if (canRefresh(true) && viewDelegate.isReadyForPull(view, x, y)) {
-                    mInitialMotionX = x;
-                    mInitialMotionY = y;
+                if (canRefresh(true)) {
+                    for (View view : mRefreshableViews.keySet()) {
+                        if (isViewBeingDragged(view, x, y)) {
+                            mInitialMotionX = x;
+                            mInitialMotionY = y;
+                            mViewBeingDragged = view;
+                        }
+                    }
                 }
                 break;
             }
@@ -415,18 +340,18 @@ public class PullToRefreshAttacher {
         return mIsBeingDragged;
     }
 
-    final boolean onTouchEvent(View view, MotionEvent event) {
+    boolean isViewBeingDragged(View view, float x, float y) {
+        ViewDelegate delegate = mRefreshableViews.get(view);
+        if (delegate != null) {
+            return delegate.isReadyForPull(view, x, y);
+        }
+        return false;
+    }
+
+    final boolean onTouchEvent(MotionEvent event) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onTouchEvent: " + event.toString());
         }
-
-        // If we're not enabled or currently refreshing don't handle any touch
-        // events
-        if (!isEnabled()) {
-            return false;
-        }
-
-        final ViewDelegate delegate = mRefreshableViews.get(view);
 
         // Record whether our handling is started from ACTION_DOWN
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -436,8 +361,12 @@ public class PullToRefreshAttacher {
         // If we're being called from ACTION_DOWN then we must call through to
         // onInterceptTouchEvent until it sets mIsBeingDragged
         if (mHandlingTouchEventFromDown && !mIsBeingDragged) {
-            onInterceptTouchEvent(view, event);
+            onInterceptTouchEvent(event);
             return true;
+        }
+
+        if (mViewBeingDragged == null) {
+            return false;
         }
 
         switch (event.getAction()) {
@@ -458,7 +387,7 @@ public class PullToRefreshAttacher {
                      * negative touch slop.
                      */
                     if (yDx >= -mTouchSlop) {
-                        onPull(view, y);
+                        onPull(mViewBeingDragged, y);
                         // Only record the y motion if the user has scrolled down.
                         if (yDx > 0f) {
                             mLastMotionY = y;
@@ -473,7 +402,7 @@ public class PullToRefreshAttacher {
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
-                checkScrollForRefresh(view);
+                checkScrollForRefresh(mViewBeingDragged);
                 if (mIsBeingDragged) {
                     onPullEnded();
                 }
@@ -560,7 +489,22 @@ public class PullToRefreshAttacher {
     }
 
     protected EnvironmentDelegate createDefaultEnvironmentDelegate() {
-        return new EnvironmentDelegate();
+        return new EnvironmentDelegate() {
+            @Override
+            public Context getContextForInflater(Activity activity) {
+                Context context = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                    ActionBar ab = activity.getActionBar();
+                    if (ab != null) {
+                        context = ab.getThemedContext();
+                    }
+                }
+                if (context == null) {
+                    context = activity;
+                }
+                return context;
+            }
+        };
     }
 
     protected HeaderTransformer createDefaultHeaderTransformer() {
@@ -676,232 +620,6 @@ public class PullToRefreshAttacher {
 
     protected void removeHeaderViewFromActivity(View headerViewLayout, Activity activity) {
         activity.getWindowManager().removeViewImmediate(headerViewLayout);
-    }
-
-    /**
-     * Simple Listener to listen for any callbacks to Refresh.
-     */
-    public interface OnRefreshListener {
-        /**
-         * Called when the user has initiated a refresh by pulling.
-         *
-         * @param view
-         *            - View which the user has started the refresh from.
-         */
-        public void onRefreshStarted(View view);
-    }
-
-    public interface HeaderViewListener {
-        /**
-         * The state when the header view is completely visible.
-         */
-        public static int STATE_VISIBLE = 0;
-
-        /**
-         * The state when the header view is minimized. By default this means
-         * that the progress bar is still visible, but the rest of the view is
-         * hidden, showing the Action Bar behind.
-         * <p/>
-         * This will not be called in header minimization is disabled.
-         */
-        public static int STATE_MINIMIZED = 1;
-
-        /**
-         * The state when the header view is completely hidden.
-         */
-        public static int STATE_HIDDEN = 2;
-
-        /**
-         * Called when the visibility state of the Header View has changed.
-         *
-         * @param headerView
-         *            HeaderView who's state has changed.
-         * @param state
-         *            The new state. One of {@link #STATE_VISIBLE},
-         *            {@link #STATE_MINIMIZED} and {@link #STATE_HIDDEN}
-         */
-        public void onStateChanged(View headerView, int state);
-    }
-
-    /**
-     * HeaderTransformers are what controls and update the Header View to reflect the current state
-     * of the pull-to-refresh interaction. They are responsible for showing and hiding the header
-     * view, as well as update the state.
-     */
-    public static abstract class HeaderTransformer {
-
-        /**
-         * Called whether the header view has been inflated from the resources
-         * defined in {@link Options#headerLayout}.
-         *
-         * @param activity The {@link Activity} that the header view is attached to.
-         * @param headerView The inflated header view.
-         */
-        public void onViewCreated(Activity activity, View headerView) {}
-
-        /**
-         * @deprecated This will be removed before v1.0. Override
-         * {@link #onViewCreated(android.app.Activity, android.view.View)} instead.
-         */
-        public void onViewCreated(View headerView) {}
-
-        /**
-         * Called when the header should be reset. You should update any child
-         * views to reflect this.
-         * <p/>
-         * You should <strong>not</strong> change the visibility of the header
-         * view.
-         */
-        public void onReset() {}
-
-        /**
-         * Called the user has pulled on the scrollable view.
-         *
-         * @param percentagePulled value between 0.0f and 1.0f depending on how far the
-         *                         user has pulled.
-         */
-        public void onPulled(float percentagePulled) {}
-
-        /**
-         * Called when a refresh has begun. Theoretically this call is similar
-         * to that provided from {@link OnRefreshListener} but is more suitable
-         * for header view updates.
-         */
-        public void onRefreshStarted() {}
-
-        /**
-         * Called when a refresh can be initiated when the user ends the touch
-         * event. This is only called when {@link Options#refreshOnUp} is set to
-         * true.
-         */
-        public void onReleaseToRefresh() {}
-
-        /**
-         * Called when the current refresh has taken longer than the time
-         * specified in {@link Options#refreshMinimizeDelay}.
-         */
-        public void onRefreshMinimized() {}
-
-        /**
-         * Called when the Header View should be made visible, usually with an animation.
-         *
-         * @return true if the visibility has changed.
-         */
-        public abstract boolean showHeaderView();
-
-        /**
-         * Called when the Header View should be made invisible, usually with an animation.
-         *
-         * @return true if the visibility has changed.
-         */
-        public abstract boolean hideHeaderView();
-
-        /**
-         * Called when the Activity's configuration has changed.
-         *
-         * @param activity The {@link Activity} that the header view is attached to.
-         * @param newConfig New configuration.
-         *
-         * @see android.app.Activity#onConfigurationChanged(android.content.res.Configuration)
-         */
-        public void onConfigurationChanged(Activity activity, Configuration newConfig) {}
-    }
-
-    /**
-     * ViewDelegates are what are used to de-couple the Attacher from the different types of
-     * scrollable views.
-     */
-    public static abstract class ViewDelegate {
-
-        /**
-         * Allows you to provide support for View which do not have built-in
-         * support. In this method you should cast <code>view</code> to it's
-         * native class, and check if it is scrolled to the top.
-         *
-         * @param view
-         *            The view which has should be checked against.
-         * @param x The X co-ordinate of the touch event
-         * @param y The Y co-ordinate of the touch event
-         * @return true if <code>view</code> is scrolled to the top.
-         */
-        public abstract boolean isReadyForPull(View view, float x, float y);
-    }
-
-    /**
-     * This is used to provide platform and environment specific functionality for the Attacher.
-     */
-    public static class EnvironmentDelegate {
-
-        /**
-         * @return Context which should be used for inflating the header layout
-         */
-        public Context getContextForInflater(Activity activity) {
-            Context context = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                ActionBar ab = activity.getActionBar();
-                if (ab != null) {
-                    context = ab.getThemedContext();
-                }
-            }
-            if (context == null) {
-                context = activity;
-            }
-            return context;
-        }
-    }
-
-    /**
-     * Allows you to specify a number of configuration options when instantiating a
-     * {@link PullToRefreshAttacher}. Used with {@link #get(Activity, Options) get()}.
-     */
-    public static class Options {
-
-        /**
-         * EnvironmentDelegate instance which will be used. If null, we will
-         * create an instance of the default class.
-         */
-        public EnvironmentDelegate environmentDelegate = null;
-
-        /**
-         * The layout resource ID which should be inflated to be displayed above
-         * the Action Bar
-         */
-        public int headerLayout = DEFAULT_HEADER_LAYOUT;
-
-        /**
-         * The header transformer to be used to transfer the header view. If
-         * null, an instance of {@link DefaultHeaderTransformer} will be used.
-         */
-        public HeaderTransformer headerTransformer = null;
-
-        /**
-         * The percentage of the refreshable view that needs to be scrolled
-         * before a refresh is initiated.
-         */
-        public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
-
-        /**
-         * Whether a refresh should only be initiated when the user has finished
-         * the touch event.
-         */
-        public boolean refreshOnUp = DEFAULT_REFRESH_ON_UP;
-
-        /**
-         * The delay after a refresh is started in which the header should be
-         * 'minimized'. By default, most of the header is faded out, leaving
-         * only the progress bar signifying that a refresh is taking place.
-         */
-        public int refreshMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
-
-        /**
-         * Enable or disable the header 'minimization', which by default means that the majority of
-         * the header is hidden, leaving only the progress bar still showing.
-         * <p/>
-         * If set to true, the header will be minimized after the delay set in
-         * {@link #refreshMinimizeDelay}. If set to false then the whole header will be displayed
-         * until the refresh is finished.
-         */
-        public boolean refreshMinimize = DEFAULT_REFRESH_MINIMIZE;
     }
 
     private final Runnable mRefreshMinimizeRunnable = new Runnable() {

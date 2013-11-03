@@ -41,7 +41,7 @@ import uk.co.senab.actionbarpulltorefresh.library.platform.SDK11;
 /**
  * Default Header Transformer.
  */
-public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransformer {
+public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private View mHeaderView;
     private ViewGroup mContentLayout;

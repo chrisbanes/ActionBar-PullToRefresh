@@ -27,6 +27,7 @@ import java.util.Set;
 
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.AbsListViewDelegate;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ScrollYDelegate;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.WebViewDelegate;
 
 class InstanceCreationUtils {
@@ -50,7 +51,7 @@ class InstanceCreationUtils {
         }
     }
 
-    static PullToRefreshAttacher.ViewDelegate getBuiltInViewDelegate(final View view) {
+    static ViewDelegate getBuiltInViewDelegate(final View view) {
         final Set<Map.Entry<Class, Class>> entries = BUILT_IN_DELEGATES.entrySet();
         for (final Map.Entry<Class, Class> entry : entries) {
             if (entry.getKey().isInstance(view)) {

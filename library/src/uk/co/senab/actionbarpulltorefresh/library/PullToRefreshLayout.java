@@ -16,16 +16,19 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import java.util.HashSet;
+
+import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
  * FIXME
@@ -36,7 +39,6 @@ public class PullToRefreshLayout extends FrameLayout {
     private static final String LOG_TAG = "PullToRefreshLayout";
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
-    private View mCurrentTouchTarget;
 
     private HashSet<Integer> mViewIdsToAdd;
 
@@ -52,89 +54,72 @@ public class PullToRefreshLayout extends FrameLayout {
         super(context, attrs, defStyle);
     }
 
-    /**
-     * @deprecated Use {@link #setPullToRefreshAttacher(PullToRefreshAttacher)} instead.
-     */
-    public void setPullToRefreshAttacher(PullToRefreshAttacher attacher,
-            PullToRefreshAttacher.OnRefreshListener refreshListener) {
-        setPullToRefreshAttacher(attacher);
-
-        // Model the deprecated behaviour by setting the refresh listener
-        if (attacher != null) {
-            attacher.setOnRefreshListener(refreshListener);
-        }
+    public API.OptionsSelector setup(Activity activity) {
+        return new SetupWizard(activity);
     }
 
     /**
-     * Set the {@link PullToRefreshAttacher} to be used with this layout. All views which are added to
-     * this layout will automatically be added as a refreshable-view in the attacher.
-     */
-    public void setPullToRefreshAttacher(PullToRefreshAttacher attacher) {
-        setPullToRefreshAttacher(attacher, true);
-    }
-
-    /**
-     * Set the {@link PullToRefreshAttacher} to be used with this layout.
+     * Manually set this Attacher's refreshing state. The header will be
+     * displayed or hidden as requested.
      *
-     * @param addAllViews Whether to add all views which are added to this layout will automatically
-     *                    be added as a refreshable-view in the attacher.
+     * @param refreshing
+     *            - Whether the attacher should be in a refreshing state,
      */
-    public void setPullToRefreshAttacher(PullToRefreshAttacher attacher, boolean addAllViews) {
-        View view;
-        for (int i = 0, z = getChildCount(); i < z; i++) {
-            view = getChildAt(i);
-
-            if (mPullToRefreshAttacher != null) {
-                mPullToRefreshAttacher.removeRefreshableView(view);
-            }
-
-            if (attacher != null) {
-                if (addAllViews) {
-                    if (DEBUG) {
-                        Log.d(LOG_TAG, "Adding View to Attacher: " + view);
-                    }
-                    attacher.addRefreshableView(view, null);
-                } else if (mViewIdsToAdd != null) {
-                    for (Integer viewId : mViewIdsToAdd) {
-                        addRefreshableView(viewId);
-                    }
-                    mViewIdsToAdd = null;
-                }
-            }
-        }
-
-        mPullToRefreshAttacher = attacher;
+    public final void setRefreshing(boolean refreshing) {
+        mPullToRefreshAttacher.setRefreshing(refreshing);
     }
 
-    public void addRefreshableView(int viewId) {
-        View view = findViewById(viewId);
-        if (view != null) {
-            if (mPullToRefreshAttacher != null) {
-                mPullToRefreshAttacher.addRefreshableView(view, null);
-            } else {
-                if (mViewIdsToAdd == null) {
-                    mViewIdsToAdd = new HashSet<Integer>();
-                }
-                mViewIdsToAdd.add(viewId);
-            }
-        }
+    /**
+     * @return true if this Attacher is currently in a refreshing state.
+     */
+    public final boolean isRefreshing() {
+        return mPullToRefreshAttacher.isRefreshing();
     }
+
+    /**
+     * Call this when your refresh is complete and this view should reset itself
+     * (header view will be hidden).
+     *
+     * This is the equivalent of calling <code>setRefreshing(false)</code>.
+     */
+    public final void setRefreshComplete() {
+        mPullToRefreshAttacher.setRefreshComplete();
+    }
+
+    /**
+     * Set a {@link uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener} which is called when the visibility
+     * state of the Header View has changed.
+     *
+     * @param listener
+     */
+    public final void setHeaderViewListener(HeaderViewListener listener) {
+        mPullToRefreshAttacher.setHeaderViewListener(listener);
+    }
+
+    /**
+     * @return The Header View which is displayed when the user is pulling, or
+     *         we are refreshing.
+     */
+    public final View getHeaderView() {
+        return mPullToRefreshAttacher.getHeaderView();
+    }
+
+    /**
+     * @return The HeaderTransformer currently used by this Attacher.
+     */
+    public HeaderTransformer getHeaderTransformer() {
+        return mPullToRefreshAttacher.getHeaderTransformer();
+    }
+
 
     @Override
     public final boolean onInterceptTouchEvent(MotionEvent event) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onInterceptTouchEvent. " + event.toString());
         }
-
         if (mPullToRefreshAttacher != null && getChildCount() > 0) {
-            View target = getChildForTouchEvent(event);
-            if (target != null && mPullToRefreshAttacher.onInterceptTouchEvent(target, event)) {
-                mCurrentTouchTarget = target;
-                return true;
-            }
+            return mPullToRefreshAttacher.onInterceptTouchEvent(event);
         }
-        // Reset Current Touch Target
-        mCurrentTouchTarget = null;
         return false;
     }
 
@@ -143,32 +128,17 @@ public class PullToRefreshLayout extends FrameLayout {
         if (DEBUG) {
             Log.d(LOG_TAG, "onTouchEvent. " + event.toString());
         }
-
         if (mPullToRefreshAttacher != null) {
-            // This is an edge-case. If the ViewGroup does not contain a valid touch target then
-            // Android calls onTouchEvent after onInterceptTouchEvent with ACTION_DOWN event.
-            // If that happens then we need to find the visible view and pass it to the attacher as
-            // usual.
-            if (mCurrentTouchTarget == null && event.getAction() == MotionEvent.ACTION_DOWN) {
-                mCurrentTouchTarget = getChildForTouchEvent(event);
-            }
-
-            if (mCurrentTouchTarget != null) {
-                return mPullToRefreshAttacher.onTouchEvent(mCurrentTouchTarget, event);
-            }
+            return mPullToRefreshAttacher.onTouchEvent(event);
         }
-        // Reset Current Touch Target
-        mCurrentTouchTarget = null;
         return super.onTouchEvent(event);
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        // Detach all refreshable views
+        // Destroy the PullToRefreshAttacher
         if (mPullToRefreshAttacher != null) {
-            for (int i = 0, z = getChildCount(); i < z; i++) {
-                mPullToRefreshAttacher.removeRefreshableView(getChildAt(i));
-            }
+            mPullToRefreshAttacher.destroy();
         }
         super.onDetachedFromWindow();
     }
@@ -181,19 +151,82 @@ public class PullToRefreshLayout extends FrameLayout {
         super.onConfigurationChanged(newConfig);
     }
 
-    private View getChildForTouchEvent(MotionEvent event) {
-        final float x = event.getX(), y = event.getY();
-        View child;
-        for (int z = getChildCount() - 1; z >= 0; z--) {
-            child = getChildAt(z);
-            if (child.isShown() && x >= child.getLeft() && x <= child.getRight()
-                    && y >= child.getTop() && y <= child.getBottom()) {
-                if (DEBUG) {
-                    Log.d(LOG_TAG, "Got Child for Touch Event: " + child);
-                }
-                return child;
+    void setPullToRefreshAttacher(PullToRefreshAttacher attacher) {
+        if (attacher != null) {
+            for (int i = 0, z = getChildCount(); i < z; i++) {
+                attacher.addRefreshableView(getChildAt(i), null);
             }
         }
-        return null;
+        mPullToRefreshAttacher = attacher;
+    }
+
+    void setPullToRefreshAttacher(PullToRefreshAttacher attacher, int[] refreshableViewIds) {
+        if (attacher != null && refreshableViewIds.length > 0) {
+            for (int i = 0, z = refreshableViewIds.length; i < z; i++) {
+                attacher.addRefreshableView(findViewById(refreshableViewIds[i]), null);
+            }
+        }
+        mPullToRefreshAttacher = attacher;
+    }
+
+    protected PullToRefreshAttacher createPullToRefreshAttacher(Activity activity,
+            Options options) {
+        return new PullToRefreshAttacher(activity, options);
+    }
+
+    protected Options createDefaultOptions() {
+        return new Options();
+    }
+
+    class SetupWizard implements API.OptionsSelector, API.ViewAdder, API.ListenerSetter {
+        final Activity mActivity;
+        Options mOptions;
+        int[] refreshableViewIds;
+        OnRefreshListener mOnRefreshListener;
+
+        SetupWizard(Activity activity) {
+            mActivity = activity;
+        }
+
+        @Override
+        public API.ViewAdder defaultOptions() {
+            mOptions = createDefaultOptions();
+            return this;
+        }
+
+        @Override
+        public API.ViewAdder options(Options options) {
+            mOptions = options;
+            return this;
+        }
+
+        @Override
+        public API.ListenerSetter allViewsAreRefreshable() {
+            refreshableViewIds = null;
+            return this;
+        }
+
+        @Override
+        public API.ListenerSetter theseViewsAreRefreshable(int... viewIds) {
+            refreshableViewIds = viewIds;
+            return this;
+        }
+
+        @Override
+        public void withListener(OnRefreshListener listener) {
+            mOnRefreshListener = listener;
+            finish();
+        }
+
+        void finish() {
+            PullToRefreshAttacher attacher = createPullToRefreshAttacher(mActivity, mOptions);
+            attacher.setOnRefreshListener(mOnRefreshListener);
+
+            if (refreshableViewIds != null) {
+                setPullToRefreshAttacher(attacher, refreshableViewIds);
+            } else {
+                setPullToRefreshAttacher(attacher);
+            }
+        }
     }
 }

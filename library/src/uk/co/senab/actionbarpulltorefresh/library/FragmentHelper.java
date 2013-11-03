@@ -56,9 +56,6 @@ public class FragmentHelper {
             viewGroup.addView(ptrLayout, ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
 
-            ptrLayout.addRefreshableView(android.R.id.list);
-            ptrLayout.addRefreshableView(android.R.id.empty);
-
             return ptrLayout;
         } else {
             return null;

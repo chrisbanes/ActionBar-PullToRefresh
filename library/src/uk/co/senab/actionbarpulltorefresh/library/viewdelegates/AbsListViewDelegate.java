@@ -21,13 +21,10 @@ import android.os.Build;
 import android.view.View;
 import android.widget.AbsListView;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-
 /**
  * FIXME
  */
-public class AbsListViewDelegate
-        extends PullToRefreshAttacher.ViewDelegate {
+public class AbsListViewDelegate implements ViewDelegate {
 
     public static final Class[] SUPPORTED_VIEW_CLASSES =  { AbsListView.class };
 

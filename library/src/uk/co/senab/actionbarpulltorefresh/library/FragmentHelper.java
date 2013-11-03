@@ -31,18 +31,18 @@ public class FragmentHelper {
             @Override
             public void onViewCreated(View view, Bundle savedInstanceState) {
                super.onViewCreated(view, savedInstanceState);
-               mPullToRefreshLayout = FragmentHelper.wrapListFragmentView(view);
+               mPullToRefreshLayout = new PullToRefreshLayout(getActivity());
+               FragmentHelper.insertIntoFragmentView(view, mPullToRefreshLayout);
             }
        }
      * </pre>
      *
-     * @param view Fragment's content view
-     * @return The created {@link PullToRefreshLayout}
+     * @param fragmentView Fragment's content view
+     * @param ptrLayout PullToRefreshLayout to inject
      */
-    public static PullToRefreshLayout wrapListFragmentView(View view) {
-        if (view instanceof ViewGroup) {
-            PullToRefreshLayout ptrLayout = new PullToRefreshLayout(view.getContext());
-            ViewGroup viewGroup = (ViewGroup) view;
+    public static void insertIntoFragmentView(View fragmentView, PullToRefreshLayout ptrLayout) {
+        if (fragmentView instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) fragmentView;
 
             // Move all children to PullToRefreshLayout. This code looks a bit silly but the child
             // indices change every time we remove a View (so we can't just iterate through)
@@ -55,10 +55,6 @@ public class FragmentHelper {
 
             viewGroup.addView(ptrLayout, ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
-
-            return ptrLayout;
-        } else {
-            return null;
         }
     }
 

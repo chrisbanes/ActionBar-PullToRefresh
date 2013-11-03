@@ -22,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
@@ -41,10 +42,10 @@ public class ScrollViewActivity extends SherlockActivity
 
         // Now find the PullToRefreshLayout and set it up
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
-        mPullToRefreshLayout.setup(this)
+        ActionBarPullToRefresh.from(this)
                 .allChildrenArePullable()
                 .listener(this)
-                .done();
+                .setup(mPullToRefreshLayout);
     }
 
     @Override

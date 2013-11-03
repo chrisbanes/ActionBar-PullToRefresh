@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarsherlock.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
@@ -63,13 +64,13 @@ public class ListViewActivity extends BaseSampleActivity {
             mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
 
             // We can now setup the PullToRefreshLayout
-            mPullToRefreshLayout.setup(getActivity())
+            ActionBarPullToRefresh.from(getActivity())
                     // We need to insert the PullToRefreshLayout into the Fragment's ViewGroup
-                    .insertInto(viewGroup)
+                    .insertLayoutInto(viewGroup)
                     // Here we mark just the ListView and it's Empty View as pullable
                     .theseChildrenArePullable(android.R.id.list, android.R.id.empty)
                     .listener(this)
-                    .done();
+                    .setup(mPullToRefreshLayout);
         }
 
         @Override

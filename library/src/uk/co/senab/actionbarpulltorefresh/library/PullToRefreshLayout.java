@@ -53,10 +53,6 @@ public class PullToRefreshLayout extends FrameLayout {
         super(context, attrs, defStyle);
     }
 
-    public SetupWizard setup(Activity activity) {
-        return new SetupWizard(activity);
-    }
-
     /**
      * Manually set this Attacher's refreshing state. The header will be
      * displayed or hidden as requested.
@@ -160,26 +156,22 @@ public class PullToRefreshLayout extends FrameLayout {
         if (mPullToRefreshAttacher != null) {
             mPullToRefreshAttacher.destroy();
         }
-
-        if (attacher != null) {
-            for (int i = 0, z = getChildCount(); i < z; i++) {
-                attacher.addRefreshableView(getChildAt(i), null);
-            }
-        }
         mPullToRefreshAttacher = attacher;
     }
 
-    void setPullToRefreshAttacher(PullToRefreshAttacher attacher, int[] refreshableViewIds) {
-        if (mPullToRefreshAttacher != null) {
-            mPullToRefreshAttacher.destroy();
+    void addAllChildrenAsPullable() {
+        ensureAttacher();
+        for (int i = 0, z = getChildCount(); i < z; i++) {
+            mPullToRefreshAttacher.addRefreshableView(getChildAt(i), null);
         }
+    }
 
-        if (attacher != null && refreshableViewIds.length > 0) {
-            for (int i = 0, z = refreshableViewIds.length; i < z; i++) {
-                attacher.addRefreshableView(findViewById(refreshableViewIds[i]), null);
+    void addChildrenAsPullable(int... viewIds) {
+        if (viewIds.length > 0) {
+            for (int i = 0, z = viewIds.length; i < z; i++) {
+                mPullToRefreshAttacher.addRefreshableView(findViewById(viewIds[i]), null);
             }
         }
-        mPullToRefreshAttacher = attacher;
     }
 
     protected PullToRefreshAttacher createPullToRefreshAttacher(Activity activity,
@@ -194,72 +186,6 @@ public class PullToRefreshLayout extends FrameLayout {
     private void ensureAttacher() {
         if (mPullToRefreshAttacher == null) {
             throw new IllegalStateException("You need to setup the PullToRefreshLayout before using it");
-        }
-    }
-
-    public final class SetupWizard {
-        final Activity mActivity;
-        Options mOptions;
-        int[] refreshableViewIds;
-        OnRefreshListener mOnRefreshListener;
-        ViewGroup mViewGroupToInsertInto;
-
-        SetupWizard(Activity activity) {
-            mActivity = activity;
-        }
-
-        public SetupWizard options(Options options) {
-            mOptions = options;
-            return this;
-        }
-
-        public SetupWizard allChildrenArePullable() {
-            refreshableViewIds = null;
-            return this;
-        }
-
-        public SetupWizard theseChildrenArePullable(int... viewIds) {
-            refreshableViewIds = viewIds;
-            return this;
-        }
-
-        public SetupWizard listener(OnRefreshListener listener) {
-            mOnRefreshListener = listener;
-            return this;
-        }
-
-        public SetupWizard insertInto(ViewGroup viewGroup) {
-            mViewGroupToInsertInto = viewGroup;
-            return this;
-        }
-
-        public void done() {
-            PullToRefreshAttacher attacher = createPullToRefreshAttacher(mActivity, mOptions);
-            attacher.setOnRefreshListener(mOnRefreshListener);
-
-            if (mViewGroupToInsertInto != null) {
-                insertLayoutIntoViewGroup(mViewGroupToInsertInto);
-            }
-
-            if (refreshableViewIds != null) {
-                setPullToRefreshAttacher(attacher, refreshableViewIds);
-            } else {
-                setPullToRefreshAttacher(attacher);
-            }
-        }
-
-        private void insertLayoutIntoViewGroup(ViewGroup viewGroup) {
-            // Move all children to PullToRefreshLayout. This code looks a bit silly but the child
-            // indices change every time we remove a View (so we can't just iterate through)
-            View child = viewGroup.getChildAt(0);
-            while (child != null) {
-                viewGroup.removeViewAt(0);
-                PullToRefreshLayout.this.addView(child);
-                child = viewGroup.getChildAt(0);
-            }
-
-            viewGroup.addView(PullToRefreshLayout.this, ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
         }
     }
 }

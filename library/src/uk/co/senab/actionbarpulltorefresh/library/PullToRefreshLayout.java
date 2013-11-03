@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import java.util.HashSet;
@@ -156,6 +157,10 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     void setPullToRefreshAttacher(PullToRefreshAttacher attacher) {
+        if (mPullToRefreshAttacher != null) {
+            mPullToRefreshAttacher.destroy();
+        }
+
         if (attacher != null) {
             for (int i = 0, z = getChildCount(); i < z; i++) {
                 attacher.addRefreshableView(getChildAt(i), null);
@@ -165,6 +170,10 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     void setPullToRefreshAttacher(PullToRefreshAttacher attacher, int[] refreshableViewIds) {
+        if (mPullToRefreshAttacher != null) {
+            mPullToRefreshAttacher.destroy();
+        }
+
         if (attacher != null && refreshableViewIds.length > 0) {
             for (int i = 0, z = refreshableViewIds.length; i < z; i++) {
                 attacher.addRefreshableView(findViewById(refreshableViewIds[i]), null);
@@ -193,6 +202,7 @@ public class PullToRefreshLayout extends FrameLayout {
         Options mOptions;
         int[] refreshableViewIds;
         OnRefreshListener mOnRefreshListener;
+        ViewGroup mViewGroupToInsertInto;
 
         SetupWizard(Activity activity) {
             mActivity = activity;
@@ -203,18 +213,23 @@ public class PullToRefreshLayout extends FrameLayout {
             return this;
         }
 
-        public SetupWizard allViewsAreRefreshable() {
+        public SetupWizard allChildrenArePullable() {
             refreshableViewIds = null;
             return this;
         }
 
-        public SetupWizard theseViewsAreRefreshable(int... viewIds) {
+        public SetupWizard theseChildrenArePullable(int... viewIds) {
             refreshableViewIds = viewIds;
             return this;
         }
 
-        public SetupWizard withListener(OnRefreshListener listener) {
+        public SetupWizard listener(OnRefreshListener listener) {
             mOnRefreshListener = listener;
+            return this;
+        }
+
+        public SetupWizard insertInto(ViewGroup viewGroup) {
+            mViewGroupToInsertInto = viewGroup;
             return this;
         }
 
@@ -222,11 +237,29 @@ public class PullToRefreshLayout extends FrameLayout {
             PullToRefreshAttacher attacher = createPullToRefreshAttacher(mActivity, mOptions);
             attacher.setOnRefreshListener(mOnRefreshListener);
 
+            if (mViewGroupToInsertInto != null) {
+                insertLayoutIntoViewGroup(mViewGroupToInsertInto);
+            }
+
             if (refreshableViewIds != null) {
                 setPullToRefreshAttacher(attacher, refreshableViewIds);
             } else {
                 setPullToRefreshAttacher(attacher);
             }
+        }
+
+        private void insertLayoutIntoViewGroup(ViewGroup viewGroup) {
+            // Move all children to PullToRefreshLayout. This code looks a bit silly but the child
+            // indices change every time we remove a View (so we can't just iterate through)
+            View child = viewGroup.getChildAt(0);
+            while (child != null) {
+                viewGroup.removeViewAt(0);
+                PullToRefreshLayout.this.addView(child);
+                child = viewGroup.getChildAt(0);
+            }
+
+            viewGroup.addView(PullToRefreshLayout.this, ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
         }
     }
 }

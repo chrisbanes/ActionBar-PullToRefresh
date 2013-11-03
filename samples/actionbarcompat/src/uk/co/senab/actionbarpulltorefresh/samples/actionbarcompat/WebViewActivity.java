@@ -49,9 +49,9 @@ public class WebViewActivity extends ActionBarActivity
         // Now find the PullToRefreshLayout and set it up
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
         mPullToRefreshLayout.setup(this)
-                .defaultOptions()
                 .allViewsAreRefreshable()
-                .withListener(this);
+                .withListener(this)
+                .done();
 
         // Finally make the WebView load something...
         mWebView.loadUrl("http://www.google.com");

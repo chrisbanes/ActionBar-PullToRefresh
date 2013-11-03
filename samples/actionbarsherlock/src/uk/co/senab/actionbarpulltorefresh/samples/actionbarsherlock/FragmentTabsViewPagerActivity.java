@@ -81,9 +81,9 @@ public class FragmentTabsViewPagerActivity extends SherlockFragmentActivity {
             // Now give the find the PullToRefreshLayout and set it up
             mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
             mPullToRefreshLayout.setup(getActivity())
-                    .defaultOptions()
                     .allViewsAreRefreshable()
-                    .withListener(this);
+                    .withListener(this)
+                    .done();
 
             // Set title in Fragment for display purposes.
             TextView title = (TextView) view.findViewById(R.id.tv_title);

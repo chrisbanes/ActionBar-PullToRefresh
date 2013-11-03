@@ -42,9 +42,9 @@ public class ScrollViewActivity extends SherlockActivity
         // Now find the PullToRefreshLayout and set it up
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
         mPullToRefreshLayout.setup(this)
-                .defaultOptions()
                 .allViewsAreRefreshable()
-                .withListener(this);
+                .withListener(this)
+                .done();
     }
 
     @Override

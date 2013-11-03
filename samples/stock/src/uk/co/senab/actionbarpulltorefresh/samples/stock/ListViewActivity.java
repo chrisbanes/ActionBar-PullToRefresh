@@ -67,9 +67,9 @@ public class ListViewActivity extends BaseSampleActivity {
 
             // Now setup the PullToRefreshLayout as normal
             mPullToRefreshLayout.setup(getActivity())
-                    .defaultOptions()
                     .theseViewsAreRefreshable(android.R.id.list, android.R.id.empty)
-                    .withListener(this);
+                    .withListener(this)
+                    .done();
         }
 
         @Override

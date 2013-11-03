@@ -30,18 +30,10 @@ import uk.co.senab.actionbarpulltorefresh.library.EnvironmentDelegate;
 import uk.co.senab.actionbarpulltorefresh.library.HeaderTransformer;
 import uk.co.senab.actionbarpulltorefresh.library.Options;
 
-public class PullToRefreshAttacher extends
+class AbsPullToRefreshAttacher extends
         uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher {
 
-    public static PullToRefreshAttacher get(Activity activity) {
-        return get(activity, new Options());
-    }
-
-    public static PullToRefreshAttacher get(Activity activity, Options options) {
-        return new PullToRefreshAttacher(activity, options);
-    }
-
-    protected PullToRefreshAttacher(Activity activity, Options options) {
+    protected AbsPullToRefreshAttacher(Activity activity, Options options) {
         super(activity, options);
     }
 
@@ -55,7 +47,7 @@ public class PullToRefreshAttacher extends
         return new AbsDefaultHeaderTransformer();
     }
 
-    public static class AbsEnvironmentDelegate extends EnvironmentDelegate {
+    public static class AbsEnvironmentDelegate implements EnvironmentDelegate {
         /**
          * @return Context which should be used for inflating the header layout
          */
@@ -78,7 +70,7 @@ public class PullToRefreshAttacher extends
                 context = ab.getThemedContext();
             }
             if (context == null) {
-                context = super.getContextForInflater(activity);
+                context = activity;
             }
             return context;
         }

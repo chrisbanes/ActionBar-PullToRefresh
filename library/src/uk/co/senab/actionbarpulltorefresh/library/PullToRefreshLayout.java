@@ -54,7 +54,7 @@ public class PullToRefreshLayout extends FrameLayout {
         super(context, attrs, defStyle);
     }
 
-    public API.OptionsSelector setup(Activity activity) {
+    public SetupWizard setup(Activity activity) {
         return new SetupWizard(activity);
     }
 
@@ -171,14 +171,14 @@ public class PullToRefreshLayout extends FrameLayout {
 
     protected PullToRefreshAttacher createPullToRefreshAttacher(Activity activity,
             Options options) {
-        return new PullToRefreshAttacher(activity, options);
+        return new PullToRefreshAttacher(activity, options != null ? options : createDefaultOptions());
     }
 
     protected Options createDefaultOptions() {
         return new Options();
     }
 
-    class SetupWizard implements API.OptionsSelector, API.ViewAdder, API.ListenerSetter {
+    public final class SetupWizard {
         final Activity mActivity;
         Options mOptions;
         int[] refreshableViewIds;
@@ -188,37 +188,27 @@ public class PullToRefreshLayout extends FrameLayout {
             mActivity = activity;
         }
 
-        @Override
-        public API.ViewAdder defaultOptions() {
-            mOptions = createDefaultOptions();
-            return this;
-        }
-
-        @Override
-        public API.ViewAdder options(Options options) {
+        public SetupWizard options(Options options) {
             mOptions = options;
             return this;
         }
 
-        @Override
-        public API.ListenerSetter allViewsAreRefreshable() {
+        public SetupWizard allViewsAreRefreshable() {
             refreshableViewIds = null;
             return this;
         }
 
-        @Override
-        public API.ListenerSetter theseViewsAreRefreshable(int... viewIds) {
+        public SetupWizard theseViewsAreRefreshable(int... viewIds) {
             refreshableViewIds = viewIds;
             return this;
         }
 
-        @Override
-        public void withListener(OnRefreshListener listener) {
+        public SetupWizard withListener(OnRefreshListener listener) {
             mOnRefreshListener = listener;
-            finish();
+            return this;
         }
 
-        void finish() {
+        public void done() {
             PullToRefreshAttacher attacher = createPullToRefreshAttacher(mActivity, mOptions);
             attacher.setOnRefreshListener(mOnRefreshListener);
 

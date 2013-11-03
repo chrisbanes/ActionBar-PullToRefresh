@@ -21,40 +21,29 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a
  * {@link android.widget.ScrollView ScrollView}.
  */
 public class ScrollViewActivity extends ActionBarActivity
-        implements PullToRefreshAttacher.OnRefreshListener {
+        implements OnRefreshListener {
 
-    private PullToRefreshAttacher mPullToRefreshAttacher;
+    private PullToRefreshLayout mPullToRefreshLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrollview);
 
-        // Create new PullToRefreshAttacher
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
-
-        // Retrieve the PullToRefreshLayout from the content view
-        PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
-
-        // Give the PullToRefreshAttacher to the PullToRefreshLayout, along with the refresh
-        // listener (this).
-        ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // Need to call destroy() manually on devices pre-ICS
-        mPullToRefreshAttacher.destroy();
+        // Now find the PullToRefreshLayout and set it up
+        mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
+        mPullToRefreshLayout.setup(this)
+                .defaultOptions()
+                .allViewsAreRefreshable()
+                .withListener(this);
     }
 
     @Override
@@ -78,8 +67,8 @@ public class ScrollViewActivity extends ActionBarActivity
             protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
 
-                // Notify PullToRefreshAttacher that the refresh has finished
-                mPullToRefreshAttacher.setRefreshComplete();
+                // Notify PullToRefreshLayout that the refresh has finished
+                mPullToRefreshLayout.setRefreshComplete();
             }
         }.execute();
     }

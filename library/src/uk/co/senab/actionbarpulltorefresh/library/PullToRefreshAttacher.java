@@ -40,9 +40,6 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
-/**
- * FIXME
- */
 public class PullToRefreshAttacher {
 
     private static final boolean DEBUG = false;

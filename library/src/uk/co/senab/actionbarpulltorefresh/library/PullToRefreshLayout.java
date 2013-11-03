@@ -40,8 +40,6 @@ public class PullToRefreshLayout extends FrameLayout {
 
     private PullToRefreshAttacher mPullToRefreshAttacher;
 
-    private HashSet<Integer> mViewIdsToAdd;
-
     public PullToRefreshLayout(Context context) {
         this(context, null);
     }
@@ -66,6 +64,7 @@ public class PullToRefreshLayout extends FrameLayout {
      *            - Whether the attacher should be in a refreshing state,
      */
     public final void setRefreshing(boolean refreshing) {
+        ensureAttacher();
         mPullToRefreshAttacher.setRefreshing(refreshing);
     }
 
@@ -73,6 +72,7 @@ public class PullToRefreshLayout extends FrameLayout {
      * @return true if this Attacher is currently in a refreshing state.
      */
     public final boolean isRefreshing() {
+        ensureAttacher();
         return mPullToRefreshAttacher.isRefreshing();
     }
 
@@ -83,6 +83,7 @@ public class PullToRefreshLayout extends FrameLayout {
      * This is the equivalent of calling <code>setRefreshing(false)</code>.
      */
     public final void setRefreshComplete() {
+        ensureAttacher();
         mPullToRefreshAttacher.setRefreshComplete();
     }
 
@@ -93,6 +94,7 @@ public class PullToRefreshLayout extends FrameLayout {
      * @param listener
      */
     public final void setHeaderViewListener(HeaderViewListener listener) {
+        ensureAttacher();
         mPullToRefreshAttacher.setHeaderViewListener(listener);
     }
 
@@ -101,6 +103,7 @@ public class PullToRefreshLayout extends FrameLayout {
      *         we are refreshing.
      */
     public final View getHeaderView() {
+        ensureAttacher();
         return mPullToRefreshAttacher.getHeaderView();
     }
 
@@ -108,6 +111,7 @@ public class PullToRefreshLayout extends FrameLayout {
      * @return The HeaderTransformer currently used by this Attacher.
      */
     public HeaderTransformer getHeaderTransformer() {
+        ensureAttacher();
         return mPullToRefreshAttacher.getHeaderTransformer();
     }
 
@@ -176,6 +180,12 @@ public class PullToRefreshLayout extends FrameLayout {
 
     protected Options createDefaultOptions() {
         return new Options();
+    }
+
+    private void ensureAttacher() {
+        if (mPullToRefreshAttacher == null) {
+            throw new IllegalStateException("You need to setup the PullToRefreshLayout before using it");
+        }
     }
 
     public final class SetupWizard {

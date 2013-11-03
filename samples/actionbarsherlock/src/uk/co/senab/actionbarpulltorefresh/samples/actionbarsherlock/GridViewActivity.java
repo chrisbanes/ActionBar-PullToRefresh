@@ -59,24 +59,18 @@ public class GridViewActivity extends SherlockActivity
                 ITEMS);
         gridView.setAdapter(adapter);
 
-        // As we're modifying some of the options, create an instance of
-        // AbsPullToRefreshAttacher.Options
-        Options ptrOptions = new Options();
-
-        // Here we make the refresh scroll distance to 75% of the GridView height
-        ptrOptions.refreshScrollDistance = 0.75f;
-
-        // Here we define a custom header layout which will be inflated and used
-        ptrOptions.headerLayout = R.layout.customised_header;
-
-        // Here we define a custom header transformer which will alter the header based on the
-        // current pull-to-refresh state
-        ptrOptions.headerTransformer = new CustomisedHeaderTransformer();
-
         // Now find the PullToRefreshLayout and set it up
         mPullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.ptr_layout);
         ActionBarPullToRefresh.from(this)
-                .options(ptrOptions)
+                .options(Options.create()
+                        // Here we make the refresh scroll distance to 75% of the GridView height
+                        .scrollDistance(.75f)
+                        // Here we define a custom header layout which will be inflated and used
+                        .headerLayout(R.layout.customised_header)
+                        // Here we define a custom header transformer which will alter the header
+                        // based on the current pull-to-refresh state
+                        .headerTransformer(new CustomisedHeaderTransformer())
+                        .build())
                 .allChildrenArePullable()
                 .listener(this)
                 .setup(mPullToRefreshLayout);

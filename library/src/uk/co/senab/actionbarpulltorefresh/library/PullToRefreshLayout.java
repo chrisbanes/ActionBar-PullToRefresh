@@ -176,11 +176,7 @@ public class PullToRefreshLayout extends FrameLayout {
 
     protected PullToRefreshAttacher createPullToRefreshAttacher(Activity activity,
             Options options) {
-        return new PullToRefreshAttacher(activity, options != null ? options : createDefaultOptions());
-    }
-
-    protected Options createDefaultOptions() {
-        return new Options();
+        return new PullToRefreshAttacher(activity, options != null ? options : new Options());
     }
 
     private void ensureAttacher() {

@@ -19,7 +19,7 @@ package uk.co.senab.actionbarpulltorefresh.library;
 /**
  * Allows you to specify a number of configuration options when setting up a {@link PullToRefreshLayout}.
  */
-public class Options {
+public final class Options {
 
     /* Default configuration values */
     private static final int DEFAULT_HEADER_LAYOUT = R.layout.default_header;
@@ -28,42 +28,18 @@ public class Options {
     private static final int DEFAULT_REFRESH_MINIMIZED_DELAY = 1 * 1000;
     private static final boolean DEFAULT_REFRESH_MINIMIZE = true;
 
-    /**
-     * EnvironmentDelegate instance which will be used. If null, we will
-     * create an instance of the default class.
-     */
-    public EnvironmentDelegate environmentDelegate = null;
+    public static Builder create() {
+        return new Builder();
+    }
 
-    /**
-     * The layout resource ID which should be inflated to be displayed above
-     * the Action Bar
-     */
-    public int headerLayout = DEFAULT_HEADER_LAYOUT;
+    Options() {}
 
-    /**
-     * The header transformer to be used to transfer the header view. If
-     * null, an instance of {@link uk.co.senab.actionbarpulltorefresh.library.DefaultHeaderTransformer} will be used.
-     */
-    public HeaderTransformer headerTransformer = null;
-
-    /**
-     * The percentage of the refreshable view that needs to be scrolled
-     * before a refresh is initiated.
-     */
-    public float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
-
-    /**
-     * Whether a refresh should only be initiated when the user has finished
-     * the touch event.
-     */
-    public boolean refreshOnUp = DEFAULT_REFRESH_ON_UP;
-
-    /**
-     * The delay after a refresh is started in which the header should be
-     * 'minimized'. By default, most of the header is faded out, leaving
-     * only the progress bar signifying that a refresh is taking place.
-     */
-    public int refreshMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
+    EnvironmentDelegate environmentDelegate = null;
+    int headerLayout = DEFAULT_HEADER_LAYOUT;
+    HeaderTransformer headerTransformer = null;
+    float refreshScrollDistance = DEFAULT_REFRESH_SCROLL_DISTANCE;
+    boolean refreshOnUp = DEFAULT_REFRESH_ON_UP;
+    int refreshMinimizeDelay = DEFAULT_REFRESH_MINIMIZED_DELAY;
 
     /**
      * Enable or disable the header 'minimization', which by default means that the majority of
@@ -73,5 +49,84 @@ public class Options {
      * {@link #refreshMinimizeDelay}. If set to false then the whole header will be displayed
      * until the refresh is finished.
      */
-    public boolean refreshMinimize = DEFAULT_REFRESH_MINIMIZE;
+    boolean refreshMinimize = DEFAULT_REFRESH_MINIMIZE;
+
+    public static class Builder {
+        final Options mOptions = new Options();
+
+        /**
+         * EnvironmentDelegate instance which will be used. If null, we will
+         * create an instance of the default class.
+         */
+        public Builder environmentDelegate(EnvironmentDelegate environmentDelegate) {
+            mOptions.environmentDelegate = environmentDelegate;
+            return this;
+        }
+
+        /**
+         * The layout resource ID which should be inflated to be displayed above
+         * the Action Bar
+         */
+        public Builder headerLayout(int headerLayoutId) {
+            mOptions.headerLayout = headerLayoutId;
+            return this;
+        }
+
+        /**
+         * The header transformer to be used to transfer the header view. If
+         * null, an instance of {@link DefaultHeaderTransformer} will be used.
+         */
+        public Builder headerTransformer(HeaderTransformer headerTransformer) {
+            mOptions.headerTransformer = headerTransformer;
+            return this;
+        }
+
+        /**
+         * The percentage of the refreshable view that needs to be scrolled
+         * before a refresh is initiated.
+         */
+        public Builder scrollDistance(float refreshScrollDistance) {
+            mOptions.refreshScrollDistance = refreshScrollDistance;
+            return this;
+        }
+
+        /**
+         * Whether a refresh should only be initiated when the user has finished
+         * the touch event.
+         */
+        public Builder refreshOnUp(boolean enabled) {
+            mOptions.refreshOnUp = enabled;
+            return this;
+        }
+
+        /**
+         * Disable the header 'minimization', which by default means that the majority of
+         * the header is hidden, leaving only the progress bar still showing.
+         */
+        public Builder noMinimize() {
+            mOptions.refreshMinimize = false;
+            return this;
+        }
+
+        /**
+         * Enable header 'minimization', which by default means that the majority of
+         * the header is hidden, leaving only the progress bar still showing.
+         */
+        public Builder minimize() {
+            return minimize(DEFAULT_REFRESH_MINIMIZED_DELAY);
+        }
+
+        /**
+         * Enable header 'minimization' and set the delay.
+         */
+        public Builder minimize(int delay) {
+            mOptions.refreshMinimizeDelay = delay;
+            mOptions.refreshMinimize = true;
+            return this;
+        }
+
+        public Options build() {
+            return mOptions;
+        }
+    }
 }

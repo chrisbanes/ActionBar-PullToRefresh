@@ -16,16 +16,13 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
-import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
@@ -86,11 +83,6 @@ public class PullToRefreshAttacher {
         }
 
         mActivity = activity;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            // Register ActivityListener so that we can make sure we're destroyed
-            ActivityListener.register(this);
-        }
-
         mRefreshableViews = new WeakHashMap<View, ViewDelegate>();
 
         // Copy necessary values from options
@@ -628,54 +620,4 @@ public class PullToRefreshAttacher {
             minimizeHeader();
         }
     };
-
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    static class ActivityListener implements Application.ActivityLifecycleCallbacks {
-        private final PullToRefreshAttacher mPullToRefreshAttacher;
-
-        static void register(PullToRefreshAttacher pullToRefreshAttacher) {
-            ActivityListener listener = new ActivityListener(pullToRefreshAttacher);
-            pullToRefreshAttacher.getAttachedActivity().getApplication()
-                    .registerActivityLifecycleCallbacks(listener);
-        }
-
-        private ActivityListener(PullToRefreshAttacher pullToRefreshAttacher) {
-            mPullToRefreshAttacher = pullToRefreshAttacher;
-        }
-
-        @Override
-        public void onActivityCreated(Activity activity, Bundle bundle) {
-        }
-
-        @Override
-        public void onActivityStarted(Activity activity) {
-        }
-
-        @Override
-        public void onActivityResumed(Activity activity) {
-        }
-
-        @Override
-        public void onActivityPaused(Activity activity) {
-        }
-
-        @Override
-        public void onActivityStopped(Activity activity) {
-        }
-
-        @Override
-        public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
-        }
-
-        @Override
-        public void onActivityDestroyed(Activity activity) {
-            Activity attacherActivity = mPullToRefreshAttacher.getAttachedActivity();
-            if (attacherActivity == activity) {
-                // Destroy PullToRefreshAttacher
-                mPullToRefreshAttacher.destroy();
-                // Activity has been destroyed so, remove this listener
-                attacherActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
-            }
-        }
-    }
 }

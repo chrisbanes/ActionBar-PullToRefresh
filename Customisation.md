@@ -69,7 +69,7 @@ DefaultHeaderTransformer is the default HeaderTransformer bundled with the libra
   <item name="ptrHeaderTitleTextAppearance">...</item>
     
   <!-- Color to tint the progress bar -->
-  <item name="ptrProgressBarColor">...<item>
+  <item name="ptrProgressBarColor">...</item>
 
   <!-- The strings to be displayed at the various states -->
   <item name="ptrPullText">...</item>

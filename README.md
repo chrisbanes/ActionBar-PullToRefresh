@@ -43,7 +43,7 @@ If the View you want to use is not listed above, you can easily add support in y
 See the [Quick Start](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/QuickStart-Stock) guide for more information.
 
 ## Customisation
-See the [Customisation](Customisation.md) page for more information.
+See the [Customisation](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/Customisation) page for more information.
 
 ## License
 

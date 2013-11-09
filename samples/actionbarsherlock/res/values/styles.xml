@@ -28,7 +28,8 @@
         <!--<item name="ptrHeaderHeight"></item>-->
 
         <item name="ptrHeaderTitleTextAppearance">@style/TextAppearance.Custom.PtrHeader.Title</item>
-        <item name="ptrProgressBarColor">@color/holo_dark_green</item>
+        <item name="ptrProgressBarStyle">inside</item>
+        <item name="ptrProgressBarColor">@android:color/black</item>
 
         <item name="ptrPullText">Keep going...</item>
         <item name="ptrRefreshingText">Pulling down the internet</item>

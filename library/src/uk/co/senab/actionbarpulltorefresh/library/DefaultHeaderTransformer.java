@@ -44,8 +44,8 @@ import uk.co.senab.actionbarpulltorefresh.library.platform.SDK11;
  */
 public class DefaultHeaderTransformer extends HeaderTransformer {
 
-    private static final int PROGRESS_BAR_STYLE_INSIDE = 0;
-    private static final int PROGRESS_BAR_STYLE_OUTSIDE = 1;
+    public static final int PROGRESS_BAR_STYLE_INSIDE = 0;
+    public static final int PROGRESS_BAR_STYLE_OUTSIDE = 1;
 
     private View mHeaderView;
     private ViewGroup mContentLayout;

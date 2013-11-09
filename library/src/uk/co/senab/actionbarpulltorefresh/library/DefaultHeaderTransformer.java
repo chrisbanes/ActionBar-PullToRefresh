@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.platform.SDK11;
@@ -42,6 +43,9 @@ import uk.co.senab.actionbarpulltorefresh.library.platform.SDK11;
  * Default Header Transformer.
  */
 public class DefaultHeaderTransformer extends HeaderTransformer {
+
+    private static final int PROGRESS_BAR_STYLE_INSIDE = 0;
+    private static final int PROGRESS_BAR_STYLE_OUTSIDE = 1;
 
     private View mHeaderView;
     private ViewGroup mContentLayout;
@@ -53,6 +57,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     private boolean mUseCustomProgressColor = false;
     private int mProgressDrawableColor;
     private long mAnimationDuration;
+    private int mProgressBarStyle;
 
     private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -84,6 +89,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         // Setup the View styles
         setupViewsFromStyles(activity, headerView);
+
+        applyProgressBarStyle();
 
         // Apply any custom ProgressBar colors
         applyProgressBarColor();
@@ -229,6 +236,16 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         applyProgressBarColor();
     }
 
+    /**
+     * Set the progress bar style. {@code style} must be one of {@link #PROGRESS_BAR_STYLE_OUTSIDE}
+     * or {@link #PROGRESS_BAR_STYLE_INSIDE}.
+     */
+    public void setProgressBarStyle(int style) {
+        if (mProgressBarStyle != style) {
+            mProgressBarStyle = style;
+            applyProgressBarStyle();
+        }
+    }
 
     /**
      * Set Text to show to prompt the user is pull (or keep pulling).
@@ -302,6 +319,9 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                     .getColor(R.styleable.PullToRefreshHeader_ptrProgressBarColor, 0);
         }
 
+        mProgressBarStyle = styleAttrs.getInt(
+                R.styleable.PullToRefreshHeader_ptrProgressBarStyle, PROGRESS_BAR_STYLE_OUTSIDE);
+
         // Retrieve the text strings from the style (if they're set)
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrPullText)) {
             mPullRefreshLabel = styleAttrs.getString(R.styleable.PullToRefreshHeader_ptrPullText);
@@ -315,6 +335,25 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         }
 
         styleAttrs.recycle();
+    }
+
+    private void applyProgressBarStyle() {
+        RelativeLayout.LayoutParams lp =
+                (RelativeLayout.LayoutParams) mHeaderProgressBar.getLayoutParams();
+
+        lp.removeRule(RelativeLayout.BELOW);
+        lp.removeRule(RelativeLayout.ALIGN_BOTTOM);
+
+        switch (mProgressBarStyle) {
+            case PROGRESS_BAR_STYLE_INSIDE:
+                lp.addRule(RelativeLayout.ALIGN_BOTTOM, R.id.ptr_content);
+                break;
+            case PROGRESS_BAR_STYLE_OUTSIDE:
+                lp.addRule(RelativeLayout.BELOW, R.id.ptr_content);
+                break;
+        }
+
+        mHeaderProgressBar.requestLayout();
     }
 
     private void applyProgressBarColor() {

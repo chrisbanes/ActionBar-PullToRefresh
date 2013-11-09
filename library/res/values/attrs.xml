@@ -34,6 +34,12 @@
         <!-- The color that the Progress Bar should be tinted with -->
         <attr name="ptrProgressBarColor" format="reference|color" />
 
+        <!-- The style of the Progress Bar -->
+        <attr name="ptrProgressBarStyle">
+            <flag name="inside" value="0x0" />
+            <flag name="outside" value="0x1" />
+        </attr>
+
         <!-- Text to show to prompt the user is pull (or keep pulling) -->
         <attr name="ptrPullText" format="reference|string" />
 

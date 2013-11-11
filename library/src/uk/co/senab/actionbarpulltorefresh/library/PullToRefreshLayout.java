@@ -118,7 +118,7 @@ public class PullToRefreshLayout extends FrameLayout {
         if (DEBUG) {
             Log.d(LOG_TAG, "onInterceptTouchEvent. " + event.toString());
         }
-        if (mPullToRefreshAttacher != null && getChildCount() > 0) {
+        if (isEnabled() && mPullToRefreshAttacher != null && getChildCount() > 0) {
             return mPullToRefreshAttacher.onInterceptTouchEvent(event);
         }
         return false;
@@ -129,7 +129,7 @@ public class PullToRefreshLayout extends FrameLayout {
         if (DEBUG) {
             Log.d(LOG_TAG, "onTouchEvent. " + event.toString());
         }
-        if (mPullToRefreshAttacher != null) {
+        if (isEnabled() && mPullToRefreshAttacher != null) {
             return mPullToRefreshAttacher.onTouchEvent(event);
         }
         return super.onTouchEvent(event);

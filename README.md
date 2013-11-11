@@ -40,7 +40,16 @@ If the View you want to use is not listed above, you can easily add support in y
 ---
 
 ## Usage and Integration
-See the [Quick Start](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/QuickStart-Stock) guide for more information.
+See the Quick Start guides for more information on how to achieve a simple integration:
+
+* [Quick Start](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/QuickStart-Stock) for API v14 and above.
+* [Quick Start: ActionBarCompat](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/QuickStart-ABC) when using ActionBarCompat (appcompat).
+* [Quick Start: ActionBarSherlock](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/QuickStart-ABS) when using ActionBarSherlock.
+
+Then we are some advanced integration information:
+
+* [ListFragment](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/ListFragment) when integrating the library with a ListFragment.
+
 
 ## Customisation
 See the [Customisation](https://github.com/chrisbanes/ActionBar-PullToRefresh/wiki/Customisation) page for more information.

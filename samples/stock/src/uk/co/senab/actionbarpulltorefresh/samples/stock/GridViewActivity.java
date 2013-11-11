@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListAdapter;
@@ -30,6 +31,7 @@ import uk.co.senab.actionbarpulltorefresh.library.HeaderTransformer;
 import uk.co.senab.actionbarpulltorefresh.library.Options;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.AbsListViewDelegate;
 
 /**
  * This sample shows how to use ActionBar-PullToRefresh with a {@link android.widget.GridView
@@ -71,6 +73,8 @@ public class GridViewActivity extends BaseSampleActivity
                         .build())
                 .allChildrenArePullable()
                 .listener(this)
+                // Here we'll set a custom ViewDelegate
+                .useViewDelegate(GridView.class, new AbsListViewDelegate())
                 .setup(mPullToRefreshLayout);
     }
 

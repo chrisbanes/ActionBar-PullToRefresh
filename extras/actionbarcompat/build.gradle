@@ -2,7 +2,7 @@ apply plugin: 'android-library'
 
 dependencies {
     compile project(':library')
-    compile "com.android.support:appcompat-v7:[18.0,)"
+    compile "com.android.support:appcompat-v7:+"
 }
 
 android {

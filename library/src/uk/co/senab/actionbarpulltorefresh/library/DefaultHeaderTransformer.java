@@ -341,9 +341,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         RelativeLayout.LayoutParams lp =
                 (RelativeLayout.LayoutParams) mHeaderProgressBar.getLayoutParams();
 
-        lp.removeRule(RelativeLayout.BELOW);
-        lp.removeRule(RelativeLayout.ALIGN_BOTTOM);
-
         switch (mProgressBarStyle) {
             case PROGRESS_BAR_STYLE_INSIDE:
                 lp.addRule(RelativeLayout.ALIGN_BOTTOM, R.id.ptr_content);

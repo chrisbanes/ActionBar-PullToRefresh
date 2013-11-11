@@ -21,7 +21,12 @@ import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
 public class ActionBarPullToRefresh {
 
@@ -35,6 +40,7 @@ public class ActionBarPullToRefresh {
         private int[] refreshableViewIds;
         private OnRefreshListener mOnRefreshListener;
         private ViewGroup mViewGroupToInsertInto;
+        private HashMap<Class, ViewDelegate> mViewDelegates;
 
         private SetupWizard(Activity activity) {
             mActivity = activity;
@@ -52,6 +58,14 @@ public class ActionBarPullToRefresh {
 
         public SetupWizard theseChildrenArePullable(int... viewIds) {
             refreshableViewIds = viewIds;
+            return this;
+        }
+
+        public SetupWizard useViewDelegate(Class<?> viewClass, ViewDelegate delegate) {
+            if (mViewDelegates == null) {
+                mViewDelegates = new HashMap<Class, ViewDelegate>();
+            }
+            mViewDelegates.put(viewClass, delegate);
             return this;
         }
 
@@ -76,10 +90,19 @@ public class ActionBarPullToRefresh {
 
             pullToRefreshLayout.setPullToRefreshAttacher(attacher);
 
+            // First add the pullable child views
             if (refreshableViewIds != null) {
                 pullToRefreshLayout.addChildrenAsPullable(refreshableViewIds);
             } else {
                 pullToRefreshLayout.addAllChildrenAsPullable();
+            }
+
+            // Now set any custom view delegates
+            if (mViewDelegates != null) {
+                final Set<Map.Entry<Class, ViewDelegate>> entries = mViewDelegates.entrySet();
+                for (final Map.Entry<Class, ViewDelegate> entry : entries) {
+                    attacher.useViewDelegate(entry.getKey(), entry.getValue());
+                }
             }
         }
 

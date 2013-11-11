@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
@@ -137,16 +138,11 @@ public class PullToRefreshAttacher {
     }
 
     /**
-     * Add a view which will be used to initiate refresh requests, along with a
-     * delegate which knows how to handle the given view, and a listener to be
-     * invoked when a refresh is started.
+     * Add a view which will be used to initiate refresh requests.
      *
-     * @param view
-     *            View which will be used to initiate refresh requests.
-     * @param viewDelegate
-     *            delegate which knows how to handle <code>view</code>.
+     * @param view View which will be used to initiate refresh requests.
      */
-    void addRefreshableView(View view, ViewDelegate viewDelegate) {
+    void addRefreshableView(View view) {
         if (isDestroyed()) return;
 
         // Check to see if view is null
@@ -156,16 +152,18 @@ public class PullToRefreshAttacher {
         }
 
         // ViewDelegate
-        if (viewDelegate == null) {
-            viewDelegate = InstanceCreationUtils.getBuiltInViewDelegate(view);
-            if (viewDelegate == null) {
-                throw new IllegalArgumentException(
-                        "No view handler found. Please provide one.");
-            }
-        }
+        ViewDelegate viewDelegate = InstanceCreationUtils.getBuiltInViewDelegate(view);
 
         // View to detect refreshes for
         mRefreshableViews.put(view, viewDelegate);
+    }
+
+    void useViewDelegate(Class<?> viewClass, ViewDelegate delegate) {
+        for (View view : mRefreshableViews.keySet()) {
+            if (viewClass.isInstance(view)) {
+                mRefreshableViews.put(view, delegate);
+            }
+        }
     }
 
     /**

@@ -162,14 +162,14 @@ public class PullToRefreshLayout extends FrameLayout {
     void addAllChildrenAsPullable() {
         ensureAttacher();
         for (int i = 0, z = getChildCount(); i < z; i++) {
-            mPullToRefreshAttacher.addRefreshableView(getChildAt(i), null);
+            mPullToRefreshAttacher.addRefreshableView(getChildAt(i));
         }
     }
 
     void addChildrenAsPullable(int... viewIds) {
         if (viewIds.length > 0) {
             for (int i = 0, z = viewIds.length; i < z; i++) {
-                mPullToRefreshAttacher.addRefreshableView(findViewById(viewIds[i]), null);
+                mPullToRefreshAttacher.addRefreshableView(findViewById(viewIds[i]));
             }
         }
     }

@@ -1,7 +1,7 @@
 apply plugin: 'android-library'
 
 android {
-    compileSdkVersion 18
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
     buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
 
     sourceSets {

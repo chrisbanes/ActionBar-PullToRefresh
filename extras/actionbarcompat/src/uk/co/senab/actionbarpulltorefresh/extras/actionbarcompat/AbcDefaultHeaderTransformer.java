@@ -27,6 +27,9 @@ import android.view.animation.AnimationUtils;
 
 import uk.co.senab.actionbarpulltorefresh.library.DefaultHeaderTransformer;
 
+/**
+ * @see uk.co.senab.actionbarpulltorefresh.library.DefaultHeaderTransformer
+ */
 public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
 
     private Animation mHeaderInAnimation, mHeaderOutAnimation;

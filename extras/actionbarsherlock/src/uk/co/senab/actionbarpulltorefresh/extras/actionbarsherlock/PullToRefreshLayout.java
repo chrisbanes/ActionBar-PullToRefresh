@@ -24,7 +24,7 @@ import uk.co.senab.actionbarpulltorefresh.library.Options;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
 /**
- * TODO
+ * @see uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
  */
 public class PullToRefreshLayout extends
         uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout {

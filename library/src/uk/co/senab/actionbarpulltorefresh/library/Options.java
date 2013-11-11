@@ -125,6 +125,9 @@ public final class Options {
             return this;
         }
 
+        /**
+         * @return the built {@link Options} instance.
+         */
         public Options build() {
             return mOptions;
         }

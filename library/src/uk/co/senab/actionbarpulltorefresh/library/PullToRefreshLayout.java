@@ -32,7 +32,9 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 /**
- * FIXME
+ * The main component of the library. You wrap the views you wish to be 'pullable' within this layout.
+ * This layout is setup by using the {@link ActionBarPullToRefresh} setup-wizard return by
+ * @link ActionBarPullToRefresh#from(android.app.Activity)}.
  */
 public class PullToRefreshLayout extends FrameLayout {
 

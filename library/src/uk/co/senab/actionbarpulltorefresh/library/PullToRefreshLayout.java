@@ -19,6 +19,8 @@ package uk.co.senab.actionbarpulltorefresh.library;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -30,6 +32,7 @@ import java.util.HashSet;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
 /**
  * The main component of the library. You wrap the views you wish to be 'pullable' within this layout.
@@ -138,6 +141,11 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     @Override
+    public FrameLayout.LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new PullToRefreshLayout.LayoutParams(getContext(), attrs);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         // Destroy the PullToRefreshAttacher
         if (mPullToRefreshAttacher != null) {
@@ -164,16 +172,41 @@ public class PullToRefreshLayout extends FrameLayout {
     void addAllChildrenAsPullable() {
         ensureAttacher();
         for (int i = 0, z = getChildCount(); i < z; i++) {
-            mPullToRefreshAttacher.addRefreshableView(getChildAt(i));
+            addRefreshableView(getChildAt(i));
         }
     }
 
     void addChildrenAsPullable(int... viewIds) {
         if (viewIds.length > 0) {
             for (int i = 0, z = viewIds.length; i < z; i++) {
-                mPullToRefreshAttacher.addRefreshableView(findViewById(viewIds[i]));
+                addRefreshableView(findViewById(viewIds[i]));
             }
         }
+    }
+
+    void addRefreshableView(View view) {
+        if (mPullToRefreshAttacher != null) {
+            mPullToRefreshAttacher.addRefreshableView(view, getViewDelegateFromLayoutParams(view));
+        }
+    }
+
+    ViewDelegate getViewDelegateFromLayoutParams(View view) {
+        if (view != null && view.getLayoutParams() instanceof LayoutParams) {
+            LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            String clazzName = lp.getViewDelegateClassName();
+
+            if (!TextUtils.isEmpty(clazzName)) {
+                // Lets convert any relative class names (i.e. .XYZViewDelegate)
+                final int firstDot = clazzName.indexOf('.');
+                if (firstDot == -1) {
+                    clazzName = getContext().getPackageName() + "." + clazzName;
+                } else if (firstDot == 0) {
+                    clazzName = getContext().getPackageName() + clazzName;
+                }
+                return InstanceCreationUtils.instantiateViewDelegate(getContext(), clazzName);
+            }
+        }
+        return null;
     }
 
     protected PullToRefreshAttacher createPullToRefreshAttacher(Activity activity,
@@ -184,6 +217,23 @@ public class PullToRefreshLayout extends FrameLayout {
     private void ensureAttacher() {
         if (mPullToRefreshAttacher == null) {
             throw new IllegalStateException("You need to setup the PullToRefreshLayout before using it");
+        }
+    }
+
+    static class LayoutParams extends FrameLayout.LayoutParams {
+        private final String mViewDelegateClassName;
+
+        LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+
+            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.PullToRefreshView);
+            mViewDelegateClassName = a
+                    .getString(R.styleable.PullToRefreshView_ptrViewDelegateClass);
+            a.recycle();
+        }
+
+        String getViewDelegateClassName() {
+            return mViewDelegateClassName;
         }
     }
 }

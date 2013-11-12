@@ -17,6 +17,13 @@
 
 <resources>
 
+    <declare-styleable name="PullToRefreshView">
+
+        <!-- The class to use as a View's View Delegate. Can be relative path from app's package name -->
+        <attr name="ptrViewDelegateClass" format="reference|string" />
+
+    </declare-styleable>
+
     <!-- The attribute to set in your Application/Activity theme to reference your custom theme -->
     <attr name="ptrHeaderStyle" format="reference" />
 

@@ -62,20 +62,20 @@ class InstanceCreationUtils {
         return null;
     }
 
-    static <T> T instantiateViewDelegate(Context context, String className, Object[] arguments) {
+    static <T> T instantiateViewDelegate(Context context, String className) {
         try {
             Class<?> clazz = context.getClassLoader().loadClass(className);
-            return newInstance(context, clazz, VIEW_DELEGATE_CONSTRUCTOR_SIGNATURE, arguments);
+            return newInstance(context, clazz, VIEW_DELEGATE_CONSTRUCTOR_SIGNATURE);
         } catch (Exception e) {
             Log.w(LOG_TAG, "Cannot instantiate class: " + className, e);
         }
         return null;
     }
 
-    static <T> T instantiateTransformer(Context context, String className, Object[] arguments) {
+    static <T> T instantiateTransformer(Context context, String className) {
         try {
             Class<?> clazz = context.getClassLoader().loadClass(className);
-            return newInstance(context, clazz, TRANSFORMER_CONSTRUCTOR_SIGNATURE, arguments);
+            return newInstance(context, clazz, TRANSFORMER_CONSTRUCTOR_SIGNATURE);
         } catch (Exception e) {
             Log.w(LOG_TAG, "Cannot instantiate class: " + className, e);
         }
@@ -83,7 +83,7 @@ class InstanceCreationUtils {
     }
 
     private static <T> T newInstance(Context context, Class clazz, Class[] constructorSig,
-            Object[] arguments) {
+            Object... arguments) {
         try {
             Constructor<?> constructor = clazz.getConstructor(constructorSig);
             return (T) constructor.newInstance(arguments);

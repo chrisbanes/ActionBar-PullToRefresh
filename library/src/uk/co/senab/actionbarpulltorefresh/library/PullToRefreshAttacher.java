@@ -142,7 +142,7 @@ public class PullToRefreshAttacher {
      *
      * @param view View which will be used to initiate refresh requests.
      */
-    void addRefreshableView(View view) {
+    void addRefreshableView(View view, ViewDelegate viewDelegate) {
         if (isDestroyed()) return;
 
         // Check to see if view is null
@@ -152,7 +152,9 @@ public class PullToRefreshAttacher {
         }
 
         // ViewDelegate
-        ViewDelegate viewDelegate = InstanceCreationUtils.getBuiltInViewDelegate(view);
+        if (viewDelegate == null) {
+            viewDelegate = InstanceCreationUtils.getBuiltInViewDelegate(view);
+        }
 
         // View to detect refreshes for
         mRefreshableViews.put(view, viewDelegate);

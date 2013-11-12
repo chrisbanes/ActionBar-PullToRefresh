@@ -14,14 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:id="@android:id/progress">
-        <scale
-            android:scaleWidth="100%"
-            android:scaleGravity="center"
-            android:drawable="@drawable/ptr_progress_primary" />
-    </item>
-
-</layer-list>
+<resources>
+    <color name="default_progress_bar_color">#FF33B5E5</color>
+</resources>

@@ -54,7 +54,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
 
-    private boolean mUseCustomProgressColor = false;
     private int mProgressDrawableColor;
     private long mAnimationDuration;
     private int mProgressBarStyle;
@@ -86,6 +85,9 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         mAnimationDuration = activity.getResources()
                 .getInteger(android.R.integer.config_shortAnimTime);
+
+        mProgressDrawableColor = activity.getResources()
+                .getColor(R.color.default_progress_bar_color);
 
         // Setup the View styles
         setupViewsFromStyles(activity, headerView);
@@ -214,8 +216,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     /**
-     * Set color to apply to the progress bar. Automatically enables usage of the custom color. Use
-     * {@link #setProgressBarColorEnabled(boolean)} to disable and re-enable the custom color usage.
+     * Set color to apply to the progress bar.
      * <p/>
      * The best way to apply a color is to load the color from resources: {@code
      * setProgressBarColor(getResources().getColor(R.color.your_color_name))}.
@@ -224,15 +225,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
      */
     public void setProgressBarColor(int color) {
         mProgressDrawableColor = color;
-        setProgressBarColorEnabled(true);
-    }
-
-    /**
-     * Enable or disable the use of a custom progress bar color. You can set what color to use with
-     * {@link #setProgressBarColor(int)}, which also automatically enables custom color usage.
-     */
-    public void setProgressBarColorEnabled(boolean enabled) {
-        mUseCustomProgressColor = enabled;
         applyProgressBarColor();
     }
 
@@ -314,9 +306,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         // Retrieve the Progress Bar Color the style
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarColor)) {
-            mUseCustomProgressColor = true;
             mProgressDrawableColor = styleAttrs
-                    .getColor(R.styleable.PullToRefreshHeader_ptrProgressBarColor, 0);
+                    .getColor(R.styleable.PullToRefreshHeader_ptrProgressBarColor, mProgressBarStyle);
         }
 
         mProgressBarStyle = styleAttrs.getInt(
@@ -355,15 +346,10 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private void applyProgressBarColor() {
         if (mHeaderProgressBar != null) {
-            if (mUseCustomProgressColor) {
-                mHeaderProgressBar.getProgressDrawable()
-                        .setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
-                mHeaderProgressBar.getIndeterminateDrawable()
-                        .setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
-            } else {
-                mHeaderProgressBar.getProgressDrawable().clearColorFilter();
-                mHeaderProgressBar.getIndeterminateDrawable().clearColorFilter();
-            }
+            mHeaderProgressBar.getProgressDrawable()
+                    .setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
+            mHeaderProgressBar.getIndeterminateDrawable()
+                    .setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
         }
     }
 

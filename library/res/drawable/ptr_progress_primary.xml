@@ -15,13 +15,12 @@
   ~ limitations under the License.
 -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:id="@android:id/progress">
-        <scale
-            android:scaleWidth="100%"
-            android:scaleGravity="center"
-            android:drawable="@drawable/ptr_progress_primary" />
-    </item>
-
-</layer-list>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="2dp" />
+    <padding
+        android:bottom="1dp"
+        android:left="1dp"
+        android:right="1dp"
+        android:top="1dp" />
+    <solid android:color="@android:color/white" />
+</shape>

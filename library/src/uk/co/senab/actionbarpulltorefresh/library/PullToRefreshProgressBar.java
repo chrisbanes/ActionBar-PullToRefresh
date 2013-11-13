@@ -49,7 +49,7 @@ public class PullToRefreshProgressBar extends View {
 
     private static final int DEFAULT_BAR_HEIGHT_DP = 4;
     private static final int DEFAULT_DETENT_WIDTH_DP = 3;
-    private static final int DEFAULT_PROGRESS_MAX = 100;
+    private static final int DEFAULT_PROGRESS_MAX = 10000;
 
     private final AnimationRunnable mIndeterminateAnimator;
     private final Paint mPaint = new Paint();
@@ -86,21 +86,12 @@ public class PullToRefreshProgressBar extends View {
         return mIndeterminate;
     }
 
-    public synchronized void setIndeterminate(boolean indeterminate) {
-        if (mIndeterminate != indeterminate) {
-            mIndeterminate = indeterminate;
-            invalidate();
-        }
+    public synchronized void setIndeterminate(final boolean indeterminate) {
+        setProgressState(mProgress, mProgressMax, indeterminate);
     }
 
     public synchronized void setProgress(int progress) {
-        if (progress != mProgress) {
-            mProgress = progress;
-
-            if (!mIndeterminate) {
-                invalidate();
-            }
-        }
+        setProgressState(progress, mProgressMax, mIndeterminate);
     }
 
     public synchronized void setProgressBarColor(int color) {
@@ -109,10 +100,7 @@ public class PullToRefreshProgressBar extends View {
     }
 
     public synchronized void setMax(int max) {
-        mProgressMax = max;
-        if (!mIndeterminate) {
-            invalidate();
-        }
+        setProgressState(mProgress, max, mIndeterminate);
     }
 
     public synchronized int getMax() {
@@ -204,6 +192,40 @@ public class PullToRefreshProgressBar extends View {
             } else {
                 mIndeterminateAnimator.cancel();
             }
+        }
+    }
+
+    void setProgressState(int progress, int progressMax, boolean indeterminate) {
+        boolean invalidate = false;
+
+        if (mIndeterminate != indeterminate) {
+            mIndeterminate = indeterminate;
+            if (indeterminate != mIndeterminateAnimator.isStarted()) {
+                if (mIndeterminate) {
+                    mIndeterminateAnimator.start();
+                } else {
+                    mIndeterminateAnimator.cancel();
+                }
+            }
+            invalidate = true;
+        }
+
+        if (progress != mProgress) {
+            mProgress = progress;
+            if (!mIndeterminate) {
+                invalidate = true;
+            }
+        }
+
+        if (progressMax != mProgressMax) {
+            mProgressMax = progressMax;
+            if (!mIndeterminate) {
+                invalidate = true;
+            }
+        }
+
+        if (invalidate) {
+            invalidate();
         }
     }
 

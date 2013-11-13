@@ -124,8 +124,8 @@ public class PullToRefreshProgressBar extends View {
 
         for (int i = -1; i < mSegmentCount; i++) {
             final float l = (i + animProgress) * barWidth;
-            final float r = l + barWidth;
-            canvas.drawRect(l + mIndeterminateBarSpacing, 0, r, canvas.getHeight(), mPaint);
+            final float r = l + barWidth - mIndeterminateBarSpacing;
+            canvas.drawRect(l, 0, r, canvas.getHeight(), mPaint);
         }
     }
 
@@ -259,12 +259,14 @@ public class PullToRefreshProgressBar extends View {
         public void start() {
             if (mStarted) return;
             checkState();
-            restart();
+            mRunCount = 0;
+            mStarted = true;
+            mStartTime = AnimationUtils.currentAnimationTimeMillis();
+            Compat.postOnAnimation(mView, this);
         }
 
         private void restart() {
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
-            mStarted = true;
             Compat.postOnAnimation(mView, this);
         }
 

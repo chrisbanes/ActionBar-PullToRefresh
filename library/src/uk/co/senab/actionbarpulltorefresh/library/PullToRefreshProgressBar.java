@@ -41,20 +41,20 @@ public class PullToRefreshProgressBar extends View {
 
     // A reasonable animation duration for the base width above. It will be weakly scaled up and
     // down for wider and narrower widths, respectively to provide a "constant" detent velocity.
-    private static final int BASE_DURATION_MS = 500;
+    private static final int BASE_DURATION_MS = 450;
 
     // A reasonable number of detents for the given width above. It will be weakly scaled up and
     // down for wider and narrower widths, respectively.
-    private static final int BASE_SEGMENT_COUNT = 5;
+    private static final int BASE_SEGMENT_COUNT = 4;
 
     private static final int DEFAULT_BAR_HEIGHT_DP = 4;
-    private static final int DEFAULT_DETENT_WIDTH_DP = 3;
+    private static final int DEFAULT_INDETERMINATE_BAR_SPACING_DP = 5;
     private static final int DEFAULT_PROGRESS_MAX = 10000;
 
     private final AnimationRunnable mIndeterminateAnimator;
     private final Paint mPaint = new Paint();
 
-    private final int mSolidBarDetentWidth;
+    private final int mIndeterminateBarSpacing;
     private final float mDensity;
     private int mSegmentCount;
 
@@ -73,11 +73,10 @@ public class PullToRefreshProgressBar extends View {
 
         mProgressMax = DEFAULT_PROGRESS_MAX;
 
-        mSolidBarDetentWidth = Math.round(DEFAULT_DETENT_WIDTH_DP * mDensity);
+        mIndeterminateBarSpacing = Math.round(DEFAULT_INDETERMINATE_BAR_SPACING_DP * mDensity);
 
         mIndeterminateAnimator = new AnimationRunnable(this);
         mIndeterminateAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        mIndeterminateAnimator.setInterpolator(new ExponentialInterpolator());
 
         mPaint.setColor(getResources().getColor(R.color.default_progress_bar_color));
     }
@@ -120,21 +119,13 @@ public class PullToRefreshProgressBar extends View {
             return;
         }
 
-        final float val = mIndeterminateAnimator.getAnimatedValue() + 1f;
+        final float animProgress = mIndeterminateAnimator.getAnimatedValue();
+        final int barWidth = canvas.getWidth() / mSegmentCount;
 
-        final int w = getWidth();
-        // Because the left-most segment doesn't start all the way on the left, and because it moves
-        // towards the right as it animates, we need to offset all drawing towards the left. This
-        // ensures that the left-most detent starts at the left origin, and that the left portion
-        // is never blank as the animation progresses towards the right.
-        final int offset = w >> mSegmentCount - 1;
-        // segments are spaced at half-width, quarter, eighth (powers-of-two). to maintain a smooth
-        // transition between segments, we used a power-of-two interpolator.
-        for (int i = 0; i < mSegmentCount; i++) {
-            final float l = val * (w >> (i + 1));
-            final float r = (i == 0) ? w + offset : l * 2;
-            canvas.drawRect(l + mSolidBarDetentWidth - offset, 0, r - offset, canvas.getHeight(),
-                    mPaint);
+        for (int i = -1; i < mSegmentCount; i++) {
+            final float l = (i + animProgress) * barWidth;
+            final float r = l + barWidth;
+            canvas.drawRect(l + mIndeterminateBarSpacing, 0, r, canvas.getHeight(), mPaint);
         }
     }
 
@@ -233,13 +224,6 @@ public class PullToRefreshProgressBar extends View {
         invalidate();
     }
 
-    private static class ExponentialInterpolator implements Interpolator {
-        @Override
-        public float getInterpolation(float input) {
-            return (float) Math.pow(2.0, input) - 1;
-        }
-    }
-
     class AnimationRunnable implements Runnable {
 
         public static final int INFINITE = -1;
@@ -274,8 +258,11 @@ public class PullToRefreshProgressBar extends View {
 
         public void start() {
             if (mStarted) return;
-
             checkState();
+            restart();
+        }
+
+        private void restart() {
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
             mStarted = true;
             Compat.postOnAnimation(mView, this);
@@ -307,8 +294,7 @@ public class PullToRefreshProgressBar extends View {
                 Compat.postOnAnimation(mView, this);
             } else {
                 if (++mRunCount < mRepeatCount || mRepeatCount == INFINITE) {
-                    cancel();
-                    start();
+                    restart();
                 }
             }
         }

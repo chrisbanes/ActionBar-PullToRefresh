@@ -50,7 +50,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     private View mHeaderView;
     private ViewGroup mContentLayout;
     private TextView mHeaderTextView;
-    private ProgressBar mHeaderProgressBar;
+    private PullToRefreshProgressBar mHeaderProgressBar;
 
     private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
 
@@ -74,7 +74,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         mHeaderView = headerView;
 
         // Get ProgressBar and TextView
-        mHeaderProgressBar = (ProgressBar) headerView.findViewById(R.id.ptr_progress);
+        mHeaderProgressBar = (PullToRefreshProgressBar) headerView.findViewById(R.id.ptr_progress);
         mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
         mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
 
@@ -346,10 +346,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private void applyProgressBarColor() {
         if (mHeaderProgressBar != null) {
-            mHeaderProgressBar.getProgressDrawable()
-                    .setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
-            mHeaderProgressBar.getIndeterminateDrawable()
-                    .setColorFilter(mProgressDrawableColor, PorterDuff.Mode.SRC_ATOP);
+            mHeaderProgressBar.setProgressBarColor(mProgressDrawableColor);
         }
     }
 

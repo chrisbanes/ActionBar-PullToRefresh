@@ -1,0 +1,16 @@
+package uk.co.senab.actionbarpulltorefresh.library.sdk;
+
+import android.os.Build;
+import android.view.View;
+
+public class Compat {
+
+    public static void postOnAnimation(View view, Runnable runnable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            CompatV16.postOnAnimation(view, runnable);
+        } else {
+            CompatBase.postOnAnimation(view, runnable);
+        }
+    }
+
+}

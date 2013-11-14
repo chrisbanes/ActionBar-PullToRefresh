@@ -41,6 +41,9 @@
         <!-- The color that the Progress Bar should be tinted with -->
         <attr name="ptrProgressBarColor" format="reference|color" />
 
+        <!-- The radius of the rounded corner on the progress bar -->
+        <attr name="ptrProgressBarCornerRadius" format="reference|dimension" />
+
         <!-- The style of the Progress Bar -->
         <attr name="ptrProgressBarStyle">
             <flag name="inside" value="0x0" />

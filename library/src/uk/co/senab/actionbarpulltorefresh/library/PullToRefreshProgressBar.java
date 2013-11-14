@@ -20,6 +20,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -62,6 +63,11 @@ public class PullToRefreshProgressBar extends View {
     private int mProgress;
     private int mProgressMax;
 
+    private int mProgressBarColor;
+    private float mProgressBarRadiusPx;
+
+    private final RectF mDrawRect = new RectF();
+
     public PullToRefreshProgressBar(Context c) {
         this(c, null);
     }
@@ -94,7 +100,12 @@ public class PullToRefreshProgressBar extends View {
     }
 
     public synchronized void setProgressBarColor(int color) {
-        mPaint.setColor(color);
+        mProgressBarColor = color;
+        invalidate();
+    }
+
+    public synchronized void setProgressBarCornerRadius(float radiusPx) {
+        mProgressBarRadiusPx = radiusPx;
         invalidate();
     }
 
@@ -107,11 +118,14 @@ public class PullToRefreshProgressBar extends View {
     }
 
     void drawProgress(Canvas canvas) {
-        final float progress = Math.max(Math.min(mProgress / (float) mProgressMax, 1f), 0f);
-        final int barWidth = Math.round(progress * canvas.getWidth());
+        mPaint.setColor(mProgressBarColor);
 
-        final int l = (canvas.getWidth() - barWidth) / 2;
-        canvas.drawRect(l, 0, l + barWidth, canvas.getHeight(), mPaint);
+        final float progress = Math.max(Math.min(mProgress / (float) mProgressMax, 1f), 0f);
+        final float barWidth = progress * canvas.getWidth();
+        final float l = (canvas.getWidth() - barWidth) / 2f;
+
+        mDrawRect.set(l, 0f, l + barWidth, canvas.getHeight());
+        canvas.drawRoundRect(mDrawRect, mProgressBarRadiusPx, mProgressBarRadiusPx, mPaint);
     }
 
     void drawIndeterminate(Canvas canvas) {
@@ -119,13 +133,16 @@ public class PullToRefreshProgressBar extends View {
             return;
         }
 
+        mPaint.setColor(mProgressBarColor);
+
         final float animProgress = mIndeterminateAnimator.getAnimatedValue();
-        final int barWidth = canvas.getWidth() / mSegmentCount;
+        final float barWidth = canvas.getWidth() / (float) mSegmentCount;
 
         for (int i = -1; i < mSegmentCount; i++) {
             final float l = (i + animProgress) * barWidth;
             final float r = l + barWidth - mIndeterminateBarSpacing;
-            canvas.drawRect(l, 0, r, canvas.getHeight(), mPaint);
+            mDrawRect.set(l, 0f, r, canvas.getHeight());
+            canvas.drawRoundRect(mDrawRect, mProgressBarRadiusPx, mProgressBarRadiusPx, mPaint);
         }
     }
 

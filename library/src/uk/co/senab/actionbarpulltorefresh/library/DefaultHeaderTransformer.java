@@ -89,6 +89,9 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         mProgressDrawableColor = activity.getResources()
                 .getColor(R.color.default_progress_bar_color);
 
+        mProgressCornerRadius = activity.getResources()
+                .getDimensionPixelSize(R.dimen.default_corner_radius);
+
         // Setup the View styles
         setupViewsFromStyles(activity, headerView);
 
@@ -317,12 +320,14 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         // Retrieve the Progress Bar Color the style
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarColor)) {
             mProgressDrawableColor = styleAttrs
-                    .getColor(R.styleable.PullToRefreshHeader_ptrProgressBarColor, mProgressBarStyle);
+                    .getColor(R.styleable.PullToRefreshHeader_ptrProgressBarColor,
+                            mProgressDrawableColor);
         }
 
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius)) {
             mProgressCornerRadius = styleAttrs
-                    .getDimension(R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius, 0f);
+                    .getDimension(R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius,
+                            mProgressCornerRadius);
         }
 
         mProgressBarStyle = styleAttrs.getInt(

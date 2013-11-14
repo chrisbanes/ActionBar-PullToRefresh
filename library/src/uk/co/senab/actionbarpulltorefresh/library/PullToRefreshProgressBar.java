@@ -84,6 +84,7 @@ public class PullToRefreshProgressBar extends View {
         mIndeterminateAnimator = new AnimationRunnable(this);
         mIndeterminateAnimator.setRepeatCount(ValueAnimator.INFINITE);
 
+        mPaint.setAntiAlias(true);
         mPaint.setColor(getResources().getColor(R.color.default_progress_bar_color));
     }
 

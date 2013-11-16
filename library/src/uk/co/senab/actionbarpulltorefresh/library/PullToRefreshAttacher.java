@@ -64,6 +64,7 @@ public class PullToRefreshAttacher {
     private float mInitialMotionY, mLastMotionY, mPullBeginY;
     private float mInitialMotionX;
     private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
+    private View mViewBeingDragged;
 
     private final WeakHashMap<View, ViewDelegate> mRefreshableViews;
 
@@ -269,8 +270,6 @@ public class PullToRefreshAttacher {
     HeaderTransformer getHeaderTransformer() {
         return mHeaderTransformer;
     }
-
-    private View mViewBeingDragged;
 
     final boolean onInterceptTouchEvent(MotionEvent event) {
         if (DEBUG) {

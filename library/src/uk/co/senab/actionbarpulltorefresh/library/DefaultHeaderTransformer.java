@@ -57,7 +57,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private long mAnimationDuration;
     private int mProgressBarStyle;
-	private float mProgressBarHeight = -1;
+    private int mProgressBarHeight = RelativeLayout.LayoutParams.WRAP_CONTENT;
 
     private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -253,15 +253,15 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         }
     }
 
-	/**
-	 * Set the progress bar height.
-	 */
-	public void setProgressBarHeight(float height) {
-		if (mProgressBarHeight != height) {
-			mProgressBarHeight = height;
-			applyProgressBarStyle();
-		}
-	}
+    /**
+     * Set the progress bar height.
+     */
+    public void setProgressBarHeight(int height) {
+        if (mProgressBarHeight != height) {
+            mProgressBarHeight = height;
+            applyProgressBarStyle();
+        }
+    }
 
     /**
      * Set Text to show to prompt the user is pull (or keep pulling).
@@ -299,9 +299,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         // Retrieve the Action Bar size from the app theme or the Action Bar's style
         if (mContentLayout != null) {
-            final int height = styleAttrs
-                    .getDimensionPixelSize(R.styleable.PullToRefreshHeader_ptrHeaderHeight,
-                            getActionBarSize(activity));
+            final int height = styleAttrs.getDimensionPixelSize(
+                    R.styleable.PullToRefreshHeader_ptrHeaderHeight, getActionBarSize(activity));
             mContentLayout.getLayoutParams().height = height;
             mContentLayout.requestLayout();
         }
@@ -330,25 +329,22 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         // Retrieve the Progress Bar Color the style
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarColor)) {
-            mProgressDrawableColor = styleAttrs
-                    .getColor(R.styleable.PullToRefreshHeader_ptrProgressBarColor,
-                            mProgressDrawableColor);
+            mProgressDrawableColor = styleAttrs.getColor(
+                    R.styleable.PullToRefreshHeader_ptrProgressBarColor, mProgressDrawableColor);
         }
 
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius)) {
-            mProgressCornerRadius = styleAttrs
-                    .getDimension(R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius,
-                            mProgressCornerRadius);
+            mProgressCornerRadius = (float) styleAttrs.getDimensionPixelSize(
+                    R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius, 0);
         }
 
         mProgressBarStyle = styleAttrs.getInt(
                 R.styleable.PullToRefreshHeader_ptrProgressBarStyle, PROGRESS_BAR_STYLE_OUTSIDE);
 
-	    if(styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarHeight)) {
-		    mProgressBarHeight = styleAttrs
-				    .getDimension(R.styleable.PullToRefreshHeader_ptrProgressBarHeight,
-						    mProgressBarHeight);
-	    }
+        if(styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarHeight)) {
+            mProgressBarHeight = styleAttrs.getDimensionPixelSize(
+                    R.styleable.PullToRefreshHeader_ptrProgressBarHeight, mProgressBarHeight);
+        }
 
         // Retrieve the text strings from the style (if they're set)
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrPullText)) {
@@ -366,8 +362,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     private void applyProgressBarStyle() {
-        RelativeLayout.LayoutParams lp =
-                (RelativeLayout.LayoutParams) mHeaderProgressBar.getLayoutParams();
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, mProgressBarHeight);
 
         switch (mProgressBarStyle) {
             case PROGRESS_BAR_STYLE_INSIDE:
@@ -378,11 +374,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                 break;
         }
 
-	    if (mProgressBarHeight >= 0) {
-		    lp.height = (int) mProgressBarHeight;
-	    }
-
-        mHeaderProgressBar.requestLayout();
+        mHeaderProgressBar.setLayoutParams(lp);
     }
 
     private void applyProgressBarSettings() {

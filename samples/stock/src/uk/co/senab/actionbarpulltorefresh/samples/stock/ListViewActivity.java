@@ -109,8 +109,11 @@ public class ListViewActivity extends BaseSampleActivity {
 
                     // Notify PullToRefreshLayout that the refresh has finished
                     mPullToRefreshLayout.setRefreshComplete();
-                    // Show the list again
-                    setListShown(true);
+
+                    if (getView() != null) {
+                        // Show the list again
+                        setListShown(true);
+                    }
                 }
             }.execute();
         }

@@ -143,7 +143,7 @@ public class PullToRefreshProgressBar extends View {
             final float l = (i + animProgress) * barWidth;
             final float r = l + barWidth - mIndeterminateBarSpacing;
             mDrawRect.set(l, 0f, r, canvas.getHeight());
-            canvas.drawRoundRect(mDrawRect, mProgressBarRadiusPx, mProgressBarRadiusPx, mPaint);
+            canvas.drawRect(mDrawRect, mPaint);
         }
     }
 

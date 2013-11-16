@@ -108,16 +108,15 @@ public class PullToRefreshAttacher {
                 .getDecorView();
 
         // Create Header view and then add to Decor View
+        mHeaderViewWrapper = new FrameLayout(mActivity);
         mHeaderView = LayoutInflater.from(
                 mEnvironmentDelegate.getContextForInflater(activity)).inflate(
-                options.headerLayout, decorView, false);
+                options.headerLayout, mHeaderViewWrapper, false);
         if (mHeaderView == null) {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
         }
         // Make Header View invisible so it still gets a layout pass
         mHeaderView.setVisibility(View.INVISIBLE);
-
-        mHeaderViewWrapper = new FrameLayout(mActivity);
         mHeaderViewWrapper.addView(mHeaderView);
 
         // Notify transformer

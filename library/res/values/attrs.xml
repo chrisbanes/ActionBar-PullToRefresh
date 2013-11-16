@@ -50,6 +50,9 @@
             <flag name="outside" value="0x1" />
         </attr>
 
+	    <!-- The height of the Progress Bar -->
+	    <attr name="ptrProgressBarHeight" format="reference|dimension" />
+
         <!-- Text to show to prompt the user is pull (or keep pulling) -->
         <attr name="ptrPullText" format="reference|string" />
 

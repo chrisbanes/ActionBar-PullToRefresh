@@ -57,6 +57,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private long mAnimationDuration;
     private int mProgressBarStyle;
+	private float mProgressBarHeight = -1;
 
     private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -252,6 +253,16 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         }
     }
 
+	/**
+	 * Set the progress bar height.
+	 */
+	public void setProgressBarHeight(float height) {
+		if (mProgressBarHeight != height) {
+			mProgressBarHeight = height;
+			applyProgressBarStyle();
+		}
+	}
+
     /**
      * Set Text to show to prompt the user is pull (or keep pulling).
      *
@@ -333,6 +344,12 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         mProgressBarStyle = styleAttrs.getInt(
                 R.styleable.PullToRefreshHeader_ptrProgressBarStyle, PROGRESS_BAR_STYLE_OUTSIDE);
 
+	    if(styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarHeight)) {
+		    mProgressBarHeight = styleAttrs
+				    .getDimension(R.styleable.PullToRefreshHeader_ptrProgressBarHeight,
+						    mProgressBarHeight);
+	    }
+
         // Retrieve the text strings from the style (if they're set)
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrPullText)) {
             mPullRefreshLabel = styleAttrs.getString(R.styleable.PullToRefreshHeader_ptrPullText);
@@ -360,6 +377,10 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                 lp.addRule(RelativeLayout.BELOW, R.id.ptr_content);
                 break;
         }
+
+	    if (mProgressBarHeight >= 0) {
+		    lp.height = (int) mProgressBarHeight;
+	    }
 
         mHeaderProgressBar.requestLayout();
     }

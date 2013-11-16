@@ -122,8 +122,6 @@ public class PullToRefreshAttacher {
 
         // Notify transformer
         mHeaderTransformer.onViewCreated(activity, mHeaderView);
-        // TODO Remove the follow deprecated method call before v1.0
-        mHeaderTransformer.onViewCreated(mHeaderView);
 
         // Now HeaderView to Activity
         mHandler.post(new Runnable() {

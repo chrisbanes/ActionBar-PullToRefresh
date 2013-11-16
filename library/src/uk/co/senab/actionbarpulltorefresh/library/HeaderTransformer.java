@@ -37,12 +37,6 @@ public abstract class HeaderTransformer {
     public void onViewCreated(Activity activity, View headerView) {}
 
     /**
-     * @deprecated This will be removed before v1.0. Override
-     * {@link #onViewCreated(android.app.Activity, android.view.View)} instead.
-     */
-    public void onViewCreated(View headerView) {}
-
-    /**
      * Called when the header should be reset. You should update any child
      * views to reflect this.
      * <p/>

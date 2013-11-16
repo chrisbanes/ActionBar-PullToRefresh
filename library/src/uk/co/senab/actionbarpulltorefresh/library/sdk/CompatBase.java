@@ -8,5 +8,4 @@ class CompatBase {
         view.postDelayed(runnable, 10l);
     }
 
-
 }

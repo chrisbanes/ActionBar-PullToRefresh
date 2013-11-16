@@ -18,8 +18,11 @@ package uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import uk.co.senab.actionbarpulltorefresh.library.EnvironmentDelegate;
 import uk.co.senab.actionbarpulltorefresh.library.HeaderTransformer;
@@ -27,8 +30,33 @@ import uk.co.senab.actionbarpulltorefresh.library.Options;
 
 class AbcPullToRefreshAttacher extends uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher {
 
+    private FrameLayout mHeaderViewWrapper;
+
     protected AbcPullToRefreshAttacher(Activity activity, Options options) {
         super(activity, options);
+    }
+
+    @Override
+    protected void addHeaderViewToActivity(View headerViewLayout, Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            super.addHeaderViewToActivity(headerViewLayout, activity);
+        } else {
+            // On older devices we need to wrap the HeaderView in a FrameLayout otherwise
+            // visibility changes do not take effect
+            mHeaderViewWrapper = new FrameLayout(activity);
+            mHeaderViewWrapper.addView(headerViewLayout);
+            super.addHeaderViewToActivity(mHeaderViewWrapper, activity);
+        }
+    }
+
+    @Override
+    protected void removeHeaderViewFromActivity(View headerViewLayout, Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            super.removeHeaderViewFromActivity(headerViewLayout, activity);
+        } else if (mHeaderViewWrapper != null) {
+            super.removeHeaderViewFromActivity(mHeaderViewWrapper, activity);
+            mHeaderViewWrapper = null;
+        }
     }
 
     @Override

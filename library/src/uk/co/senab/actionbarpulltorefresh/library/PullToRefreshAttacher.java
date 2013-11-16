@@ -32,7 +32,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import java.util.WeakHashMap;
 
@@ -54,7 +53,6 @@ public class PullToRefreshAttacher {
 
     private Activity mActivity;
     private View mHeaderView;
-    private FrameLayout mHeaderViewWrapper;
     private HeaderViewListener mHeaderViewListener;
 
     private final int mTouchSlop;
@@ -108,16 +106,14 @@ public class PullToRefreshAttacher {
                 .getDecorView();
 
         // Create Header view and then add to Decor View
-        mHeaderViewWrapper = new FrameLayout(mActivity);
         mHeaderView = LayoutInflater.from(
                 mEnvironmentDelegate.getContextForInflater(activity)).inflate(
-                options.headerLayout, mHeaderViewWrapper, false);
+                options.headerLayout, decorView, false);
         if (mHeaderView == null) {
             throw new IllegalArgumentException("Must supply valid layout id for header.");
         }
         // Make Header View invisible so it still gets a layout pass
         mHeaderView.setVisibility(View.INVISIBLE);
-        mHeaderViewWrapper.addView(mHeaderView);
 
         // Notify transformer
         mHeaderTransformer.onViewCreated(activity, mHeaderView);
@@ -128,7 +124,7 @@ public class PullToRefreshAttacher {
             public void run() {
                 if (decorView.getWindowToken() != null) {
                     // The Decor View has a Window Token, so we can add the HeaderView!
-                    addHeaderViewToActivity(mHeaderViewWrapper, mActivity);
+                    addHeaderViewToActivity(mHeaderView, mActivity);
                 } else {
                     // The Decor View doesn't have a Window Token yet, post ourselves again...
                     mHandler.post(this);
@@ -220,24 +216,17 @@ public class PullToRefreshAttacher {
         mOnRefreshListener = listener;
     }
 
-    /**
-     * This should be called when you now longer need the Pull-to-Refresh functionality. Typically
-     * from your {@link android.app.Activity#onDestroy()}.
-     *
-     * Please note, this is automatically when running on a device with Android v4.0 (Ice Cream Sandwich)
-     * by the hosting Activity's {@link android.app.Activity#onDestroy() onDestroy()}.
-     */
     void destroy() {
         if (mIsDestroyed) return; // We've already been destroyed
 
         // Remove the Header View from the Activity
-        removeHeaderViewFromActivity(mHeaderViewWrapper, mActivity);
+        removeHeaderViewFromActivity(mHeaderView, mActivity);
 
         // Lets clear out all of our internal state
         clearRefreshableViews();
 
         mActivity = null;
-        mHeaderView = mHeaderViewWrapper = null;
+        mHeaderView = null;
         mHeaderViewListener = null;
         mEnvironmentDelegate = null;
         mHeaderTransformer = null;
@@ -606,9 +595,17 @@ public class PullToRefreshAttacher {
         final Rect visibleRect = new Rect();
         decorView.getWindowVisibleDisplayFrame(visibleRect);
 
+        // Honour the requested layout params
+        int width = WindowManager.LayoutParams.MATCH_PARENT;
+        int height = WindowManager.LayoutParams.WRAP_CONTENT;
+        ViewGroup.LayoutParams requestedLp = headerViewLayout.getLayoutParams();
+        if (requestedLp != null) {
+            width = requestedLp.width;
+            height = requestedLp.height;
+        }
+
         // Create LayoutParams for adding the View as a panel
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(width, height,
                 WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);

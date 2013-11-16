@@ -45,7 +45,7 @@ public class PullToRefreshAttacher {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PullToRefreshAttacher";
 
-	/* Member Variables */
+    /* Member Variables */
 
     private EnvironmentDelegate mEnvironmentDelegate;
     private HeaderTransformer mHeaderTransformer;

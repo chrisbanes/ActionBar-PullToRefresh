@@ -34,7 +34,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import java.util.Map;
 import java.util.WeakHashMap;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
@@ -72,6 +71,9 @@ public class PullToRefreshAttacher {
     private final int mRefreshMinimizeDelay;
     private final boolean mRefreshMinimize;
     private boolean mIsDestroyed = false;
+
+    private final int[] mViewLocationResult = new int[2];
+    private final Rect mRect = new Rect();
 
     private final Handler mHandler = new Handler();
 
@@ -306,7 +308,7 @@ public class PullToRefreshAttacher {
                 // If we're already refreshing, ignore
                 if (canRefresh(true)) {
                     for (View view : mRefreshableViews.keySet()) {
-                        if (isViewBeingDragged(view, x, y)) {
+                        if (isViewBeingDragged(view, event)) {
                             mInitialMotionX = x;
                             mInitialMotionY = y;
                             mViewBeingDragged = view;
@@ -328,10 +330,24 @@ public class PullToRefreshAttacher {
         return mIsBeingDragged;
     }
 
-    boolean isViewBeingDragged(View view, float x, float y) {
-        ViewDelegate delegate = mRefreshableViews.get(view);
-        if (delegate != null) {
-            return delegate.isReadyForPull(view, x, y);
+    final boolean isViewBeingDragged(View view, MotionEvent event) {
+        if (view.isShown() && mRefreshableViews.containsKey(view)) {
+            // First we need to set the rect to the view's screen co-ordinates
+            view.getLocationOnScreen(mViewLocationResult);
+            final int viewLeft = mViewLocationResult[0], viewTop = mViewLocationResult[1];
+            mRect.set(viewLeft, viewTop, viewLeft + view.getWidth(), viewTop + view.getHeight());
+
+            if (DEBUG) Log.d(LOG_TAG, "isViewBeingDragged. View Rect: " + mRect.toString());
+
+            final int rawX = (int) event.getRawX(), rawY = (int) event.getRawY();
+            if (mRect.contains(rawX, rawY)) {
+                // The Touch Event is within the View's display Rect
+                ViewDelegate delegate = mRefreshableViews.get(view);
+                if (delegate != null) {
+                    // Now call the delegate, converting the X/Y into the View's co-ordinate system
+                    return delegate.isReadyForPull(view, rawX - mRect.left, rawY - mRect.top);
+                }
+            }
         }
         return false;
     }

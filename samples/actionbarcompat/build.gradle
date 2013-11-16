@@ -33,7 +33,7 @@ android {
 File propFile = file('signing.properties');
 if (propFile.exists()) {
     def Properties props = new Properties()
-    props.load(new FileInputStream())
+    props.load(new FileInputStream(propFile))
 
     if (props.containsKey('STORE_FILE') && props.containsKey('STORE_PASSWORD') &&
             props.containsKey('KEY_ALIAS') && props.containsKey('KEY_PASSWORD')) {

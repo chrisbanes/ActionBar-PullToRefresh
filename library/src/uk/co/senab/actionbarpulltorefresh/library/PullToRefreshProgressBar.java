@@ -46,7 +46,7 @@ public class PullToRefreshProgressBar extends View {
 
     // A reasonable number of detents for the given width above. It will be weakly scaled up and
     // down for wider and narrower widths, respectively.
-    private static final int BASE_SEGMENT_COUNT = 4;
+    private static final int BASE_SEGMENT_COUNT = 3;
 
     private static final int DEFAULT_BAR_HEIGHT_DP = 4;
     private static final int DEFAULT_INDETERMINATE_BAR_SPACING_DP = 5;

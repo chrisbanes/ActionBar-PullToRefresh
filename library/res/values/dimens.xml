@@ -17,6 +17,6 @@
 
 <resources>
 
-    <dimen name="default_corner_radius">2dp</dimen>
+    <dimen name="default_corner_radius">1dp</dimen>
 
 </resources>

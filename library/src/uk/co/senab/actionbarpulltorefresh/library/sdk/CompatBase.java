@@ -4,7 +4,11 @@ import android.view.View;
 
 class CompatBase {
 
-    public static void postOnAnimation(View view, Runnable runnable) {
+    static void setAlpha(View view, float alpha) {
+        // NO-OP
+    }
+
+    static void postOnAnimation(View view, Runnable runnable) {
         view.postDelayed(runnable, 10l);
     }
 

@@ -21,7 +21,11 @@ import android.view.View;
 
 class CompatV11 {
 
-    public static void postOnAnimation(View view, Runnable runnable) {
+    static void setAlpha(View view, float alpha) {
+        view.setAlpha(alpha);
+    }
+
+    static void postOnAnimation(View view, Runnable runnable) {
         view.postDelayed(runnable, ValueAnimator.getFrameDelay());
     }
 

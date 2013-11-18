@@ -35,7 +35,7 @@ import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import uk.co.senab.actionbarpulltorefresh.library.platform.SDK11;
+import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
 import uk.co.senab.actionbarpulltorefresh.library.widget.PullToRefreshProgressBar;
 
 /**
@@ -129,9 +129,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         // Reset the Content Layout
         if (mContentLayout != null) {
             mContentLayout.setVisibility(View.VISIBLE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                SDK11.setAlpha(mContentLayout, 1f);
-            }
+            Compat.setAlpha(mContentLayout, 1f);
         }
     }
 

@@ -36,6 +36,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import uk.co.senab.actionbarpulltorefresh.library.platform.SDK11;
+import uk.co.senab.actionbarpulltorefresh.library.widget.PullToRefreshProgressBar;
 
 /**
  * Default Header Transformer.

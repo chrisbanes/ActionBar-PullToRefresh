@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.co.senab.actionbarpulltorefresh.library;
+package uk.co.senab.actionbarpulltorefresh.library.widget;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -23,11 +23,8 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 
-import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
+import uk.co.senab.actionbarpulltorefresh.library.R;
 
 /**
  * Modified version of ButteryProgressBar from:
@@ -35,7 +32,8 @@ import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
  *
  * Implements more of the {@link android.widget.ProgressBar} API to achieve increased compatibility.
  */
-public class PullToRefreshProgressBar extends View {
+public class PullToRefreshProgressBar extends View implements
+        AnimationRunnable.AnimatorUpdateListener {
 
     // The baseline width that the other constants below are optimized for.
     private static final int BASE_WIDTH_DP = 300;
@@ -83,6 +81,7 @@ public class PullToRefreshProgressBar extends View {
 
         mIndeterminateAnimator = new AnimationRunnable(this);
         mIndeterminateAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mIndeterminateAnimator.setUpdateListener(this);
 
         mPaint.setAntiAlias(true);
         mPaint.setColor(getResources().getColor(R.color.default_progress_bar_color));
@@ -238,95 +237,8 @@ public class PullToRefreshProgressBar extends View {
         }
     }
 
-    void onAnimationUpdate() {
+    @Override
+    public void onAnimationUpdate(AnimationRunnable animation) {
         invalidate();
     }
-
-    class AnimationRunnable implements Runnable {
-
-        public static final int INFINITE = -1;
-
-        private final View mView;
-
-        private boolean mStarted;
-        private int mDuration;
-        private long mStartTime;
-        private Interpolator mInterpolator;
-
-        private int mRunCount;
-        private int mRepeatCount;
-
-        private float mAnimationValue;
-
-        public AnimationRunnable(View view) {
-            mView = view;
-        }
-
-        public void setDuration(int duration) {
-            mDuration = duration;
-        }
-
-        public void setInterpolator(Interpolator interpolator) {
-            mInterpolator = interpolator;
-        }
-
-        public void setRepeatCount(int repeatCount) {
-            mRepeatCount = repeatCount;
-        }
-
-        public void start() {
-            if (mStarted) return;
-            checkState();
-            mRunCount = 0;
-            mStarted = true;
-            mStartTime = AnimationUtils.currentAnimationTimeMillis();
-            Compat.postOnAnimation(mView, this);
-        }
-
-        private void restart() {
-            mStartTime = AnimationUtils.currentAnimationTimeMillis();
-            Compat.postOnAnimation(mView, this);
-        }
-
-        public void cancel() {
-            mStarted = false;
-            mView.removeCallbacks(this);
-        }
-
-        public boolean isStarted() {
-            return mStarted;
-        }
-
-        public float getAnimatedValue() {
-            return mAnimationValue;
-        }
-
-        @Override
-        public final void run() {
-            if (!mStarted) return;
-
-            final long timeElapsed = AnimationUtils.currentAnimationTimeMillis() - mStartTime;
-            mAnimationValue = mInterpolator.getInterpolation(timeElapsed / (float) mDuration);
-
-            onAnimationUpdate();
-
-            if (timeElapsed < mDuration) {
-                Compat.postOnAnimation(mView, this);
-            } else {
-                if (++mRunCount < mRepeatCount || mRepeatCount == INFINITE) {
-                    restart();
-                }
-            }
-        }
-
-        private void checkState() {
-            if (mInterpolator == null) {
-                mInterpolator = new LinearInterpolator();
-            }
-            if (mDuration == 0) {
-                mDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-            }
-        }
-    }
-
 }

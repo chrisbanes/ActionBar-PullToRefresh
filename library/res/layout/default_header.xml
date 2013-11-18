@@ -34,7 +34,7 @@
 
     </FrameLayout>
 
-    <uk.co.senab.actionbarpulltorefresh.library.PullToRefreshProgressBar
+    <uk.co.senab.actionbarpulltorefresh.library.widget.PullToRefreshProgressBar
         android:id="@id/ptr_progress"
         android:layout_height="wrap_content"
         android:layout_width="match_parent" />

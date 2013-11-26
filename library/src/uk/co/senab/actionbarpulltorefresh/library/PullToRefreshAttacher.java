@@ -617,7 +617,9 @@ public class PullToRefreshAttacher {
     }
 
     protected void removeHeaderViewFromActivity(View headerViewLayout, Activity activity) {
-        activity.getWindowManager().removeViewImmediate(headerViewLayout);
+        if (headerViewLayout.getWindowToken() != null) {
+            activity.getWindowManager().removeView(headerViewLayout);
+        }
     }
 
     private final Runnable mRefreshMinimizeRunnable = new Runnable() {

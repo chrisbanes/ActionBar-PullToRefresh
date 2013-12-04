@@ -76,6 +76,9 @@ public class PullToRefreshAttacher {
     private final Handler mHandler = new Handler();
 
     protected PullToRefreshAttacher(Activity activity, Options options) {
+        if (activity == null) {
+            throw new IllegalArgumentException("activity cannot be null");
+        }
         if (options == null) {
             Log.i(LOG_TAG, "Given null options so using default options.");
             options = new Options();

@@ -37,24 +37,33 @@ class AbcPullToRefreshAttacher extends uk.co.senab.actionbarpulltorefresh.librar
     }
 
     @Override
-    protected void addHeaderViewToActivity(View headerViewLayout, Activity activity) {
+    protected void addHeaderViewToActivity(View headerView) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            super.addHeaderViewToActivity(headerViewLayout, activity);
+            super.addHeaderViewToActivity(headerView);
         } else {
             // On older devices we need to wrap the HeaderView in a FrameLayout otherwise
             // visibility changes do not take effect
-            mHeaderViewWrapper = new FrameLayout(activity);
-            mHeaderViewWrapper.addView(headerViewLayout);
-            super.addHeaderViewToActivity(mHeaderViewWrapper, activity);
+            mHeaderViewWrapper = new FrameLayout(getAttachedActivity());
+            mHeaderViewWrapper.addView(headerView);
+            super.addHeaderViewToActivity(mHeaderViewWrapper);
         }
     }
 
     @Override
-    protected void removeHeaderViewFromActivity(View headerViewLayout, Activity activity) {
+    protected void updateHeaderViewPosition(View headerView) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            super.removeHeaderViewFromActivity(headerViewLayout, activity);
+            super.updateHeaderViewPosition(headerView);
+        } else {
+            super.updateHeaderViewPosition(mHeaderViewWrapper);
+        }
+    }
+
+    @Override
+    protected void removeHeaderViewFromActivity(View headerView) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            super.removeHeaderViewFromActivity(headerView);
         } else if (mHeaderViewWrapper != null) {
-            super.removeHeaderViewFromActivity(mHeaderViewWrapper, activity);
+            super.removeHeaderViewFromActivity(mHeaderViewWrapper);
             mHeaderViewWrapper = null;
         }
     }

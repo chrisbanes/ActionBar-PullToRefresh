@@ -127,7 +127,7 @@ public class PullToRefreshAttacher {
             public void run() {
                 if (decorView.getWindowToken() != null) {
                     // The Decor View has a Window Token, so we can add the HeaderView!
-                    addHeaderViewToActivity(mHeaderView, mActivity);
+                    addHeaderViewToActivity(mHeaderView);
                 } else {
                     // The Decor View doesn't have a Window Token yet, post ourselves again...
                     mHandler.post(this);
@@ -223,7 +223,7 @@ public class PullToRefreshAttacher {
         if (mIsDestroyed) return; // We've already been destroyed
 
         // Remove the Header View from the Activity
-        removeHeaderViewFromActivity(mHeaderView, mActivity);
+        removeHeaderViewFromActivity(mHeaderView);
 
         // Lets clear out all of our internal state
         clearRefreshableViews();
@@ -460,6 +460,7 @@ public class PullToRefreshAttacher {
     }
 
     void showHeaderView() {
+        updateHeaderViewPosition(mHeaderView);
         if (mHeaderTransformer.showHeaderView()) {
             if (mHeaderViewListener != null) {
                 mHeaderViewListener.onStateChanged(mHeaderView,
@@ -477,7 +478,7 @@ public class PullToRefreshAttacher {
         }
     }
 
-    final Activity getAttachedActivity() {
+    protected final Activity getAttachedActivity() {
         return mActivity;
     }
 
@@ -592,36 +593,44 @@ public class PullToRefreshAttacher {
         return mIsDestroyed;
     }
 
-    protected void addHeaderViewToActivity(View headerViewLayout, Activity activity) {
+    protected void addHeaderViewToActivity(View headerView) {
         // Get the Display Rect of the Decor View
-        final View decorView = activity.getWindow().getDecorView();
-        final Rect visibleRect = new Rect();
-        decorView.getWindowVisibleDisplayFrame(visibleRect);
+        mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(mRect);
 
         // Honour the requested layout params
         int width = WindowManager.LayoutParams.MATCH_PARENT;
         int height = WindowManager.LayoutParams.WRAP_CONTENT;
-        ViewGroup.LayoutParams requestedLp = headerViewLayout.getLayoutParams();
+        ViewGroup.LayoutParams requestedLp = headerView.getLayoutParams();
         if (requestedLp != null) {
             width = requestedLp.width;
             height = requestedLp.height;
         }
 
         // Create LayoutParams for adding the View as a panel
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(width, height,
+        WindowManager.LayoutParams wlp = new WindowManager.LayoutParams(width, height,
                 WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);
-        params.x = 0;
-        params.y = visibleRect.top;
-        params.gravity = Gravity.TOP;
+        wlp.x = 0;
+        wlp.y = mRect.top;
+        wlp.gravity = Gravity.TOP;
 
-        activity.getWindowManager().addView(headerViewLayout, params);
+        mActivity.getWindowManager().addView(headerView, wlp);
     }
 
-    protected void removeHeaderViewFromActivity(View headerViewLayout, Activity activity) {
-        if (headerViewLayout.getWindowToken() != null) {
-            activity.getWindowManager().removeViewImmediate(headerViewLayout);
+    protected void updateHeaderViewPosition(View headerView) {
+        // Refresh the Display Rect of the Decor View
+        mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(mRect);
+        WindowManager.LayoutParams wlp = (WindowManager.LayoutParams) headerView.getLayoutParams();
+        if (wlp.y != mRect.top) {
+            wlp.y = mRect.top;
+            mActivity.getWindowManager().updateViewLayout(headerView, wlp);
+        }
+    }
+
+    protected void removeHeaderViewFromActivity(View headerView) {
+        if (headerView.getWindowToken() != null) {
+            mActivity.getWindowManager().removeViewImmediate(headerView);
         }
     }
 

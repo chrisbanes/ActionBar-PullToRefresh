@@ -621,7 +621,7 @@ public class PullToRefreshAttacher {
 
     protected void removeHeaderViewFromActivity(View headerViewLayout, Activity activity) {
         if (headerViewLayout.getWindowToken() != null) {
-            activity.getWindowManager().removeView(headerViewLayout);
+            activity.getWindowManager().removeViewImmediate(headerViewLayout);
         }
     }
 

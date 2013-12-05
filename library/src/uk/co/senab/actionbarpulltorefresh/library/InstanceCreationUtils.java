@@ -56,7 +56,7 @@ class InstanceCreationUtils {
         for (final Map.Entry<Class, Class> entry : entries) {
             if (entry.getKey().isInstance(view)) {
                 return InstanceCreationUtils.newInstance(view.getContext(),
-                        entry.getValue(), VIEW_DELEGATE_CONSTRUCTOR_SIGNATURE, null);
+                        entry.getValue(), VIEW_DELEGATE_CONSTRUCTOR_SIGNATURE);
             }
         }
         return null;

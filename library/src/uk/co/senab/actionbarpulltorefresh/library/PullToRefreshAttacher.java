@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -92,11 +91,13 @@ public class PullToRefreshAttacher {
         mRefreshMinimize = options.refreshMinimize;
 
         // EnvironmentDelegate
-        mEnvironmentDelegate = options.environmentDelegate != null ? options.environmentDelegate
+        mEnvironmentDelegate = options.environmentDelegate != null
+                ? options.environmentDelegate
                 : createDefaultEnvironmentDelegate();
 
         // Header Transformer
-        mHeaderTransformer = options.headerTransformer != null ? options.headerTransformer
+        mHeaderTransformer = options.headerTransformer != null
+                ? options.headerTransformer
                 : createDefaultHeaderTransformer();
 
         // Get touch slop for use later
@@ -237,8 +238,6 @@ public class PullToRefreshAttacher {
     /**
      * Set a {@link HeaderViewListener} which is called when the visibility
      * state of the Header View has changed.
-     *
-     * @param listener
      */
     final void setHeaderViewListener(HeaderViewListener listener) {
         mHeaderViewListener = listener;

@@ -35,6 +35,8 @@ import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
+import fr.castorflex.android.smoothprogressbar.SmoothProgressDrawable;
 import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
 import uk.co.senab.actionbarpulltorefresh.library.widget.PullToRefreshProgressBar;
 
@@ -49,12 +51,11 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     private View mHeaderView;
     private ViewGroup mContentLayout;
     private TextView mHeaderTextView;
-    private PullToRefreshProgressBar mHeaderProgressBar;
+    private SmoothProgressBar mHeaderProgressBar;
 
     private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
 
     private int mProgressDrawableColor;
-    private float mProgressCornerRadius;
 
     private long mAnimationDuration;
     private int mProgressBarStyle;
@@ -76,7 +77,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         mHeaderView = headerView;
 
         // Get ProgressBar and TextView
-        mHeaderProgressBar = (PullToRefreshProgressBar) headerView.findViewById(R.id.ptr_progress);
+        mHeaderProgressBar = (SmoothProgressBar) headerView.findViewById(R.id.ptr_progress);
         mHeaderTextView = (TextView) headerView.findViewById(R.id.ptr_text);
         mContentLayout = (ViewGroup) headerView.findViewById(R.id.ptr_content);
 
@@ -90,9 +91,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         mProgressDrawableColor = activity.getResources()
                 .getColor(R.color.default_progress_bar_color);
-
-        mProgressCornerRadius = activity.getResources()
-                .getDimensionPixelSize(R.dimen.default_corner_radius);
 
         // Setup the View styles
         setupViewsFromStyles(activity, headerView);
@@ -232,16 +230,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     /**
-     * Set the rounded corner radius.
-     *
-     * @param radiusPx
-     */
-    public void setProgressBarCornerRadius(float radiusPx) {
-        mProgressCornerRadius = Math.max(radiusPx, 0f);
-        applyProgressBarSettings();
-    }
-
-    /**
      * Set the progress bar style. {@code style} must be one of {@link #PROGRESS_BAR_STYLE_OUTSIDE}
      * or {@link #PROGRESS_BAR_STYLE_INSIDE}.
      */
@@ -332,11 +320,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                     R.styleable.PullToRefreshHeader_ptrProgressBarColor, mProgressDrawableColor);
         }
 
-        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius)) {
-            mProgressCornerRadius = (float) styleAttrs.getDimensionPixelSize(
-                    R.styleable.PullToRefreshHeader_ptrProgressBarCornerRadius, 0);
-        }
-
         mProgressBarStyle = styleAttrs.getInt(
                 R.styleable.PullToRefreshHeader_ptrProgressBarStyle, PROGRESS_BAR_STYLE_OUTSIDE);
 
@@ -378,8 +361,10 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private void applyProgressBarSettings() {
         if (mHeaderProgressBar != null) {
-            mHeaderProgressBar.setProgressBarColor(mProgressDrawableColor);
-            mHeaderProgressBar.setProgressBarCornerRadius(mProgressCornerRadius);
+            mHeaderProgressBar.setIndeterminateDrawable(
+                    new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
+                            .color(mProgressDrawableColor)
+                            .build());
         }
     }
 

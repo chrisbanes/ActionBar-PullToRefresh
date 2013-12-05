@@ -1,5 +1,9 @@
 apply plugin: 'android-library'
 
+dependencies {
+    compile 'com.github.castorflex.smoothprogressbar:library:0.2.0'
+}
+
 android {
     compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
     buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION

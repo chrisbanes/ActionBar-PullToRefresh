@@ -34,10 +34,11 @@
 
     </FrameLayout>
 
-    <uk.co.senab.actionbarpulltorefresh.library.widget.PullToRefreshProgressBar
+    <fr.castorflex.android.smoothprogressbar.SmoothProgressBar
         android:id="@id/ptr_progress"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent" />
+        android:indeterminate="true" />
 
 </RelativeLayout>
 

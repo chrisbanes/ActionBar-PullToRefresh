@@ -73,8 +73,6 @@ public class PullToRefreshAttacher {
     private final int[] mViewLocationResult = new int[2];
     private final Rect mRect = new Rect();
 
-    private final Handler mHandler = new Handler();
-
     protected PullToRefreshAttacher(Activity activity, Options options) {
         if (activity == null) {
             throw new IllegalArgumentException("activity cannot be null");
@@ -105,8 +103,7 @@ public class PullToRefreshAttacher {
         mTouchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
 
         // Get Window Decor View
-        final ViewGroup decorView = (ViewGroup) activity.getWindow()
-                .getDecorView();
+        final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
 
         // Create Header view and then add to Decor View
         mHeaderView = LayoutInflater.from(
@@ -122,7 +119,7 @@ public class PullToRefreshAttacher {
         mHeaderTransformer.onViewCreated(activity, mHeaderView);
 
         // Now HeaderView to Activity
-        mHandler.post(new Runnable() {
+        decorView.post(new Runnable() {
             @Override
             public void run() {
                 if (decorView.getWindowToken() != null) {
@@ -130,7 +127,7 @@ public class PullToRefreshAttacher {
                     addHeaderViewToActivity(mHeaderView);
                 } else {
                     // The Decor View doesn't have a Window Token yet, post ourselves again...
-                    mHandler.post(this);
+                    decorView.post(this);
                 }
             }
         });
@@ -552,7 +549,7 @@ public class PullToRefreshAttacher {
 
         // Remove any minimize callbacks
         if (mRefreshMinimize) {
-            mHandler.removeCallbacks(mRefreshMinimizeRunnable);
+            getHeaderView().removeCallbacks(mRefreshMinimizeRunnable);
         }
 
         // Hide Header View
@@ -579,9 +576,9 @@ public class PullToRefreshAttacher {
         // Post a runnable to minimize the refresh header
         if (mRefreshMinimize) {
             if (mRefreshMinimizeDelay > 0) {
-                mHandler.postDelayed(mRefreshMinimizeRunnable, mRefreshMinimizeDelay);
+                getHeaderView().postDelayed(mRefreshMinimizeRunnable, mRefreshMinimizeDelay);
             } else {
-                mHandler.post(mRefreshMinimizeRunnable);
+                getHeaderView().post(mRefreshMinimizeRunnable);
             }
         }
     }

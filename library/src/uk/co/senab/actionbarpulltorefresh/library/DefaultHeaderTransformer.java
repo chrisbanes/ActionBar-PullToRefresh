@@ -39,7 +39,6 @@ import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressDrawable;
 import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
 import uk.co.senab.actionbarpulltorefresh.library.widget.CenterProgressDrawable;
-import uk.co.senab.actionbarpulltorefresh.library.widget.PullToRefreshProgressBar;
 
 /**
  * Default Header Transformer.
@@ -226,8 +225,10 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
      * @param color The color to use.
      */
     public void setProgressBarColor(int color) {
-        mProgressDrawableColor = color;
-        applyProgressBarSettings();
+        if (color != mProgressDrawableColor) {
+            mProgressDrawableColor = color;
+            applyProgressBarSettings();
+        }
     }
 
     /**
@@ -362,11 +363,16 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private void applyProgressBarSettings() {
         if (mHeaderProgressBar != null) {
+            final int strokeWidth = mHeaderProgressBar.getResources()
+                    .getDimensionPixelSize(R.dimen.ptr_progress_bar_stroke_width);
+
             mHeaderProgressBar.setIndeterminateDrawable(
                     new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
                             .color(mProgressDrawableColor)
+                            .width(strokeWidth)
                             .build());
-            mHeaderProgressBar.setProgressDrawable(new CenterProgressDrawable(mProgressDrawableColor));
+            mHeaderProgressBar.setProgressDrawable(
+                    new CenterProgressDrawable(mProgressDrawableColor, strokeWidth));
         }
     }
 

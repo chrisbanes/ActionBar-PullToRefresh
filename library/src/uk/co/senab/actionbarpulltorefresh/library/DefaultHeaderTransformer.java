@@ -38,6 +38,7 @@ import android.widget.TextView;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressDrawable;
 import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
+import uk.co.senab.actionbarpulltorefresh.library.widget.CenterProgressDrawable;
 import uk.co.senab.actionbarpulltorefresh.library.widget.PullToRefreshProgressBar;
 
 /**
@@ -365,6 +366,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                     new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
                             .color(mProgressDrawableColor)
                             .build());
+            mHeaderProgressBar.setProgressDrawable(new CenterProgressDrawable(mProgressDrawableColor));
         }
     }
 

@@ -16,6 +16,9 @@
 -->
 <resources>
 
-    <dimen name="ptr_progress_bar_stroke_width">4dp</dimen>
+    <style name="Widget.ProgressBar.PullToRefresh"
+        parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:minHeight">@dimen/ptr_progress_bar_stroke_width</item>
+    </style>
 
 </resources>

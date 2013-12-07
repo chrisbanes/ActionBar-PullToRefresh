@@ -16,7 +16,7 @@
   -->
 
 <resources>
-    <string name="app_name">ActionBarPullToRefresh ABS</string>
+    <string name="app_name">ActionBarPullToRefresh ABC</string>
     <string name="activity_scrollview">ScrollView</string>
     <string name="activity_listview">ListView</string>
     <string name="activity_gridview">GridView</string>

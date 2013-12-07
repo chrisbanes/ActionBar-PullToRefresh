@@ -611,14 +611,23 @@ public class PullToRefreshAttacher {
         wlp.y = mRect.top;
         wlp.gravity = Gravity.TOP;
 
+        // Workaround for Issue #182
+        headerView.setTag(wlp);
         mActivity.getWindowManager().addView(headerView, wlp);
     }
 
     protected void updateHeaderViewPosition(View headerView) {
         // Refresh the Display Rect of the Decor View
         mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(mRect);
-        WindowManager.LayoutParams wlp = (WindowManager.LayoutParams) headerView.getLayoutParams();
-        if (wlp.y != mRect.top) {
+
+        WindowManager.LayoutParams wlp = null;
+        if (headerView.getLayoutParams() instanceof WindowManager.LayoutParams) {
+            wlp = (WindowManager.LayoutParams) headerView.getLayoutParams();
+        } else if (headerView.getTag() instanceof  WindowManager.LayoutParams) {
+            wlp = (WindowManager.LayoutParams) headerView.getTag();
+        }
+
+        if (wlp != null && wlp.y != mRect.top) {
             wlp.y = mRect.top;
             mActivity.getWindowManager().updateViewLayout(headerView, wlp);
         }

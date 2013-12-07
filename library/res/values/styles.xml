@@ -16,8 +16,7 @@
 -->
 <resources>
 
-    <style name="Widget.ProgressBar.PullToRefresh"
-        parent="@android:style/Widget.ProgressBar.Horizontal">
+    <style name="Widget.ProgressBar.PullToRefresh" parent="SmoothProgressBar">
         <item name="android:minHeight">@dimen/ptr_progress_bar_stroke_width</item>
     </style>
 

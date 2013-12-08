@@ -25,9 +25,13 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -38,7 +42,6 @@ import android.widget.TextView;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressDrawable;
 import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
-import uk.co.senab.actionbarpulltorefresh.library.widget.CenterProgressDrawable;
 
 /**
  * Default Header Transformer.
@@ -113,7 +116,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     public void onReset() {
         // Reset Progress Bar
         if (mHeaderProgressBar != null) {
-            mHeaderProgressBar.setVisibility(View.GONE);
+            mHeaderProgressBar.setVisibility(View.VISIBLE);
             mHeaderProgressBar.setProgress(0);
             mHeaderProgressBar.setIndeterminate(false);
         }
@@ -371,8 +374,13 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                             .color(mProgressDrawableColor)
                             .width(strokeWidth)
                             .build());
-            mHeaderProgressBar.setProgressDrawable(
-                    new CenterProgressDrawable(mProgressDrawableColor, strokeWidth));
+
+            ShapeDrawable shape = new ShapeDrawable();
+            shape.setShape(new RectShape());
+            shape.getPaint().setColor(mProgressDrawableColor);
+            ClipDrawable clipDrawable = new ClipDrawable(shape, Gravity.CENTER, ClipDrawable.HORIZONTAL);
+
+            mHeaderProgressBar.setProgressDrawable(clipDrawable);
         }
     }
 

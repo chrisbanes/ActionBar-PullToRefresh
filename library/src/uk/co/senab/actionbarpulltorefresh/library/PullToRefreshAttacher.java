@@ -16,6 +16,7 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -38,6 +39,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class PullToRefreshAttacher {
 
     private static final boolean DEBUG = false;
@@ -71,6 +73,8 @@ public class PullToRefreshAttacher {
 
     private final int[] mViewLocationResult = new int[2];
     private final Rect mRect = new Rect();
+
+    private final AddHeaderViewRunnable mAddHeaderViewRunnable;
 
     protected PullToRefreshAttacher(Activity activity, Options options) {
         if (activity == null) {
@@ -120,18 +124,8 @@ public class PullToRefreshAttacher {
         mHeaderTransformer.onViewCreated(activity, mHeaderView);
 
         // Now HeaderView to Activity
-        decorView.post(new Runnable() {
-            @Override
-            public void run() {
-                if (decorView.getWindowToken() != null) {
-                    // The Decor View has a Window Token, so we can add the HeaderView!
-                    addHeaderViewToActivity(mHeaderView);
-                } else {
-                    // The Decor View doesn't have a Window Token yet, post ourselves again...
-                    decorView.post(this);
-                }
-            }
-        });
+        mAddHeaderViewRunnable = new AddHeaderViewRunnable();
+        mAddHeaderViewRunnable.start();
     }
 
     /**
@@ -634,6 +628,8 @@ public class PullToRefreshAttacher {
     }
 
     protected void removeHeaderViewFromActivity(View headerView) {
+        mAddHeaderViewRunnable.finish();
+
         if (headerView.getWindowToken() != null) {
             mActivity.getWindowManager().removeViewImmediate(headerView);
         }
@@ -645,4 +641,31 @@ public class PullToRefreshAttacher {
             minimizeHeader();
         }
     };
+
+    private class AddHeaderViewRunnable implements Runnable {
+        @Override
+        public void run() {
+            if (isDestroyed()) return;
+
+            if (getDecorView().getWindowToken() != null) {
+                // The Decor View has a Window Token, so we can add the HeaderView!
+                addHeaderViewToActivity(mHeaderView);
+            } else {
+                // The Decor View doesn't have a Window Token yet, post ourselves again...
+                start();
+            }
+        }
+
+        public void start() {
+            getDecorView().post(this);
+        }
+
+        public void finish() {
+            getDecorView().removeCallbacks(this);
+        }
+
+        private View getDecorView() {
+            return getAttachedActivity().getWindow().getDecorView();
+        }
+    }
 }

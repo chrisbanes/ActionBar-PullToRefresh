@@ -53,7 +53,7 @@ class AbcPullToRefreshAttacher extends uk.co.senab.actionbarpulltorefresh.librar
     protected void updateHeaderViewPosition(View headerView) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             super.updateHeaderViewPosition(headerView);
-        } else {
+        } else if (mHeaderViewWrapper != null) {
             super.updateHeaderViewPosition(mHeaderViewWrapper);
         }
     }

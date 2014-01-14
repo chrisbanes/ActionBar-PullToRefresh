@@ -68,6 +68,7 @@ public class PullToRefreshAttacher {
     private final int mRefreshMinimizeDelay;
     private final boolean mRefreshMinimize;
     private boolean mIsDestroyed = false;
+    private boolean mRefreshEnabled = true;
 
     private final int[] mViewLocationResult = new int[2];
     private final Rect mRect = new Rect();
@@ -258,6 +259,20 @@ public class PullToRefreshAttacher {
         return mHeaderTransformer;
     }
 
+    /**
+     * @return Whether the Attacher has pull to refresh enabled
+     */
+    public boolean getRefreshEnabled() {
+        return mRefreshEnabled;
+    }
+
+   /**
+     * Set the enabled state of the refresh action on the Attacher
+     */
+    public void setRefreshEnabled(boolean enabled) {
+        mRefreshEnabled = enabled;
+    }
+
     final boolean onInterceptTouchEvent(MotionEvent event) {
         if (DEBUG) {
             Log.d(LOG_TAG, "onInterceptTouchEvent: " + event.toString());
@@ -265,7 +280,7 @@ public class PullToRefreshAttacher {
 
         // If we're not enabled or currently refreshing don't handle any touch
         // events
-        if (isRefreshing()) {
+        if (!mRefreshEnabled || isRefreshing()) {
             return false;
         }
 

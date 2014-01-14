@@ -117,6 +117,22 @@ public class PullToRefreshLayout extends FrameLayout {
         return mPullToRefreshAttacher.getHeaderTransformer();
     }
 
+    /**
+     * @return Whether the Attacher has pull to refresh enabled
+     */
+    public boolean getRefreshEnabled() {
+        ensureAttacher();
+        return mPullToRefreshAttacher.getRefreshEnabled();
+    }
+
+    /**
+     * Set the enabled state of the refresh action on the Attacher
+     */
+    public void setRefreshEnabled(boolean enabled) {
+        ensureAttacher();
+        mPullToRefreshAttacher.setRefreshEnabled(enabled);
+    }
+
 
     @Override
     public final boolean onInterceptTouchEvent(MotionEvent event) {

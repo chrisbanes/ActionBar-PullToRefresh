@@ -590,6 +590,9 @@ public class PullToRefreshAttacher {
     }
 
     protected void addHeaderViewToActivity(View headerView) {
+        if (mActivity == null || mActivity.getWindow() == null)
+            return;
+
         // Get the Display Rect of the Decor View
         mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(mRect);
 

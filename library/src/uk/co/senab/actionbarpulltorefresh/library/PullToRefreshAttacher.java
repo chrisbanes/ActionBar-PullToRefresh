@@ -605,7 +605,8 @@ public class PullToRefreshAttacher {
         // Create LayoutParams for adding the View as a panel
         WindowManager.LayoutParams wlp = new WindowManager.LayoutParams(width, height,
                 WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
         wlp.x = 0;
         wlp.y = mRect.top;

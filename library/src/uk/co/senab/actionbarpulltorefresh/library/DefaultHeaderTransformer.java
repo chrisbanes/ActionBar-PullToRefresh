@@ -310,15 +310,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
             }
         }
 
-        // Retrieve the Action Bar Title Style from the app theme or the Action Bar's style
-        Context abContext = headerView.getContext();
-        final int titleTextStyle = styleAttrs
-                .getResourceId(R.styleable.PullToRefreshHeader_ptrHeaderTitleTextAppearance,
-                        getActionBarTitleStyle(abContext));
-        if (titleTextStyle != 0) {
-            mHeaderTextView.setTextAppearance(abContext, titleTextStyle);
-        }
-
         // Retrieve the Progress Bar Color the style
         if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarColor)) {
             mProgressDrawableColor = styleAttrs.getColor(

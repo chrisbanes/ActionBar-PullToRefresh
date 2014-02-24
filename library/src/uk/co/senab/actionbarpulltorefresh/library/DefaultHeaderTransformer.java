@@ -328,7 +328,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         mProgressBarStyle = styleAttrs.getInt(
                 R.styleable.PullToRefreshHeader_ptrProgressBarStyle, PROGRESS_BAR_STYLE_OUTSIDE);
 
-        if(styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarHeight)) {
+        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarHeight)) {
             mProgressBarHeight = styleAttrs.getDimensionPixelSize(
                     R.styleable.PullToRefreshHeader_ptrProgressBarHeight, mProgressBarHeight);
         }
@@ -372,7 +372,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
             mHeaderProgressBar.setIndeterminateDrawable(
                     new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
                             .color(mProgressDrawableColor)
-                            .width(strokeWidth)
+                            .strokeWidth(strokeWidth)
                             .build());
 
             ShapeDrawable shape = new ShapeDrawable();
@@ -438,11 +438,11 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     protected static TypedArray obtainStyledAttrsFromThemeAttr(Context context, int themeAttr,
-            int[] styleAttrs) {
+                                                               int[] styleAttrs) {
         // Need to get resource id of style pointed to from the theme attr
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(themeAttr, outValue, true);
-        final int styleResId =  outValue.resourceId;
+        final int styleResId = outValue.resourceId;
 
         // Now return the values (from styleAttrs) from the style
         return context.obtainStyledAttributes(styleResId, styleAttrs);

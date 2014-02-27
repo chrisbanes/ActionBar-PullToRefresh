@@ -1,7 +1,19 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.7.+'
+    }
+}
+repositories {
+    mavenCentral()
+}
 apply plugin: 'android-library'
 
 dependencies {
-    compile project(':library')
+    compile project(':libraries:pull_to_refresh:library')
     compile "com.android.support:appcompat-v7:+"
 }
 

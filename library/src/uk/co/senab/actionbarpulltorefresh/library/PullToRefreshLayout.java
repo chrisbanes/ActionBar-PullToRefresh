@@ -16,6 +16,8 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -25,14 +27,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
-import java.util.HashSet;
-
-import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
-import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
-import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
 /**
  * The main component of the library. You wrap the views you wish to be 'pullable' within this layout.
@@ -196,6 +191,29 @@ public class PullToRefreshLayout extends FrameLayout {
     void addRefreshableView(View view) {
         if (mPullToRefreshAttacher != null) {
             mPullToRefreshAttacher.addRefreshableView(view, getViewDelegateFromLayoutParams(view));
+        }
+    }
+
+    void addChildrenAsCannotPullable(int[] viewIds) {
+        for (int i = 0, z = viewIds.length; i < z; i++) {
+            View view = findViewById(viewIds[i]);
+            if (view != null) {
+                addCannotRefreshableView(findViewById(viewIds[i]));
+            }
+        }
+    }
+
+    void addChildrenAsCannotPullable(View[] views) {
+        for (int i = 0, z = views.length; i < z; i++) {
+            if (views[i] != null) {
+                addCannotRefreshableView(views[i]);
+            }
+        }
+    }
+
+    void addCannotRefreshableView(View view) {
+        if (mPullToRefreshAttacher != null) {
+            mPullToRefreshAttacher.addCannotRefreshView(view);
         }
     }
 

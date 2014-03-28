@@ -1,7 +1,7 @@
 apply plugin: 'android-library'
 
 dependencies {
-    compile 'com.github.castorflex.smoothprogressbar:library:0.2.0'
+    compile 'com.github.castorflex.smoothprogressbar:library:0.2.0@aar'
 }
 
 android {

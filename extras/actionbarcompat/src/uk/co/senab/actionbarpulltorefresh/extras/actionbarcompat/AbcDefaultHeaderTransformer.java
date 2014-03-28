@@ -74,7 +74,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
             return super.getActionBarSize(context);
         }
 
-        int[] attrs = { R.attr.actionBarSize };
+        int[] attrs = {R.attr.actionBarSize};
         TypedArray values = context.obtainStyledAttributes(attrs);
         try {
             return values.getDimensionPixelSize(0, 0);

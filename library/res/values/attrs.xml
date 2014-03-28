@@ -59,6 +59,9 @@
         <!-- Text to show to tell the user has scrolled enough to refresh -->
         <attr name="ptrReleaseText" format="reference|string" />
 
+        <!--indeterminate progressbar style-->
+        <attr name="ptrSmoothProgressBarStyle" format="reference"/>
+
     </declare-styleable>
 
 </resources>

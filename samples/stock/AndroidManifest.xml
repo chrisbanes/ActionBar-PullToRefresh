@@ -38,7 +38,7 @@
         <activity
             android:name=".FragmentTabsActivity"
             android:label="@string/activity_fragment_tabs"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" />
+            android:theme="@style/Theme.Holo.CustomSmoothProgressBar" />
 
     </application>
 

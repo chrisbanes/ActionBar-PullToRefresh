@@ -20,6 +20,9 @@
     <style name="Theme.Holo.CustomPtrHeader" parent="android:Theme.Holo">
         <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader</item>
     </style>
+    <style name="Theme.Holo.CustomSmoothProgressBar" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="ptrHeaderStyle">@style/Widget.Custom.PtrHeader2</item>
+    </style>
 
     <style name="Widget.Custom.PtrHeader" parent="android:Widget">
         <item name="ptrHeaderBackground">@color/holo_dark_green</item>
@@ -34,6 +37,29 @@
         <item name="ptrPullText">Keep going...</item>
         <item name="ptrRefreshingText">Pulling down the internet</item>
         <item name="ptrReleaseText">Let go if you want me to refresh!</item>
+    </style>
+
+    <style name="Widget.Custom.PtrHeader2" parent="android:Widget">
+        <item name="ptrProgressBarColor">@color/gplus_color_2</item>
+        <item name="ptrSmoothProgressBarStyle">@style/Widget.Custom.SmoothProgressBar.GNowProgressBar</item>
+    </style>
+
+    <style name="Widget.Custom.SmoothProgressBar.GPlusProgressBar" parent="SmoothProgressBar">
+        <item name="spb_stroke_separator_length">12dp</item>
+        <item name="spb_sections_count">4</item>
+        <item name="spb_speed">0.7</item>
+        <item name="spb_interpolator">spb_interpolator_linear</item>
+        <item name="spb_colors">@array/gplus_colors</item>
+    </style>
+
+    <style name="Widget.Custom.SmoothProgressBar.GNowProgressBar" parent="SmoothProgressBar">
+        <item name="spb_stroke_separator_length">0dp</item>
+        <item name="spb_sections_count">2</item>
+        <item name="spb_speed">1.7</item>
+        <item name="spb_interpolator">spb_interpolator_acceleratedecelerate</item>
+        <item name="spb_mirror_mode">true</item>
+        <item name="spb_reversed">true</item>
+        <item name="spb_colors">@array/gplus_colors</item>
     </style>
 
     <style name="TextAppearance.Custom.PtrHeader.Title"

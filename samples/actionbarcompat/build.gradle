@@ -1,7 +1,7 @@
 apply plugin: 'android'
 
 dependencies {
-    compile project(':extras/actionbarcompat')
+    compile project(':extras:actionbarcompat')
 }
 
 android {

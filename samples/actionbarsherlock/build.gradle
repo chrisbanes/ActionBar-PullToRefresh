@@ -22,14 +22,6 @@ android {
             signingConfig signingConfigs.release
         }
     }
-
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            res.srcDirs = ['res']
-        }
-    }
 }
 
 File propFile = file('signing.properties');

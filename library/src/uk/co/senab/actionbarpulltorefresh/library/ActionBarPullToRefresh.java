@@ -16,17 +16,17 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
-
-import android.app.Activity;
-import android.view.View;
-import android.view.ViewGroup;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
+import android.app.Activity;
+import android.view.View;
+import android.view.ViewGroup;
+
+
 
 public class ActionBarPullToRefresh {
 
@@ -39,6 +39,8 @@ public class ActionBarPullToRefresh {
         private Options mOptions;
         private int[] refreshableViewIds;
         private View[] refreshableViews;
+        private int[] cannotRefreshableViewIds;
+        private View[] cannotRefreshableViews;
         private OnRefreshListener mOnRefreshListener;
         private ViewGroup mViewGroupToInsertInto;
         private HashMap<Class, ViewDelegate> mViewDelegates;
@@ -67,6 +69,18 @@ public class ActionBarPullToRefresh {
         public SetupWizard theseChildrenArePullable(View... views) {
             refreshableViews = views;
             refreshableViewIds = null;
+            return this;
+        }
+
+        public SetupWizard theseChildrenAreCannotPullable(int... viewIds) {
+            cannotRefreshableViewIds = viewIds;
+            cannotRefreshableViews = null;
+            return this;
+        }
+
+        public SetupWizard theseChildrenAreCannotPullable(View... views) {
+            cannotRefreshableViews = views;
+            cannotRefreshableViewIds = null;
             return this;
         }
 
@@ -106,6 +120,13 @@ public class ActionBarPullToRefresh {
                 pullToRefreshLayout.addChildrenAsPullable(refreshableViews);
             } else {
                 pullToRefreshLayout.addAllChildrenAsPullable();
+            }
+
+            // add the cannot pullable child views
+            if (cannotRefreshableViewIds != null) {
+                pullToRefreshLayout.addChildrenAsCannotPullable(cannotRefreshableViewIds);
+            } else if (cannotRefreshableViews != null) {
+                pullToRefreshLayout.addChildrenAsCannotPullable(cannotRefreshableViews);
             }
 
             // Now set any custom view delegates

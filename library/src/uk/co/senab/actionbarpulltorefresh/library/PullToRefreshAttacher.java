@@ -16,6 +16,14 @@
 
 package uk.co.senab.actionbarpulltorefresh.library;
 
+import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -31,12 +39,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-
-import java.util.WeakHashMap;
-
-import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
-import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
-import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
 public class PullToRefreshAttacher {
 
@@ -63,6 +65,7 @@ public class PullToRefreshAttacher {
     private View mViewBeingDragged;
 
     private final WeakHashMap<View, ViewDelegate> mRefreshableViews;
+    private final Set<WeakReference<View>> mCannotRefreshViews;
 
     private final boolean mRefreshOnUp;
     private final int mRefreshMinimizeDelay;
@@ -83,6 +86,7 @@ public class PullToRefreshAttacher {
 
         mActivity = activity;
         mRefreshableViews = new WeakHashMap<View, ViewDelegate>();
+        mCannotRefreshViews = new HashSet<WeakReference<View>>();
 
         // Copy necessary values from options
         mRefreshScrollDistance = options.refreshScrollDistance;
@@ -156,6 +160,18 @@ public class PullToRefreshAttacher {
         // View to detect refreshes for
         mRefreshableViews.put(view, viewDelegate);
     }
+
+    void addCannotRefreshView(View view) {
+         if (isDestroyed()) return;
+
+         if (view == null) {
+             Log.i(LOG_TAG, "DisRefreshable View is null.");
+             return;
+         }
+
+         mCannotRefreshViews.add(new WeakReference<View>(view));
+    }
+
 
     void useViewDelegate(Class<?> viewClass, ViewDelegate delegate) {
         for (View view : mRefreshableViews.keySet()) {
@@ -317,14 +333,21 @@ public class PullToRefreshAttacher {
 
     final boolean isViewBeingDragged(View view, MotionEvent event) {
         if (view.isShown() && mRefreshableViews.containsKey(view)) {
+            final int rawX = (int) event.getRawX(), rawY = (int) event.getRawY();
+            // return false if the touch point at the cannot refresh region
+            if(mCannotRefreshViews.size() > 0)
+                for(WeakReference<View> v : mCannotRefreshViews) {
+                    v.get().getLocationOnScreen(mViewLocationResult);
+                    final int viewLeft = mViewLocationResult[0], viewTop = mViewLocationResult[1];
+	                mRect.set(viewLeft, viewTop, viewLeft + v.get().getWidth(), viewTop + v.get().getHeight());
+	                if(mRect.contains(rawX, rawY)) return false;
+                }
+
             // First we need to set the rect to the view's screen co-ordinates
             view.getLocationOnScreen(mViewLocationResult);
             final int viewLeft = mViewLocationResult[0], viewTop = mViewLocationResult[1];
             mRect.set(viewLeft, viewTop, viewLeft + view.getWidth(), viewTop + view.getHeight());
-
             if (DEBUG) Log.d(LOG_TAG, "isViewBeingDragged. View Rect: " + mRect.toString());
-
-            final int rawX = (int) event.getRawX(), rawY = (int) event.getRawY();
             if (mRect.contains(rawX, rawY)) {
                 // The Touch Event is within the View's display Rect
                 ViewDelegate delegate = mRefreshableViews.get(view);

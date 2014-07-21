@@ -2,7 +2,7 @@ apply plugin: 'android-library'
 
 dependencies {
     compile project(':library')
-    compile "com.android.support:appcompat-v7:+"
+    compile "com.android.support:appcompat-v7:20+"
 }
 
 android {
@@ -14,5 +14,3 @@ android {
         targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
     }
 }
-
-apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
